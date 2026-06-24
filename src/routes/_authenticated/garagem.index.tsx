@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Bike, Gauge } from "lucide-react";
+import { Plus, Bike, Gauge, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
+import { generateUploadUrl } from "@/server/upload";
 
-export const Route = createFileRoute("/_authenticated/garagem")({
+export const Route = createFileRoute("/_authenticated/garagem/")({
   head: () => ({ meta: [{ title: "Minha Garagem — Café Moto e Asfalto" }] }),
   component: GaragemPage,
 });
@@ -106,6 +107,7 @@ function GaragemPage() {
 
 function NewMotoDialog({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     brand: "", model: "", year: "", plate: "", color: "", nickname: "", current_km: "0", photo_url: "",
   });
@@ -117,23 +119,51 @@ function NewMotoDialog({ onCreated }: { onCreated: () => void }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) { setSaving(false); return toast.error("Sessão expirou"); }
-    const { error } = await supabase.from("motorcycles").insert({
-      user_id: userData.user.id,
-      brand: form.brand.trim(),
-      model: form.model.trim(),
-      year: form.year ? parseInt(form.year) : null,
-      plate: form.plate.trim() || null,
-      color: form.color.trim() || null,
-      nickname: form.nickname.trim() || null,
-      current_km: parseInt(form.current_km) || 0,
-      photo_url: form.photo_url.trim() || null,
-    });
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Moto cadastrada!");
-    onCreated();
+    
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) { 
+        setSaving(false); 
+        return toast.error("Sessão expirou"); 
+      }
+
+      let finalPhotoUrl = form.photo_url.trim() || null;
+
+      if (file) {
+        const { presignedUrl, publicUrl } = await generateUploadUrl({ data: { filename: file.name, contentType: file.type } });
+        const uploadRes = await fetch(presignedUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error("Falha ao fazer upload da foto.");
+        }
+        finalPhotoUrl = publicUrl;
+      }
+
+      const { error } = await supabase.from("motorcycles").insert({
+        user_id: userData.user.id,
+        brand: form.brand.trim(),
+        model: form.model.trim(),
+        year: form.year ? parseInt(form.year) : null,
+        plate: form.plate.trim() || null,
+        color: form.color.trim() || null,
+        nickname: form.nickname.trim() || null,
+        current_km: parseInt(form.current_km) || 0,
+        photo_url: finalPhotoUrl,
+      });
+
+      if (error) throw new Error(error.message);
+      
+      toast.success("Moto cadastrada!");
+      onCreated();
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -172,9 +202,15 @@ function NewMotoDialog({ onCreated }: { onCreated: () => void }) {
             <Label>KM atual *</Label>
             <Input type="number" required value={form.current_km} onChange={(e) => setField("current_km", e.target.value)} />
           </div>
-          <div>
-            <Label>Foto (URL)</Label>
-            <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} placeholder="https://…" />
+          <div className="col-span-2">
+            <Label>Foto da Moto</Label>
+            <div className="flex flex-col gap-2">
+              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <div className="flex items-center text-xs text-leather gap-2">
+                <span className="shrink-0">Ou URL:</span>
+                <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} placeholder="https://…" className="h-8 text-xs" disabled={!!file} />
+              </div>
+            </div>
           </div>
         </div>
         <DialogFooter>

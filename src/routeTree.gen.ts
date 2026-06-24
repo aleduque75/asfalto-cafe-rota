@@ -13,9 +13,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRotasRouteImport } from './routes/_authenticated/rotas'
-import { Route as AuthenticatedGaragemRouteImport } from './routes/_authenticated/garagem'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedGaragemIndexRouteImport } from './routes/_authenticated/garagem.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
@@ -41,11 +41,6 @@ const AuthenticatedRotasRoute = AuthenticatedRotasRouteImport.update({
   path: '/rotas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedGaragemRoute = AuthenticatedGaragemRouteImport.update({
-  id: '/garagem',
-  path: '/garagem',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -56,15 +51,21 @@ const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGaragemIndexRoute =
+  AuthenticatedGaragemIndexRouteImport.update({
+    id: '/garagem/',
+    path: '/garagem/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
 const AuthenticatedGaragemIdRoute = AuthenticatedGaragemIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AuthenticatedGaragemRoute,
+  id: '/garagem/$id',
+  path: '/garagem/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminNoticiasRoute =
   AuthenticatedAdminNoticiasRouteImport.update({
@@ -90,25 +91,25 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/garagem': typeof AuthenticatedGaragemRouteWithChildren
   '/rotas': typeof AuthenticatedRotasRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/garagem/': typeof AuthenticatedGaragemIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/garagem': typeof AuthenticatedGaragemRouteWithChildren
   '/rotas': typeof AuthenticatedRotasRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/garagem': typeof AuthenticatedGaragemIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,13 +118,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/garagem': typeof AuthenticatedGaragemRouteWithChildren
   '/_authenticated/rotas': typeof AuthenticatedRotasRoute
   '/_authenticated/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/_authenticated/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/garagem/': typeof AuthenticatedGaragemIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -132,25 +133,25 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/dashboard'
-    | '/garagem'
     | '/rotas'
     | '/admin/conteudo'
     | '/admin/galeria'
     | '/admin/noticias'
     | '/garagem/$id'
     | '/admin/'
+    | '/garagem/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/dashboard'
-    | '/garagem'
     | '/rotas'
     | '/admin/conteudo'
     | '/admin/galeria'
     | '/admin/noticias'
     | '/garagem/$id'
     | '/admin'
+    | '/garagem'
   id:
     | '__root__'
     | '/'
@@ -158,13 +159,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
-    | '/_authenticated/garagem'
     | '/_authenticated/rotas'
     | '/_authenticated/admin/conteudo'
     | '/_authenticated/admin/galeria'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/garagem/$id'
     | '/_authenticated/admin/'
+    | '/_authenticated/garagem/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,13 +204,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRotasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/garagem': {
-      id: '/_authenticated/garagem'
-      path: '/garagem'
-      fullPath: '/garagem'
-      preLoaderRoute: typeof AuthenticatedGaragemRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -224,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/garagem/': {
+      id: '/_authenticated/garagem/'
+      path: '/garagem'
+      fullPath: '/garagem/'
+      preLoaderRoute: typeof AuthenticatedGaragemIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -233,10 +234,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/garagem/$id': {
       id: '/_authenticated/garagem/$id'
-      path: '/$id'
+      path: '/garagem/$id'
       fullPath: '/garagem/$id'
       preLoaderRoute: typeof AuthenticatedGaragemIdRouteImport
-      parentRoute: typeof AuthenticatedGaragemRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/noticias': {
       id: '/_authenticated/admin/noticias'
@@ -282,29 +283,20 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
-interface AuthenticatedGaragemRouteChildren {
-  AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
-}
-
-const AuthenticatedGaragemRouteChildren: AuthenticatedGaragemRouteChildren = {
-  AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRoute,
-}
-
-const AuthenticatedGaragemRouteWithChildren =
-  AuthenticatedGaragemRoute._addFileChildren(AuthenticatedGaragemRouteChildren)
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedGaragemRoute: typeof AuthenticatedGaragemRouteWithChildren
   AuthenticatedRotasRoute: typeof AuthenticatedRotasRoute
+  AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
+  AuthenticatedGaragemIndexRoute: typeof AuthenticatedGaragemIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedGaragemRoute: AuthenticatedGaragemRouteWithChildren,
   AuthenticatedRotasRoute: AuthenticatedRotasRoute,
+  AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRoute,
+  AuthenticatedGaragemIndexRoute: AuthenticatedGaragemIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

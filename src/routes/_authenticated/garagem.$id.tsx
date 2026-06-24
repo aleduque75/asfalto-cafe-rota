@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
+import { generateUploadUrl } from "@/server/upload";
 
 export const Route = createFileRoute("/_authenticated/garagem/$id")({
   head: () => ({ meta: [{ title: "Detalhes da moto — Café Moto e Asfalto" }] }),
@@ -512,6 +513,7 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
 
 function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void }) {
   const [saving, setSaving] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
     plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
@@ -519,6 +521,7 @@ function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void
   });
 
   useEffect(() => {
+    setFile(null);
     setForm({
       brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
       plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
@@ -533,20 +536,43 @@ function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("motorcycles").update({
-      brand: form.brand.trim(),
-      model: form.model.trim(),
-      year: form.year ? parseInt(form.year) : null,
-      plate: form.plate.trim() || null,
-      color: form.color.trim() || null,
-      nickname: form.nickname.trim() || null,
-      photo_url: form.photo_url.trim() || null,
-    }).eq("id", moto.id);
     
-    setSaving(false);
-    if (error) return toast.error(error.message);
-    toast.success("Moto atualizada!");
-    onUpdated();
+    try {
+      let finalPhotoUrl = form.photo_url.trim() || null;
+
+      if (file) {
+        const { presignedUrl, publicUrl } = await generateUploadUrl({ data: { filename: file.name, contentType: file.type } });
+        const uploadRes = await fetch(presignedUrl, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error("Falha ao fazer upload da foto.");
+        }
+        finalPhotoUrl = publicUrl;
+      }
+
+      const { error } = await supabase.from("motorcycles").update({
+        brand: form.brand.trim(),
+        model: form.model.trim(),
+        year: form.year ? parseInt(form.year) : null,
+        plate: form.plate.trim() || null,
+        color: form.color.trim() || null,
+        nickname: form.nickname.trim() || null,
+        photo_url: finalPhotoUrl,
+      }).eq("id", moto.id);
+      
+      if (error) throw new Error(error.message);
+      
+      toast.success("Moto atualizada!");
+      onUpdated();
+    } catch (err: any) {
+      toast.error(err.message || "Erro inesperado.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -582,8 +608,14 @@ function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void
             <Input value={form.nickname} onChange={(e) => setField("nickname", e.target.value)} />
           </div>
           <div className="col-span-2">
-            <Label>Foto (URL)</Label>
-            <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} />
+            <Label>Foto da Moto</Label>
+            <div className="flex flex-col gap-2">
+              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+              <div className="flex items-center text-xs text-leather gap-2">
+                <span className="shrink-0">Ou URL:</span>
+                <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} placeholder="https://…" className="h-8 text-xs" disabled={!!file} />
+              </div>
+            </div>
           </div>
         </div>
         <DialogFooter>
