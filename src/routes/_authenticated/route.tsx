@@ -1,10 +1,13 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster, toast } from "sonner";
 import logo from "@/assets/logo-badge.png";
-import { LogOut, Bike, ShieldCheck, LayoutDashboard } from "lucide-react";
+import { LogOut, Bike, ShieldCheck, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -19,6 +22,9 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -31,12 +37,43 @@ function AuthenticatedLayout() {
         .eq("role", "admin")
         .maybeSingle();
       setIsAdmin(!!data);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("id", u.user.id)
+        .maybeSingle();
+      if (profile && profile.phone) {
+        setWhatsapp(profile.phone);
+      }
     })();
   }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
+  }
+
+  async function saveSettings(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingSettings(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user) {
+      // Clean phone number (remove non-digits)
+      const cleanPhone = whatsapp.replace(/\D/g, "");
+      const { error } = await supabase
+        .from("profiles")
+        .update({ phone: cleanPhone })
+        .eq("id", u.user.id);
+      
+      if (error) {
+        toast.error("Erro ao salvar número. Certifique-se de que criou a coluna no banco.");
+      } else {
+        toast.success("Configurações salvas!");
+        setSettingsOpen(false);
+      }
+    }
+    setSavingSettings(false);
   }
 
   return (
@@ -76,11 +113,41 @@ function AuthenticatedLayout() {
                 <ShieldCheck className="h-4 w-4" /> Admin
               </Link>
             )}
-            <Link to="/" className="text-xs text-cream/70 hover:text-copper px-3">
+            <Link to="/" className="hidden sm:inline-block text-xs text-cream/70 hover:text-copper px-3">
               Site
             </Link>
-            <Button variant="outline" size="sm" onClick={signOut} className="border-copper/50 text-cream hover:bg-leather/40 hover:text-cream bg-transparent">
-              <LogOut className="h-4 w-4 mr-1" /> Sair
+            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-cream/80 hover:text-copper hover:bg-transparent">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Configurações da Conta</DialogTitle>
+                  <DialogDescription>Configure alertas e notificações.</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={saveSettings} className="space-y-4">
+                  <div>
+                    <Label>WhatsApp para Alertas (com DDD)</Label>
+                    <Input 
+                      type="tel" 
+                      placeholder="Ex: 11999999999" 
+                      value={whatsapp} 
+                      onChange={(e) => setWhatsapp(e.target.value)} 
+                    />
+                    <p className="text-xs text-leather mt-1">O robô enviará avisos automáticos de manutenção para este número.</p>
+                  </div>
+                  <DialogFooter>
+                    <Button type="submit" className="btn-copper" disabled={savingSettings}>
+                      {savingSettings ? "Salvando..." : "Salvar"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline" size="sm" onClick={signOut} className="border-copper/50 text-cream hover:bg-leather/40 hover:text-cream bg-transparent ml-2">
+              <LogOut className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Sair</span>
             </Button>
           </nav>
         </div>
