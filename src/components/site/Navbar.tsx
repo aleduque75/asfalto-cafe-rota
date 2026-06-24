@@ -40,7 +40,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
               alt="Café Moto e Asfalto"
               width={48}
               height={48}
-              className="h-10 w-10 md:h-12 md:w-12 rounded-full ring-2 ring-copper/40 group-hover:ring-copper transition object-cover bg-leather/20"
+              className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
             />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="eyebrow text-[10px]">Moto Clube</span>

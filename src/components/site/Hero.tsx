@@ -1,7 +1,7 @@
 import heroRoad from "@/assets/hero-road.jpg";
 import logo from "@/assets/logo-badge.png";
 
-export function Hero({ content }: { content?: Record<string, string> }) {
+export function Hero({ content, logoUrl }: { content?: Record<string, string>, logoUrl?: string }) {
   return (
     <section id="inicio" className="relative min-h-screen w-full overflow-hidden">
       <img
@@ -29,11 +29,11 @@ export function Hero({ content }: { content?: Record<string, string> }) {
         <div className="mb-8 relative">
           <div className="absolute inset-0 rounded-full blur-2xl bg-copper/30" />
           <img
-            src={logo}
+            src={logoUrl || logo}
             alt="Brasão Café Moto e Asfalto"
             width={1024}
             height={1024}
-            className="relative h-44 w-44 sm:h-56 sm:w-56 md:h-72 md:w-72 rounded-full ring-4 ring-copper/40 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)]"
+            className="relative h-44 w-44 sm:h-56 sm:w-56 md:h-72 md:w-72 object-contain"
           />
         </div>
 

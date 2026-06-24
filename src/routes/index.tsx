@@ -44,7 +44,7 @@ function Index() {
     <div className="min-h-screen scroll-smooth">
       <Navbar logoUrl={contentMap.general?.logo_url} />
       <main>
-        <Hero content={contentMap.hero} />
+        <Hero content={contentMap.hero} logoUrl={contentMap.general?.logo_url} />
         <MotoClube content={contentMap.club_story} />
         <Galeria />
         <Noticias />
