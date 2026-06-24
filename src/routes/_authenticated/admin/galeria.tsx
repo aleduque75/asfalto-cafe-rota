@@ -167,7 +167,7 @@ function AdminGaleria() {
       ) : (
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {items.map((i) => (
-            <div key={i.id} className="border border-leather/30 rounded-lg overflow-hidden bg-white">
+            <div key={i.id} className="border border-leather/30 rounded-lg overflow-hidden bg-cream shadow-sm">
               <div className="aspect-square overflow-hidden bg-leather/10">
                 <img src={i.image_url} alt={i.title ?? ""} className="h-full w-full object-cover" />
               </div>

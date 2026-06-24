@@ -94,8 +94,8 @@ function AdminConteudo() {
       ) : (
         <div className="grid gap-6">
           {SECTIONS.map((s) => (
-            <Card key={s.key} className="border-leather/30">
-              <CardHeader><CardTitle className="text-lg">{s.label}</CardTitle></CardHeader>
+            <Card key={s.key} className="border-leather/30 bg-cream shadow-sm">
+              <CardHeader><CardTitle className="text-lg text-coffee font-display" style={{ fontFamily: "var(--font-display)" }}>{s.label}</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {s.fields.map((f) => (
                   <div key={f.name}>

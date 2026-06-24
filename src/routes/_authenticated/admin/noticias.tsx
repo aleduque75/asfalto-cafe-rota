@@ -180,7 +180,7 @@ function AdminNoticias() {
         </Dialog>
       </div>
 
-      <div className="border border-leather/30 rounded-lg bg-white">
+      <div className="border border-leather/30 rounded-lg bg-cream shadow-sm">
         {loading ? (
           <div className="p-8 text-center text-leather/70"><Loader2 className="h-5 w-5 animate-spin inline" /></div>
         ) : items.length === 0 ? (

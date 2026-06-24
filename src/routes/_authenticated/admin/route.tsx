@@ -76,8 +76,8 @@ function AdminLayout() {
   }
 
   return (
-    <div className="grid lg:grid-cols-[220px_1fr] gap-8">
-      <aside className="lg:sticky lg:top-24 self-start">
+    <div className="grid lg:grid-cols-[240px_1fr] gap-8">
+      <aside className="lg:sticky lg:top-24 self-start rounded-xl border border-leather/30 bg-coffee text-cream p-4 shadow-warm">
         <p className="text-[10px] uppercase tracking-[0.3em] text-copper mb-3" style={{ fontFamily: "var(--font-display)" }}>
           Painel admin
         </p>
@@ -100,8 +100,8 @@ function AdminLink({ to, icon, children }: { to: string; icon: React.ReactNode; 
     <Link
       to={to}
       activeOptions={{ exact: to === "/admin" }}
-      className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm text-leather hover:bg-coffee/5 transition whitespace-nowrap"
-      activeProps={{ className: "bg-coffee text-cream hover:bg-coffee" }}
+      className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm text-cream/80 hover:text-copper hover:bg-leather/40 transition whitespace-nowrap"
+      activeProps={{ className: "bg-leather text-copper hover:bg-leather" }}
     >
       {icon}
       {children}
