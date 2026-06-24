@@ -129,7 +129,7 @@ function DashboardPage() {
             <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Minhas motos</h2>
             <p className="text-sm text-leather">Acesso rápido à sua garagem.</p>
           </div>
-          <Link to="/garagem"><Button variant="outline" size="sm" className="border-leather/40 text-coffee">Ver todas</Button></Link>
+          <Link to="/garagem"><Button variant="outline" size="sm" className="border-leather/40 text-coffee bg-transparent hover:bg-leather/10">Ver todas</Button></Link>
         </div>
         {motos.length === 0 ? (
           <Card className="border-dashed border-leather/40 bg-cream">
