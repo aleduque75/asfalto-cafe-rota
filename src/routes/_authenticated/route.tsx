@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import logo from "@/assets/logo-badge.png";
-import { LogOut, Bike, ShieldCheck } from "lucide-react";
+import { LogOut, Bike, ShieldCheck, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -43,7 +43,7 @@ function AuthenticatedLayout() {
     <div className="min-h-screen" style={{ background: "var(--cream)" }}>
       <header className="border-b border-leather/20 bg-coffee">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/garagem" className="flex items-center gap-3">
+          <Link to="/dashboard" className="flex items-center gap-3">
             <img src={logo} alt="" className="h-10 w-10 rounded-full ring-2 ring-copper/40" />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-[10px] uppercase tracking-[0.25em] text-copper">Área do membro</span>
@@ -53,6 +53,13 @@ function AuthenticatedLayout() {
             </div>
           </Link>
           <nav className="flex items-center gap-2">
+            <Link
+              to="/dashboard"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <LayoutDashboard className="h-4 w-4" /> Painel
+            </Link>
             <Link
               to="/garagem"
               className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
