@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Plus, Trash2, Loader2, Upload } from "lucide-react";
 import { uploadMedia, slugify } from "@/lib/upload";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 type News = Tables<"news">;
 
@@ -72,7 +72,7 @@ function AdminNoticias() {
     if (!editing.title?.trim()) return toast.error("Informe um título");
     const slug = editing.slug?.trim() || slugify(editing.title);
     setSaving(true);
-    const payload: Partial<News> = {
+    const payload: TablesInsert<"news"> = {
       title: editing.title.trim(),
       slug,
       excerpt: editing.excerpt?.trim() || null,
