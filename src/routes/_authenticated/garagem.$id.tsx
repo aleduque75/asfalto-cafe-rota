@@ -222,9 +222,9 @@ function MotoDetail() {
         </TabsList>
 
         <TabsContent value="items" className="space-y-4">
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 gap-4">
             <p className="text-sm text-leather">Cadastre cada item e seu intervalo de troca por KM e/ou por tempo.</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Dialog open={recordOpen} onOpenChange={setRecordOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline">
