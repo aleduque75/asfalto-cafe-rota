@@ -236,7 +236,7 @@ function MotoDetail() {
               <Dialog open={itemOpen} onOpenChange={setItemOpen}>
                 <DialogTrigger asChild>
                   <Button className="btn-copper">
-                    <Plus className="h-4 w-4" /> Novo item
+                    <Plus className="h-4 w-4" /> Criar lembrete
                   </Button>
                 </DialogTrigger>
                 <NewItemDialog motorcycleId={id} currentKm={moto.current_km} onCreated={() => { setItemOpen(false); loadAll(); }} />
@@ -398,12 +398,12 @@ function NewItemDialog({ motorcycleId, currentKm, onCreated }: { motorcycleId: s
   return (
     <DialogContent className="max-w-lg">
       <DialogHeader>
-        <DialogTitle>Novo item de manutenção</DialogTitle>
-        <DialogDescription>Defina intervalo por KM, por tempo, ou ambos.</DialogDescription>
+        <DialogTitle>Criar lembrete de manutenção</DialogTitle>
+        <DialogDescription>Defina de quanto em quanto tempo o sistema deve te alertar.</DialogDescription>
       </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <Label>Item *</Label>
+          <Label>O que monitorar? *</Label>
           <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Óleo do motor, pneu, corrente…" />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -481,12 +481,12 @@ function EditItemDialog({ item, motorcycleId, currentKm, onUpdated }: { item: It
   return (
     <DialogContent className="max-w-lg">
       <DialogHeader>
-        <DialogTitle>Editar item de manutenção</DialogTitle>
+        <DialogTitle>Editar lembrete de manutenção</DialogTitle>
         <DialogDescription>Altere os intervalos ou registros da última troca.</DialogDescription>
       </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <Label>Item *</Label>
+          <Label>O que monitorar? *</Label>
           <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         </div>
         <div className="grid grid-cols-2 gap-3">
