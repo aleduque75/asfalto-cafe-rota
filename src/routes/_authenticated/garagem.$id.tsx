@@ -332,7 +332,7 @@ function MotoDetail() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-leather/30 mt-4 bg-cream">
+            <Card className="border-leather/30 mt-4 bg-cream text-coffee">
               <Table>
                 <TableHeader>
                   <TableRow>
