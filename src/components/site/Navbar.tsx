@@ -42,7 +42,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
               height={48}
               className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
             />
-            <div className="hidden sm:flex flex-col leading-none">
+            <div className="flex flex-col leading-none">
               <span className="eyebrow text-[10px]">Moto Clube</span>
               <span className="font-display text-base md:text-lg tracking-wide text-cream" style={{ fontFamily: "var(--font-display)" }}>
                 Café Moto e Asfalto

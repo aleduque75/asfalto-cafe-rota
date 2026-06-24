@@ -58,7 +58,7 @@ function AuthenticatedLayout() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-3 group">
             <img src={logoUrl || logo} alt="" className="h-10 w-10 object-contain transition-transform group-hover:scale-105" />
-            <div className="hidden sm:flex flex-col leading-none">
+            <div className="flex flex-col leading-none">
               <span className="text-[10px] uppercase tracking-[0.25em] text-copper">Área do membro</span>
               <span className="font-display text-cream text-base" style={{ fontFamily: "var(--font-display)" }}>
                 Minha Garagem
