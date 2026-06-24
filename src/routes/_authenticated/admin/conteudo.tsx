@@ -58,8 +58,27 @@ const SECTIONS: Section[] = [
   },
 ];
 
+const DEFAULT_CONTENT: Record<string, Record<string, string>> = {
+  hero: {
+    eyebrow: "Atibaia · SP · Desde 2024",
+    title: "Café quente.\nAsfalto livre.",
+    subtitle: "\"O primeiro de muitos quilômetros juntos.\" Um grupo de amigos, algumas motos e uma vontade enorme de pegar a estrada.",
+    cta_label: "Conheça o clube",
+  },
+  club_story: {
+    title: "Café Moto e Asfalto",
+    paragraph: "Tudo começou com um grupo de amigos, algumas motos e uma vontade enorme de pegar a estrada.\n\nCriamos esse espaço pra dividir o que move a nossa turma: o cheiro do asfalto de manhã cedo, o café quente numa parada no meio do caminho e as paisagens do interior de SP — e além — que só quem anda de moto conhece de verdade.\n\nDe Pedra Bela, Monte Verde, Joanópolis, Salesópolis e muitos outros que estão por vir, cada rolê vira história e a amizade se fortalece. Aqui a gente compartilha nossos passeios, viagens, paradas e os melhores momentos da estrada.",
+  },
+  contact: {
+    address: "Atibaia — São Paulo — Brasil",
+    whatsapp: "Solicite o contato pela mensagem ao lado",
+    email: "contato@cafemotoasfalto.com.br",
+    instagram: "@cafe_moto_asfalto",
+  },
+};
+
 function AdminConteudo() {
-  const [values, setValues] = useState<Record<string, Record<string, string>>>({});
+  const [values, setValues] = useState<Record<string, Record<string, string>>>(DEFAULT_CONTENT);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
 
@@ -68,9 +87,11 @@ function AdminConteudo() {
     const { data, error } = await supabase.from("site_content").select("key, value");
     setLoading(false);
     if (error) return toast.error(error.message);
-    const map: Record<string, Record<string, string>> = {};
+    
+    // Merge DB data over defaults
+    const map = { ...DEFAULT_CONTENT };
     for (const row of data ?? []) {
-      map[row.key] = (row.value as Record<string, string>) ?? {};
+      map[row.key] = { ...(map[row.key] || {}), ...(row.value as Record<string, string>) };
     }
     setValues(map);
   }
@@ -102,17 +123,17 @@ function AdminConteudo() {
       ) : (
         <div className="grid gap-6">
           {SECTIONS.map((s) => (
-            <Card key={s.key} className="border-leather/30 bg-cream shadow-sm">
+            <Card key={s.key} className="border-leather/30 bg-cream text-coffee shadow-sm">
               <CardHeader><CardTitle className="text-lg text-coffee font-display" style={{ fontFamily: "var(--font-display)" }}>{s.label}</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-4">
                 {s.fields.map((f) => (
                   <div key={f.name}>
-                    <Label>{f.label}</Label>
+                    <Label className="text-leather mb-1 block">{f.label}</Label>
                     {f.type === "textarea" ? (
-                      <Textarea rows={3} value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
+                      <Textarea rows={4} className="bg-transparent" value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
                     ) : f.type === "image" ? (
                       <div className="space-y-2">
-                        <Input type="file" accept="image/*" onChange={async (e) => {
+                        <Input type="file" accept="image/*" className="bg-transparent" onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
                           const loadingToast = toast.loading("Enviando imagem...");
@@ -127,7 +148,7 @@ function AdminConteudo() {
                         {values[s.key]?.[f.name] && <img src={values[s.key][f.name]} alt="Preview" className="h-16 w-auto object-contain bg-leather/10 rounded p-1" />}
                       </div>
                     ) : (
-                      <Input value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
+                      <Input className="bg-transparent" value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
                     )}
                   </div>
                 ))}
