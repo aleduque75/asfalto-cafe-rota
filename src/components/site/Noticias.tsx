@@ -1,9 +1,13 @@
 import { ArrowRight, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import n1 from "@/assets/news-1.jpg";
 import n2 from "@/assets/news-2.jpg";
 import n3 from "@/assets/news-3.jpg";
 
-const noticias = [
+type NewsCard = { img: string; date: string; tag: string; title: string; excerpt: string; slug?: string };
+
+const defaultNoticias: NewsCard[] = [
   {
     img: n1,
     date: "10 Jun 2026",
@@ -31,6 +35,31 @@ const noticias = [
 ];
 
 export function Noticias() {
+  const [noticias, setNoticias] = useState<NewsCard[]>(defaultNoticias);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("news")
+        .select("title, slug, excerpt, cover_url, tag, published_at, created_at")
+        .eq("status", "published")
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(6);
+      if (data && data.length > 0) {
+        setNoticias(
+          data.map((d) => ({
+            img: d.cover_url || n1,
+            date: new Date(d.published_at ?? d.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }),
+            tag: d.tag ?? "Notícia",
+            title: d.title,
+            excerpt: d.excerpt ?? "",
+            slug: d.slug,
+          })),
+        );
+      }
+    })();
+  }, []);
+
   return (
     <section id="noticias" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
