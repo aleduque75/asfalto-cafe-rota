@@ -1,1 +1,7 @@
 project_id = "dphpnagvizyphgehussx"
+
+[auth]
+enable_signup = true
+
+[auth.email]
+enable_confirmations = false

@@ -76,7 +76,7 @@ function GaragemPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {motos.map((m) => (
             <Link key={m.id} to="/garagem/$id" params={{ id: m.id }} className="group">
-              <Card className="overflow-hidden border-leather/30 hover:border-copper hover:shadow-lg transition h-full">
+              <Card className="overflow-hidden border-leather/30 hover:border-copper hover:shadow-lg transition h-full bg-cream">
                 <div className="aspect-[16/10] bg-gradient-to-br from-coffee to-leather flex items-center justify-center">
                   {m.photo_url ? (
                     <img src={m.photo_url} alt={`${m.brand} ${m.model}`} className="w-full h-full object-cover" />

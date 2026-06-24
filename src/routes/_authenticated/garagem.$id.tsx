@@ -72,6 +72,7 @@ function MotoDetail() {
   const [records, setRecords] = useState<Record_[]>([]);
   const [loading, setLoading] = useState(true);
   const [kmEdit, setKmEdit] = useState<string>("");
+  const [editOpen, setEditOpen] = useState(false);
   const [itemOpen, setItemOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
 
@@ -151,9 +152,19 @@ function MotoDetail() {
               {moto.plate && (
                 <p className="text-sm text-coffee"><span className="text-leather">Placa:</span> {moto.plate}</p>
               )}
-              <Button variant="outline" size="sm" className="mt-6 text-destructive border-destructive/40 hover:bg-destructive/10" onClick={deleteMoto}>
-                <Trash2 className="h-4 w-4" /> Excluir moto
-              </Button>
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-coffee border-leather/40 hover:bg-leather/10">
+                      <Wrench className="h-4 w-4 mr-1.5" /> Editar moto
+                    </Button>
+                  </DialogTrigger>
+                  <EditMotoDialog moto={moto} onUpdated={() => { setEditOpen(false); loadAll(); }} />
+                </Dialog>
+                <Button variant="outline" size="sm" className="text-destructive border-destructive/40 hover:bg-destructive/10" onClick={deleteMoto}>
+                  <Trash2 className="h-4 w-4 mr-1.5" /> Excluir moto
+                </Button>
+              </div>
             </CardContent>
           </div>
         </Card>
@@ -493,6 +504,92 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
         </div>
         <DialogFooter>
           <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando…" : "Salvar"}</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
+    plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
+    photo_url: moto.photo_url || "",
+  });
+
+  useEffect(() => {
+    setForm({
+      brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
+      plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
+      photo_url: moto.photo_url || "",
+    });
+  }, [moto]);
+
+  function setField<K extends keyof typeof form>(k: K, v: string) {
+    setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from("motorcycles").update({
+      brand: form.brand.trim(),
+      model: form.model.trim(),
+      year: form.year ? parseInt(form.year) : null,
+      plate: form.plate.trim() || null,
+      color: form.color.trim() || null,
+      nickname: form.nickname.trim() || null,
+      photo_url: form.photo_url.trim() || null,
+    }).eq("id", moto.id);
+    
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Moto atualizada!");
+    onUpdated();
+  }
+
+  return (
+    <DialogContent className="max-w-lg">
+      <DialogHeader>
+        <DialogTitle>Editar moto</DialogTitle>
+        <DialogDescription>Atualize os dados da sua moto.</DialogDescription>
+      </DialogHeader>
+      <form onSubmit={submit} className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Marca *</Label>
+            <Input required value={form.brand} onChange={(e) => setField("brand", e.target.value)} />
+          </div>
+          <div>
+            <Label>Modelo *</Label>
+            <Input required value={form.model} onChange={(e) => setField("model", e.target.value)} />
+          </div>
+          <div>
+            <Label>Ano</Label>
+            <Input type="number" value={form.year} onChange={(e) => setField("year", e.target.value)} />
+          </div>
+          <div>
+            <Label>Cor</Label>
+            <Input value={form.color} onChange={(e) => setField("color", e.target.value)} />
+          </div>
+          <div>
+            <Label>Placa</Label>
+            <Input value={form.plate} onChange={(e) => setField("plate", e.target.value)} />
+          </div>
+          <div>
+            <Label>Apelido</Label>
+            <Input value={form.nickname} onChange={(e) => setField("nickname", e.target.value)} />
+          </div>
+          <div className="col-span-2">
+            <Label>Foto (URL)</Label>
+            <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button type="submit" className="btn-copper" disabled={saving}>
+            {saving ? "Salvando…" : "Salvar alterações"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

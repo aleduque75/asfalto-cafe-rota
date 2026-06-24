@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -283,6 +303,51 @@ export type Database = {
         }
         Relationships: []
       }
+      routes: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          destination: string
+          estimated_distance_km: number | null
+          id: string
+          media_url: string | null
+          meeting_point: string
+          meeting_time: string
+          start_date: string
+          title: string
+          waze_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          destination: string
+          estimated_distance_km?: number | null
+          id?: string
+          media_url?: string | null
+          meeting_point: string
+          meeting_time: string
+          start_date: string
+          title: string
+          waze_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          destination?: string
+          estimated_distance_km?: number | null
+          id?: string
+          media_url?: string | null
+          meeting_point?: string
+          meeting_time?: string
+          start_date?: string
+          title?: string
+          waze_url?: string | null
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
@@ -467,6 +532,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "member"],
@@ -474,3 +542,4 @@ export const Constants = {
     },
   },
 } as const
+

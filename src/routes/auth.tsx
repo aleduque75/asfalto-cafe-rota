@@ -80,14 +80,14 @@ function AuthPage() {
               <TabsContent value="signin">
                 <form onSubmit={handleSignIn} className="space-y-4 mt-4">
                   <div>
-                    <Label htmlFor="email-in">E-mail</Label>
-                    <Input id="email-in" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Label htmlFor="email-in" className="text-coffee font-medium">E-mail</Label>
+                    <Input id="email-in" type="email" placeholder="seu@email.com" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
                   <div>
-                    <Label htmlFor="pwd-in">Senha</Label>
-                    <Input id="pwd-in" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Label htmlFor="pwd-in" className="text-coffee font-medium">Senha</Label>
+                    <Input id="pwd-in" type="password" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
+                  <Button type="submit" disabled={loading} className="w-full btn-copper mt-6">
                     {loading ? "Entrando..." : "Entrar"}
                   </Button>
                 </form>
@@ -95,18 +95,18 @@ function AuthPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4 mt-4">
                   <div>
-                    <Label htmlFor="name-up">Nome completo</Label>
-                    <Input id="name-up" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                    <Label htmlFor="name-up" className="text-coffee font-medium">Nome completo</Label>
+                    <Input id="name-up" placeholder="João da Silva" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
                   <div>
-                    <Label htmlFor="email-up">E-mail</Label>
-                    <Input id="email-up" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                    <Label htmlFor="email-up" className="text-coffee font-medium">E-mail</Label>
+                    <Input id="email-up" type="email" placeholder="seu@email.com" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
                   <div>
-                    <Label htmlFor="pwd-up">Senha</Label>
-                    <Input id="pwd-up" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+                    <Label htmlFor="pwd-up" className="text-coffee font-medium">Senha</Label>
+                    <Input id="pwd-up" type="password" placeholder="Mínimo 6 caracteres" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
-                  <Button type="submit" disabled={loading} className="w-full">
+                  <Button type="submit" disabled={loading} className="w-full btn-copper mt-6">
                     {loading ? "Criando..." : "Criar conta"}
                   </Button>
                 </form>
