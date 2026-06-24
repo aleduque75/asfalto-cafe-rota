@@ -14,7 +14,194 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      maintenance_items: {
+        Row: {
+          created_at: string
+          id: string
+          interval_km: number | null
+          interval_months: number | null
+          last_change_date: string | null
+          last_change_km: number | null
+          motorcycle_id: string
+          name: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interval_km?: number | null
+          interval_months?: number | null
+          last_change_date?: string | null
+          last_change_km?: number | null
+          motorcycle_id: string
+          name: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interval_km?: number | null
+          interval_months?: number | null
+          last_change_date?: string | null
+          last_change_km?: number | null
+          motorcycle_id?: string
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_items_motorcycle_id_fkey"
+            columns: ["motorcycle_id"]
+            isOneToOne: false
+            referencedRelation: "motorcycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maintenance_records: {
+        Row: {
+          cost: number | null
+          created_at: string
+          id: string
+          item_name: string
+          km_at_service: number | null
+          maintenance_item_id: string | null
+          motorcycle_id: string
+          notes: string | null
+          service_date: string
+          user_id: string
+          workshop: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          item_name: string
+          km_at_service?: number | null
+          maintenance_item_id?: string | null
+          motorcycle_id: string
+          notes?: string | null
+          service_date?: string
+          user_id: string
+          workshop?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          id?: string
+          item_name?: string
+          km_at_service?: number | null
+          maintenance_item_id?: string | null
+          motorcycle_id?: string
+          notes?: string | null
+          service_date?: string
+          user_id?: string
+          workshop?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_records_maintenance_item_id_fkey"
+            columns: ["maintenance_item_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_records_motorcycle_id_fkey"
+            columns: ["motorcycle_id"]
+            isOneToOne: false
+            referencedRelation: "motorcycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      motorcycles: {
+        Row: {
+          brand: string
+          color: string | null
+          created_at: string
+          current_km: number
+          id: string
+          model: string
+          nickname: string | null
+          photo_url: string | null
+          plate: string | null
+          updated_at: string
+          user_id: string
+          year: number | null
+        }
+        Insert: {
+          brand: string
+          color?: string | null
+          created_at?: string
+          current_km?: number
+          id?: string
+          model: string
+          nickname?: string | null
+          photo_url?: string | null
+          plate?: string | null
+          updated_at?: string
+          user_id: string
+          year?: number | null
+        }
+        Update: {
+          brand?: string
+          color?: string | null
+          created_at?: string
+          current_km?: number
+          id?: string
+          model?: string
+          nickname?: string | null
+          photo_url?: string | null
+          plate?: string | null
+          updated_at?: string
+          user_id?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          instagram: string | null
+          nickname: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          instagram?: string | null
+          nickname?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          instagram?: string | null
+          nickname?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
