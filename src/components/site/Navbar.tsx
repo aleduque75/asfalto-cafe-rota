@@ -62,11 +62,11 @@ export function Navbar() {
               </a>
             ))}
             <a
-              href="#contato"
+              href="/auth"
               className="btn-copper ml-3 inline-flex items-center justify-center rounded-md px-5 py-2.5 text-sm uppercase tracking-[0.18em] font-semibold"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Entrar no rolê
+              Área do Membro
             </a>
           </nav>
 
@@ -96,12 +96,12 @@ export function Navbar() {
               </a>
             ))}
             <a
-              href="#contato"
+              href="/auth"
               onClick={() => setOpen(false)}
               className="btn-copper mt-3 inline-flex items-center justify-center rounded-md px-5 py-3 text-sm uppercase tracking-[0.18em] font-semibold"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Entrar no rolê
+              Área do Membro
             </a>
           </nav>
         </div>
