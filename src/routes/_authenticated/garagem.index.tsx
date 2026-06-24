@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Bike, Gauge, UploadCloud } from "lucide-react";
 import { toast } from "sonner";
-import { generateUploadUrl } from "@/server/upload";
+import { generateUploadUrl } from "@/lib/upload";
 
 export const Route = createFileRoute("/_authenticated/garagem/")({
   head: () => ({ meta: [{ title: "Minha Garagem — Café Moto e Asfalto" }] }),

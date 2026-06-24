@@ -1,26 +1,44 @@
-import { supabase } from "@/integrations/supabase/client";
+import { createServerFn } from "@tanstack/react-start";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export async function uploadMedia(file: File, folder: string): Promise<string> {
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const path = `${folder}/${crypto.randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("media").upload(path, file, {
-    cacheControl: "3600",
-    upsert: false,
-    contentType: file.type,
+export const generateUploadUrl = createServerFn({ method: "POST" })
+  .validator((data: { filename: string; contentType: string }) => data)
+  .handler(async ({ data }) => {
+    const { filename, contentType } = data;
+
+    const region = process.env.AWS_REGION;
+    const bucket = process.env.AWS_BUCKET_NAME;
+    const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+    if (!region || !bucket || !accessKeyId || !secretAccessKey) {
+      throw new Error("Configurações da AWS ausentes no servidor.");
+    }
+
+    const s3Client = new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    });
+
+    const uniqueId = crypto.randomUUID();
+    // Use the motoclube folder as requested
+    const key = `motoclube/${uniqueId}-${filename}`;
+
+    const command = new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    // URL is valid for 5 minutes
+    const presignedUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
+    
+    // AWS S3 standard URL format
+    const publicUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+
+    return { presignedUrl, publicUrl, key };
   });
-  if (error) throw error;
-  const { data } = supabase.storage.from("media").getPublicUrl(path);
-  return data.publicUrl;
-}
-
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
-}

@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { generateUploadUrl } from "@/server/upload";
+import { generateUploadUrl } from "@/lib/upload";
 
 export const Route = createFileRoute("/_authenticated/garagem/$id")({
   head: () => ({ meta: [{ title: "Detalhes da moto — Café Moto e Asfalto" }] }),
