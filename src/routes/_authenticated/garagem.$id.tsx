@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -76,6 +76,7 @@ function MotoDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [itemOpen, setItemOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
+  const [kmEditOpen, setKmEditOpen] = useState(false);
 
   async function loadAll() {
     const [{ data: m }, { data: it }, { data: rc }] = await Promise.all([
@@ -100,6 +101,7 @@ function MotoDetail() {
     const { error } = await supabase.from("motorcycles").update({ current_km: km }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("KM atualizado");
+    setKmEditOpen(false);
     loadAll();
   }
 
@@ -128,12 +130,21 @@ function MotoDetail() {
 
   return (
     <div>
-      <Link to="/garagem" className="inline-flex items-center gap-1 text-sm text-leather hover:text-copper mb-4">
-        <ArrowLeft className="h-4 w-4" /> Voltar para a garagem
-      </Link>
+      <button 
+        onClick={() => {
+          if (window.history.length > 2) {
+            window.history.back();
+          } else {
+            navigate({ to: "/dashboard" });
+          }
+        }} 
+        className="inline-flex items-center gap-1 text-sm text-leather hover:text-copper mb-4 cursor-pointer bg-transparent border-0 p-0"
+      >
+        <ArrowLeft className="h-4 w-4" /> Voltar
+      </button>
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        <Card className="lg:col-span-2 overflow-hidden border-leather/30">
+        <Card className="lg:col-span-2 overflow-hidden border-leather/30 bg-cream">
           <div className="grid sm:grid-cols-2">
             <div className="aspect-[4/3] bg-gradient-to-br from-coffee to-leather flex items-center justify-center">
               {moto.photo_url ? (
@@ -156,13 +167,13 @@ function MotoDetail() {
               <div className="mt-6 flex flex-wrap gap-2">
                 <Dialog open={editOpen} onOpenChange={setEditOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-coffee border-leather/40 hover:bg-leather/10">
-                      <Wrench className="h-4 w-4 mr-1.5" /> Editar moto
+                    <Button variant="outline" size="sm" className="border-copper text-copper hover:bg-copper hover:text-white">
+                      <Pencil className="h-4 w-4 mr-1.5" /> Editar moto
                     </Button>
                   </DialogTrigger>
                   <EditMotoDialog moto={moto} onUpdated={() => { setEditOpen(false); loadAll(); }} />
                 </Dialog>
-                <Button variant="outline" size="sm" className="text-destructive border-destructive/40 hover:bg-destructive/10" onClick={deleteMoto}>
+                <Button variant="outline" size="sm" className="text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground" onClick={deleteMoto}>
                   <Trash2 className="h-4 w-4 mr-1.5" /> Excluir moto
                 </Button>
               </div>
@@ -170,7 +181,7 @@ function MotoDetail() {
           </div>
         </Card>
 
-        <Card className="border-leather/30">
+        <Card className="border-leather/30 bg-cream">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-coffee">
               <Gauge className="h-5 w-5 text-copper" /> Quilometragem
@@ -180,11 +191,21 @@ function MotoDetail() {
             <p className="font-display text-4xl text-coffee mb-1" style={{ fontFamily: "var(--font-display)" }}>
               {moto.current_km.toLocaleString("pt-BR")} <span className="text-base text-leather">km</span>
             </p>
-            <Label className="mt-4 block">Atualizar KM</Label>
-            <div className="flex gap-2 mt-1">
-              <Input type="number" value={kmEdit} onChange={(e) => setKmEdit(e.target.value)} />
-              <Button onClick={updateKm} className="btn-copper">Salvar</Button>
-            </div>
+            
+            {!kmEditOpen ? (
+              <Button variant="outline" size="sm" onClick={() => setKmEditOpen(true)} className="mt-4 border-copper text-copper hover:bg-copper hover:text-white">
+                <Gauge className="h-4 w-4 mr-2" /> Atualizar KM
+              </Button>
+            ) : (
+              <div className="mt-4 p-4 border border-leather/20 rounded-md bg-white">
+                <Label className="block mb-2">Novo KM</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Input type="number" className="max-w-[150px]" value={kmEdit} onChange={(e) => setKmEdit(e.target.value)} />
+                  <Button onClick={updateKm} className="btn-copper">Salvar</Button>
+                  <Button variant="ghost" onClick={() => { setKmEditOpen(false); setKmEdit(String(moto.current_km)); }}>Cancelar</Button>
+                </div>
+              </div>
+            )}
             {alertCount > 0 && (
               <div className="mt-4 flex items-center gap-2 text-sm text-destructive">
                 <AlertTriangle className="h-4 w-4" /> {alertCount} alerta{alertCount > 1 ? "s" : ""} de manutenção
@@ -235,7 +256,7 @@ function MotoDetail() {
               {items.map((it) => {
                 const s = statusFor(it, moto.current_km);
                 return (
-                  <Card key={it.id} className="border-leather/30">
+                  <Card key={it.id} className="border-leather/30 bg-cream">
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
@@ -282,8 +303,16 @@ function MotoDetail() {
                         </p>
                       )}
                       {it.notes && <p className="text-xs text-coffee/80 mt-2 italic">{it.notes}</p>}
-                      <div className="flex justify-end mt-3">
-                        <Button variant="ghost" size="sm" onClick={() => deleteItem(it.id)} className="text-destructive hover:bg-destructive/10">
+                      <div className="flex justify-end gap-1 mt-3">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm" className="text-coffee hover:bg-leather/10 h-8 px-2">
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                          </DialogTrigger>
+                          <EditItemDialog item={it} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
+                        </Dialog>
+                        <Button variant="ghost" size="sm" onClick={() => deleteItem(it.id)} className="text-destructive hover:bg-destructive/10 h-8 px-2">
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                       </div>
@@ -303,7 +332,7 @@ function MotoDetail() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-leather/30 mt-4">
+            <Card className="border-leather/30 mt-4 bg-cream">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -401,6 +430,89 @@ function NewItemDialog({ motorcycleId, currentKm, onCreated }: { motorcycleId: s
         </div>
         <DialogFooter>
           <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando…" : "Salvar"}</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+function EditItemDialog({ item, motorcycleId, currentKm, onUpdated }: { item: Item; motorcycleId: string; currentKm: number; onUpdated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: item.name || "",
+    interval_km: item.interval_km ? String(item.interval_km) : "",
+    interval_months: item.interval_months ? String(item.interval_months) : "",
+    last_change_km: item.last_change_km != null ? String(item.last_change_km) : String(currentKm),
+    last_change_date: item.last_change_date || new Date().toISOString().slice(0, 10),
+    notes: item.notes || "",
+  });
+
+  useEffect(() => {
+    setForm({
+      name: item.name || "",
+      interval_km: item.interval_km ? String(item.interval_km) : "",
+      interval_months: item.interval_months ? String(item.interval_months) : "",
+      last_change_km: item.last_change_km != null ? String(item.last_change_km) : String(currentKm),
+      last_change_date: item.last_change_date || new Date().toISOString().slice(0, 10),
+      notes: item.notes || "",
+    });
+  }, [item, currentKm]);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from("maintenance_items").update({
+      name: form.name.trim(),
+      interval_km: form.interval_km ? parseInt(form.interval_km) : null,
+      interval_months: form.interval_months ? parseInt(form.interval_months) : null,
+      last_change_km: form.last_change_km ? parseInt(form.last_change_km) : null,
+      last_change_date: form.last_change_date || null,
+      notes: form.notes.trim() || null,
+    }).eq("id", item.id);
+    
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Item atualizado");
+    setOpen(false);
+    onUpdated();
+  }
+
+  return (
+    <DialogContent className="max-w-lg">
+      <DialogHeader>
+        <DialogTitle>Editar item de manutenção</DialogTitle>
+        <DialogDescription>Altere os intervalos ou registros da última troca.</DialogDescription>
+      </DialogHeader>
+      <form onSubmit={submit} className="space-y-3">
+        <div>
+          <Label>Item *</Label>
+          <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label>Intervalo (km)</Label>
+            <Input type="number" value={form.interval_km} onChange={(e) => setForm({ ...form, interval_km: e.target.value })} />
+          </div>
+          <div>
+            <Label>Intervalo (meses)</Label>
+            <Input type="number" value={form.interval_months} onChange={(e) => setForm({ ...form, interval_months: e.target.value })} />
+          </div>
+          <div>
+            <Label>Última troca (km)</Label>
+            <Input type="number" value={form.last_change_km} onChange={(e) => setForm({ ...form, last_change_km: e.target.value })} />
+          </div>
+          <div>
+            <Label>Última troca (data)</Label>
+            <Input type="date" value={form.last_change_date} onChange={(e) => setForm({ ...form, last_change_date: e.target.value })} />
+          </div>
+        </div>
+        <div>
+          <Label>Observações</Label>
+          <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+        </div>
+        <DialogFooter>
+          <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando…" : "Salvar alterações"}</Button>
         </DialogFooter>
       </form>
     </DialogContent>
