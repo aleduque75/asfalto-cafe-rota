@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/logo-badge.png";
 import { cn } from "@/lib/utils";
+import { Link } from "@tanstack/react-router";
 
 const links = [
-  { href: "#inicio", label: "Início" },
-  { href: "#moto-clube", label: "Moto Clube" },
-  { href: "#galeria", label: "Galeria" },
-  { href: "#noticias", label: "Notícias" },
-  { href: "#contato", label: "Contato" },
+  { hash: "inicio", label: "Início" },
+  { hash: "moto-clube", label: "Moto Clube" },
+  { hash: "galeria", label: "Galeria" },
+  { hash: "noticias", label: "Notícias" },
+  { hash: "contato", label: "Contato" },
 ];
 
 export function Navbar({ logoUrl }: { logoUrl?: string }) {
@@ -34,7 +35,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 md:h-20 items-center justify-between">
-          <a href="#inicio" className="flex items-center gap-3 group">
+          <Link to="/" hash="inicio" className="flex items-center gap-3 group">
             <img
               src={logoUrl || logo}
               alt="Café Moto e Asfalto"
@@ -48,26 +49,27 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
                 Café Moto e Asfalto
               </span>
             </div>
-          </a>
+          </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
             {links.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
+              <Link
+                key={l.hash}
+                to="/"
+                hash={l.hash}
                 className="px-4 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper transition-colors"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="/auth"
+            <Link
+              to="/auth"
               className="btn-copper ml-3 inline-flex items-center justify-center rounded-md px-5 py-2.5 text-sm uppercase tracking-[0.18em] font-semibold"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Área do Membro
-            </a>
+            </Link>
           </nav>
 
           <button
@@ -85,24 +87,25 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
         <div className="lg:hidden border-t border-border/60" style={{ backgroundColor: "var(--coffee)" }}>
           <nav className="px-4 py-4 flex flex-col gap-1">
             {links.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
+              <Link
+                key={l.hash}
+                to="/"
+                hash={l.hash}
                 onClick={() => setOpen(false)}
                 className="px-3 py-3 text-sm uppercase tracking-[0.2em] text-cream/90 hover:text-copper border-b border-border/40 last:border-0"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
-            <a
-              href="/auth"
+            <Link
+              to="/auth"
               onClick={() => setOpen(false)}
               className="btn-copper mt-3 inline-flex items-center justify-center rounded-md px-5 py-3 text-sm uppercase tracking-[0.18em] font-semibold"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Área do Membro
-            </a>
+            </Link>
           </nav>
         </div>
       )}
