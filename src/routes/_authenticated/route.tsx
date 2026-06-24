@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import logo from "@/assets/logo-badge.png";
-import { LogOut, Bike } from "lucide-react";
+import { LogOut, Bike, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -17,6 +18,21 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    })();
+  }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -44,6 +60,15 @@ function AuthenticatedLayout() {
             >
               <Bike className="h-4 w-4" /> Motos
             </Link>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                <ShieldCheck className="h-4 w-4" /> Admin
+              </Link>
+            )}
             <Link to="/" className="text-xs text-cream/70 hover:text-copper px-3">
               Site
             </Link>

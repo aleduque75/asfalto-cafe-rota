@@ -1,4 +1,6 @@
 import { Instagram } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Carousel,
   CarouselContent,
@@ -15,7 +17,9 @@ import g6 from "@/assets/gallery-6.jpg";
 import g7 from "@/assets/gallery-7.jpg";
 import g8 from "@/assets/gallery-8.jpg";
 
-const posts = [
+type GalleryPost = { src: string; caption: string; date: string; href?: string };
+
+const defaultPosts: GalleryPost[] = [
   { src: g1, caption: "Estrada da serra ao amanhecer", date: "Mar 2025" },
   { src: g2, caption: "Mirante em Joanópolis", date: "Fev 2025" },
   { src: g3, caption: "Parada do café — Pedra Bela", date: "Fev 2025" },
@@ -27,6 +31,29 @@ const posts = [
 ];
 
 export function Galeria() {
+  const [posts, setPosts] = useState<GalleryPost[]>(defaultPosts);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("gallery_items")
+        .select("title, caption, image_url, instagram_url, created_at")
+        .eq("status", "published")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (data && data.length > 0) {
+        setPosts(
+          data.map((d) => ({
+            src: d.image_url,
+            caption: d.caption ?? d.title ?? "",
+            date: new Date(d.created_at).toLocaleDateString("pt-BR", { month: "short", year: "numeric" }),
+            href: d.instagram_url ?? undefined,
+          })),
+        );
+      }
+    })();
+  }, []);
+
   return (
     <section id="galeria" className="relative py-24 md:py-32 border-t border-border/60" style={{ background: "var(--gradient-leather)" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -54,7 +81,7 @@ export function Galeria() {
             {posts.map((p, i) => (
               <CarouselItem key={i} className="pl-4 basis-full md:basis-1/2 lg:basis-1/4">
                 <a
-                  href="https://www.instagram.com/cafe_moto_asfalto"
+                  href={p.href ?? "https://www.instagram.com/cafe_moto_asfalto"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group block relative overflow-hidden rounded-lg card-leather"

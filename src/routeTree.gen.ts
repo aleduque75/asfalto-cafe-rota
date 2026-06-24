@@ -13,7 +13,12 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedGaragemRouteImport } from './routes/_authenticated/garagem'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
+import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
+import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authenticated/admin/galeria'
+import { Route as AuthenticatedAdminConteudoRouteImport } from './routes/_authenticated/admin/conteudo'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,44 +39,108 @@ const AuthenticatedGaragemRoute = AuthenticatedGaragemRouteImport.update({
   path: '/garagem',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedGaragemIdRoute = AuthenticatedGaragemIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AuthenticatedGaragemRoute,
 } as any)
+const AuthenticatedAdminNoticiasRoute =
+  AuthenticatedAdminNoticiasRouteImport.update({
+    id: '/noticias',
+    path: '/noticias',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminGaleriaRoute =
+  AuthenticatedAdminGaleriaRouteImport.update({
+    id: '/galeria',
+    path: '/galeria',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminConteudoRoute =
+  AuthenticatedAdminConteudoRouteImport.update({
+    id: '/conteudo',
+    path: '/conteudo',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
+  '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
+  '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/_authenticated/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
+  '/_authenticated/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/garagem' | '/garagem/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/admin'
+    | '/garagem'
+    | '/admin/conteudo'
+    | '/admin/galeria'
+    | '/admin/noticias'
+    | '/garagem/$id'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/garagem' | '/garagem/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/garagem'
+    | '/admin/conteudo'
+    | '/admin/galeria'
+    | '/admin/noticias'
+    | '/garagem/$id'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin'
     | '/_authenticated/garagem'
+    | '/_authenticated/admin/conteudo'
+    | '/_authenticated/admin/galeria'
+    | '/_authenticated/admin/noticias'
     | '/_authenticated/garagem/$id'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -110,6 +179,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGaragemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/garagem/$id': {
       id: '/_authenticated/garagem/$id'
       path: '/$id'
@@ -117,8 +200,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGaragemIdRouteImport
       parentRoute: typeof AuthenticatedGaragemRoute
     }
+    '/_authenticated/admin/noticias': {
+      id: '/_authenticated/admin/noticias'
+      path: '/noticias'
+      fullPath: '/admin/noticias'
+      preLoaderRoute: typeof AuthenticatedAdminNoticiasRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/galeria': {
+      id: '/_authenticated/admin/galeria'
+      path: '/galeria'
+      fullPath: '/admin/galeria'
+      preLoaderRoute: typeof AuthenticatedAdminGaleriaRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/conteudo': {
+      id: '/_authenticated/admin/conteudo'
+      path: '/conteudo'
+      fullPath: '/admin/conteudo'
+      preLoaderRoute: typeof AuthenticatedAdminConteudoRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
+
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminConteudoRoute: typeof AuthenticatedAdminConteudoRoute
+  AuthenticatedAdminGaleriaRoute: typeof AuthenticatedAdminGaleriaRoute
+  AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminConteudoRoute: AuthenticatedAdminConteudoRoute,
+    AuthenticatedAdminGaleriaRoute: AuthenticatedAdminGaleriaRoute,
+    AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
 
 interface AuthenticatedGaragemRouteChildren {
   AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
@@ -132,10 +256,12 @@ const AuthenticatedGaragemRouteWithChildren =
   AuthenticatedGaragemRoute._addFileChildren(AuthenticatedGaragemRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedGaragemRoute: typeof AuthenticatedGaragemRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedGaragemRoute: AuthenticatedGaragemRouteWithChildren,
 }
 
