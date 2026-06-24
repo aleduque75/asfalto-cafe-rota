@@ -25,7 +25,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/garagem", replace: true });
+      if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
 
@@ -36,7 +36,7 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Bem-vindo de volta!");
-    navigate({ to: "/garagem", replace: true });
+    navigate({ to: "/dashboard", replace: true });
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -46,7 +46,7 @@ function AuthPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/garagem`,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
         data: { full_name: fullName },
       },
     });
