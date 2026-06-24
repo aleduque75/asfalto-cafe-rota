@@ -3,11 +3,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster, toast } from "sonner";
 import logo from "@/assets/logo-badge.png";
-import { LogOut, Bike, ShieldCheck, LayoutDashboard, Settings } from "lucide-react";
+import { LogOut, Bike, ShieldCheck, LayoutDashboard, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -22,9 +20,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [whatsapp, setWhatsapp] = useState("");
-  const [savingSettings, setSavingSettings] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -37,48 +33,12 @@ function AuthenticatedLayout() {
         .eq("role", "admin")
         .maybeSingle();
       setIsAdmin(!!data);
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("phone")
-        .eq("id", u.user.id)
-        .maybeSingle();
-      if (profile && profile.phone) {
-        setWhatsapp(profile.phone);
-      }
     })();
   }, []);
 
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
-  }
-
-  async function saveSettings(e: React.FormEvent) {
-    e.preventDefault();
-    setSavingSettings(true);
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user) {
-      // Clean phone number (remove non-digits)
-      let cleanPhone = whatsapp.replace(/\D/g, "");
-      // Auto-prepend 55 for Brazil if user only typed DDD + number (10 or 11 digits)
-      if (cleanPhone.length === 10 || cleanPhone.length === 11) {
-        cleanPhone = "55" + cleanPhone;
-      }
-      
-      const { error } = await supabase
-        .from("profiles")
-        .update({ phone: cleanPhone })
-        .eq("id", u.user.id);
-      
-      if (error) {
-        toast.error("Erro ao salvar número. Certifique-se de que criou a coluna no banco.");
-      } else {
-        toast.success("Configurações salvas!");
-        setSettingsOpen(false);
-      }
-    }
-    setSavingSettings(false);
   }
 
   return (
@@ -121,39 +81,53 @@ function AuthenticatedLayout() {
             <Link to="/" className="hidden sm:inline-block text-xs text-cream/70 hover:text-copper px-3">
               Site
             </Link>
-            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-cream/80 hover:text-copper hover:bg-transparent">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Configurações da Conta</DialogTitle>
-                  <DialogDescription>Configure alertas e notificações.</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={saveSettings} className="space-y-4">
-                  <div>
-                    <Label>WhatsApp para Alertas (com DDD)</Label>
-                    <Input 
-                      type="tel" 
-                      placeholder="Ex: 11999999999" 
-                      value={whatsapp} 
-                      onChange={(e) => setWhatsapp(e.target.value)} 
-                    />
-                    <p className="text-xs text-leather mt-1">O robô enviará avisos automáticos de manutenção para este número.</p>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit" className="btn-copper" disabled={savingSettings}>
-                      {savingSettings ? "Salvando..." : "Salvar"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-            <Button variant="outline" size="sm" onClick={signOut} className="border-copper/50 text-cream hover:bg-leather/40 hover:text-cream bg-transparent ml-2">
-              <LogOut className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">Sair</span>
+            <Link to="/perfil" className="hidden sm:flex text-cream/80 hover:text-copper items-center justify-center p-2">
+              <Settings className="h-5 w-5" />
+            </Link>
+            <Button variant="outline" size="sm" onClick={signOut} className="hidden sm:inline-flex border-copper/50 text-cream hover:bg-leather/40 hover:text-cream bg-transparent ml-2">
+              <LogOut className="h-4 w-4 mr-1" /> Sair
             </Button>
+
+            {/* Mobile Menu */}
+            <div className="sm:hidden flex items-center">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-cream hover:text-copper hover:bg-transparent">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-coffee border-leather/20 text-cream p-6 w-[280px]">
+                  <SheetHeader className="text-left mb-8 mt-4">
+                    <SheetTitle className="text-copper font-display uppercase tracking-widest text-lg" style={{ fontFamily: "var(--font-display)" }}>
+                      Menu
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="flex flex-col gap-6">
+                    <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <LayoutDashboard className="h-5 w-5" /> Painel Principal
+                    </Link>
+                    <Link to="/garagem" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <Bike className="h-5 w-5" /> Minha Garagem
+                    </Link>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                        <ShieldCheck className="h-5 w-5" /> Painel Admin
+                      </Link>
+                    )}
+                    <Link to="/perfil" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <Settings className="h-5 w-5" /> Meu Perfil
+                    </Link>
+                    <div className="h-px w-full bg-leather/20 my-2"></div>
+                    <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/70 hover:text-copper">
+                      Ver Site
+                    </Link>
+                    <button onClick={() => { setMobileMenuOpen(false); signOut(); }} className="flex items-center gap-3 text-base text-destructive hover:text-destructive/80 mt-2">
+                      <LogOut className="h-5 w-5" /> Sair da conta
+                    </button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
           </nav>
         </div>
       </header>
