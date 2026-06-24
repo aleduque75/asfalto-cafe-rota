@@ -126,7 +126,7 @@ function PerfilPage() {
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Dados Gerais */}
-        <Card className="border-leather/30 bg-cream">
+        <Card className="border-leather/30 bg-cream text-coffee">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-coffee">
               <User className="h-5 w-5 text-copper" /> Dados Gerais
@@ -188,7 +188,7 @@ function PerfilPage() {
         </Card>
 
         {/* Segurança */}
-        <Card className="border-leather/30 bg-cream">
+        <Card className="border-leather/30 bg-cream text-coffee">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-coffee">
               <Lock className="h-5 w-5 text-copper" /> Segurança
