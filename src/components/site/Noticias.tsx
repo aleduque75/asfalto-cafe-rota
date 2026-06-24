@@ -8,35 +8,8 @@ import n3 from "@/assets/news-3.jpg";
 
 type NewsCard = { img: string; date: string; tag: string; title: string; excerpt: string; slug?: string };
 
-const defaultNoticias: NewsCard[] = [
-  {
-    img: n1,
-    date: "10 Jun 2026",
-    tag: "Passeio",
-    title: "Rolê a Monte Verde reúne a turma na serra",
-    excerpt:
-      "Saída cedo de Atibaia, parada estratégica pra café e um dia inteiro curtindo as curvas da serra. Foi rolê pra entrar pra história do clube.",
-  },
-  {
-    img: n2,
-    date: "28 Mai 2026",
-    tag: "Cultura",
-    title: "Por que a parada do café faz parte do roteiro",
-    excerpt:
-      "Mais do que combustível, o café é o pretexto pra conversa, pra rever a rota e pra deixar a estrada esperar mais um pouco.",
-  },
-  {
-    img: n3,
-    date: "12 Mai 2026",
-    tag: "Bastidores",
-    title: "Pedra Bela ao nascer do sol: como foi o último rolê",
-    excerpt:
-      "Acordamos antes do galo cantar pra pegar o nascer do sol no mirante. O frio compensou — e as fotos também.",
-  },
-];
-
 export function Noticias() {
-  const [noticias, setNoticias] = useState<NewsCard[]>(defaultNoticias);
+  const [noticias, setNoticias] = useState<NewsCard[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -48,18 +21,24 @@ export function Noticias() {
         .limit(6);
       if (data && data.length > 0) {
         setNoticias(
-          data.map((d) => ({
-            img: d.cover_url || n1,
-            date: new Date(d.published_at ?? d.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }),
-            tag: d.tag ?? "Notícia",
-            title: d.title,
-            excerpt: d.excerpt ?? "",
-            slug: d.slug,
-          })),
+          data.map((d, index) => {
+            const fallbacks = [n1, n2, n3];
+            const fallbackImg = fallbacks[index % 3];
+            return {
+              img: d.cover_url || fallbackImg,
+              date: new Date(d.published_at ?? d.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }),
+              tag: d.tag ?? "Notícia",
+              title: d.title,
+              excerpt: d.excerpt ?? "",
+              slug: d.slug,
+            };
+          })
         );
       }
     })();
   }, []);
+
+  if (noticias.length === 0) return null;
 
   return (
     <section id="noticias" className="relative py-24 md:py-32">
