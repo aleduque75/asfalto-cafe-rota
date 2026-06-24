@@ -60,7 +60,12 @@ function AuthenticatedLayout() {
     const { data: u } = await supabase.auth.getUser();
     if (u.user) {
       // Clean phone number (remove non-digits)
-      const cleanPhone = whatsapp.replace(/\D/g, "");
+      let cleanPhone = whatsapp.replace(/\D/g, "");
+      // Auto-prepend 55 for Brazil if user only typed DDD + number (10 or 11 digits)
+      if (cleanPhone.length === 10 || cleanPhone.length === 11) {
+        cleanPhone = "55" + cleanPhone;
+      }
+      
       const { error } = await supabase
         .from("profiles")
         .update({ phone: cleanPhone })
