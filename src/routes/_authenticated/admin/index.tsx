@@ -26,10 +26,11 @@ function AdminHome() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl md:text-4xl font-display" style={{ fontFamily: "var(--font-display)" }}>
+        <p className="text-xs uppercase tracking-[0.25em] text-copper mb-2">Painel administrativo</p>
+        <h1 className="text-3xl md:text-4xl font-display text-coffee" style={{ fontFamily: "var(--font-display)" }}>
           Visão geral
         </h1>
-        <p className="text-leather/70 mt-1">Gerencie o conteúdo público do site.</p>
+        <p className="text-leather/80 mt-2">Gerencie o conteúdo público do site.</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Stat icon={<Newspaper className="h-5 w-5" />} label="Notícias publicadas" value={counts.news} sub={`${counts.newsDraft} rascunho(s)`} to="/admin/noticias" />
@@ -43,14 +44,14 @@ function AdminHome() {
 function Stat({ icon, label, value, sub, to }: { icon: React.ReactNode; label: string; value: number | string; sub: string; to: string }) {
   return (
     <Link to={to} className="block">
-      <Card className="border-leather/30 hover:border-copper transition">
+      <Card className="border-leather/30 bg-cream hover:border-copper hover:shadow-lg transition">
         <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-sm font-medium text-leather/80">{label}</CardTitle>
+          <CardTitle className="text-sm font-medium text-leather">{label}</CardTitle>
           <span className="text-copper">{icon}</span>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-display" style={{ fontFamily: "var(--font-display)" }}>{value}</div>
-          <p className="text-xs text-leather/60 mt-1">{sub}</p>
+          <div className="text-3xl font-display text-coffee" style={{ fontFamily: "var(--font-display)" }}>{value}</div>
+          <p className="text-xs text-leather/70 mt-1">{sub}</p>
         </CardContent>
       </Card>
     </Link>
