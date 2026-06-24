@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Bike, Gauge, UploadCloud } from "lucide-react";
+import { Plus, Bike, Gauge, UploadCloud, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -40,6 +40,10 @@ function GaragemPage() {
 
   return (
     <div>
+      <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-leather hover:text-copper mb-4">
+        <ArrowLeft className="h-4 w-4" /> Voltar para o painel
+      </Link>
+      
       <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
         <div>
           <p className="text-xs uppercase tracking-[0.25em] text-copper mb-2">Minha garagem</p>
