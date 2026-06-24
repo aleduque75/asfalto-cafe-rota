@@ -11,7 +11,7 @@ const links = [
   { href: "#contato", label: "Contato" },
 ];
 
-export function Navbar() {
+export function Navbar({ logoUrl }: { logoUrl?: string }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -36,11 +36,11 @@ export function Navbar() {
         <div className="flex h-16 md:h-20 items-center justify-between">
           <a href="#inicio" className="flex items-center gap-3 group">
             <img
-              src={logo}
+              src={logoUrl || logo}
               alt="Café Moto e Asfalto"
               width={48}
               height={48}
-              className="h-10 w-10 md:h-12 md:w-12 rounded-full ring-2 ring-copper/40 group-hover:ring-copper transition"
+              className="h-10 w-10 md:h-12 md:w-12 rounded-full ring-2 ring-copper/40 group-hover:ring-copper transition object-cover bg-leather/20"
             />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="eyebrow text-[10px]">Moto Clube</span>

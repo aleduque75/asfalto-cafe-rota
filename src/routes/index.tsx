@@ -7,6 +7,7 @@ import { Galeria } from "@/components/site/Galeria";
 import { Noticias } from "@/components/site/Noticias";
 import { Contato } from "@/components/site/Contato";
 import { Footer } from "@/components/site/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,19 +25,30 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
+  loader: async () => {
+    const { data } = await supabase.from("site_content").select("key, value");
+    const contentMap: Record<string, any> = {};
+    if (data) {
+      for (const row of data) {
+        contentMap[row.key] = row.value;
+      }
+    }
+    return { contentMap };
+  },
   component: Index,
 });
 
 function Index() {
+  const { contentMap } = Route.useLoaderData();
   return (
     <div className="min-h-screen scroll-smooth">
-      <Navbar />
+      <Navbar logoUrl={contentMap.general?.logo_url} />
       <main>
-        <Hero />
-        <MotoClube />
+        <Hero content={contentMap.hero} />
+        <MotoClube content={contentMap.club_story} />
         <Galeria />
         <Noticias />
-        <Contato />
+        <Contato content={contentMap.contact} />
       </main>
       <Footer />
       <Toaster />

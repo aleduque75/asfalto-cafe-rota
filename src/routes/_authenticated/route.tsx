@@ -21,6 +21,7 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -33,6 +34,16 @@ function AuthenticatedLayout() {
         .eq("role", "admin")
         .maybeSingle();
       setIsAdmin(!!data);
+
+      const { data: contentData } = await supabase
+        .from("site_content")
+        .select("value")
+        .eq("key", "general")
+        .maybeSingle();
+      
+      if (contentData?.value && typeof contentData.value === 'object' && 'logo_url' in contentData.value) {
+        setLogoUrl((contentData.value as any).logo_url);
+      }
     })();
   }, []);
 
@@ -46,7 +57,7 @@ function AuthenticatedLayout() {
       <header className="border-b border-leather/20 bg-coffee">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-3">
-            <img src={logo} alt="" className="h-10 w-10 rounded-full ring-2 ring-copper/40" />
+            <img src={logoUrl || logo} alt="" className="h-10 w-10 rounded-full ring-2 ring-copper/40 object-cover bg-leather/20" />
             <div className="hidden sm:flex flex-col leading-none">
               <span className="text-[10px] uppercase tracking-[0.25em] text-copper">Área do membro</span>
               <span className="font-display text-cream text-base" style={{ fontFamily: "var(--font-display)" }}>

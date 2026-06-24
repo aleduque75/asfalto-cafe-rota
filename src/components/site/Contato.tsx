@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Instagram, Mail, MapPin, MessageCircle, Send } from "lucide-react";
 import { toast } from "sonner";
 
-export function Contato() {
+export function Contato({ content }: { content?: Record<string, string> }) {
   const [sending, setSending] = useState(false);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,7 +41,7 @@ export function Contato() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-copper" style={{ fontFamily: "var(--font-display)" }}>Base</p>
-                  <p className="text-cream">Atibaia — São Paulo — Brasil</p>
+                  <p className="text-cream">{content?.address || "Atibaia — São Paulo — Brasil"}</p>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -51,12 +51,12 @@ export function Contato() {
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-copper" style={{ fontFamily: "var(--font-display)" }}>Instagram</p>
                   <a
-                    href="https://www.instagram.com/cafe_moto_asfalto"
+                    href={content?.instagram ? `https://www.instagram.com/${content.instagram.replace("@", "")}` : "https://www.instagram.com/cafe_moto_asfalto"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cream hover:text-copper transition"
                   >
-                    @cafe_moto_asfalto
+                    {content?.instagram || "@cafe_moto_asfalto"}
                   </a>
                 </div>
               </li>
@@ -66,7 +66,7 @@ export function Contato() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-copper" style={{ fontFamily: "var(--font-display)" }}>WhatsApp</p>
-                  <p className="text-cream">Solicite o contato pela mensagem ao lado</p>
+                  <p className="text-cream">{content?.whatsapp || "Solicite o contato pela mensagem ao lado"}</p>
                 </div>
               </li>
               <li className="flex items-start gap-4">
@@ -75,7 +75,7 @@ export function Contato() {
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.28em] text-copper" style={{ fontFamily: "var(--font-display)" }}>E-mail</p>
-                  <p className="text-cream">contato@cafemotoasfalto.com.br</p>
+                  <p className="text-cream">{content?.email || "contato@cafemotoasfalto.com.br"}</p>
                 </div>
               </li>
             </ul>

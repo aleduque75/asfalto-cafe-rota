@@ -76,8 +76,8 @@ function AdminLayout() {
   }
 
   return (
-    <div className="grid lg:grid-cols-[240px_1fr] gap-8">
-      <aside className="lg:sticky lg:top-8 self-start">
+    <div className="grid lg:grid-cols-[240px_1fr] gap-8 min-w-0">
+      <aside className="lg:sticky lg:top-8 self-start min-w-0 w-full">
         <p className="hidden lg:block text-xs uppercase tracking-[0.2em] text-copper font-bold mb-4 px-1" style={{ fontFamily: "var(--font-display)" }}>
           Administração
         </p>

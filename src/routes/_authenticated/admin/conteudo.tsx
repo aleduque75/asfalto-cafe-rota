@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
+import { uploadMedia } from "@/lib/upload";
 
 export const Route = createFileRoute("/_authenticated/admin/conteudo")({
   component: AdminConteudo,
@@ -16,10 +17,17 @@ export const Route = createFileRoute("/_authenticated/admin/conteudo")({
 type Section = {
   key: string;
   label: string;
-  fields: { name: string; label: string; type: "text" | "textarea" }[];
+  fields: { name: string; label: string; type: "text" | "textarea" | "image" }[];
 };
 
 const SECTIONS: Section[] = [
+  {
+    key: "general",
+    label: "Geral",
+    fields: [
+      { name: "logo_url", label: "Logotipo (Imagem)", type: "image" },
+    ],
+  },
   {
     key: "hero",
     label: "Hero (topo)",
@@ -102,6 +110,22 @@ function AdminConteudo() {
                     <Label>{f.label}</Label>
                     {f.type === "textarea" ? (
                       <Textarea rows={3} value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
+                    ) : f.type === "image" ? (
+                      <div className="space-y-2">
+                        <Input type="file" accept="image/*" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const loadingToast = toast.loading("Enviando imagem...");
+                          try {
+                            const url = await uploadMedia(file, "logo");
+                            setField(s.key, f.name, url);
+                            toast.success("Upload concluído! Salve a seção para aplicar.", { id: loadingToast });
+                          } catch (err) {
+                            toast.error("Erro ao enviar imagem", { id: loadingToast });
+                          }
+                        }} />
+                        {values[s.key]?.[f.name] && <img src={values[s.key][f.name]} alt="Preview" className="h-16 w-auto object-contain bg-leather/10 rounded p-1" />}
+                      </div>
                     ) : (
                       <Input value={values[s.key]?.[f.name] ?? ""} onChange={(e) => setField(s.key, f.name, e.target.value)} />
                     )}

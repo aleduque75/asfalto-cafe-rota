@@ -9,14 +9,14 @@ const pilares = [
 
 const destinos = ["Pedra Bela", "Monte Verde", "Joanópolis", "Salesópolis"];
 
-export function MotoClube() {
+export function MotoClube({ content }: { content?: Record<string, string> }) {
   return (
     <section id="moto-clube" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <p className="eyebrow mb-3">Nossa história</p>
           <h2 className="section-title text-4xl md:text-6xl mb-6">
-            Café Moto e Asfalto
+            {content?.title || "Café Moto e Asfalto"}
           </h2>
           <p className="text-cream/70 text-lg md:text-xl font-serif italic" style={{ fontFamily: "var(--font-serif)" }}>
             O primeiro de muitos quilômetros juntos.
@@ -25,22 +25,30 @@ export function MotoClube() {
 
         <div className="mt-16 grid md:grid-cols-2 gap-10 items-start">
           <div className="card-leather rounded-lg p-8 md:p-10">
-            <p className="text-cream/85 leading-relaxed mb-4">
-              Tudo começou com um grupo de amigos, algumas motos e uma vontade enorme de
-              pegar a estrada.
-            </p>
-            <p className="text-cream/85 leading-relaxed mb-4">
-              Criamos esse espaço pra dividir o que move a nossa turma: o cheiro do
-              asfalto de manhã cedo, o café quente numa parada no meio do caminho e as
-              paisagens do interior de SP — e além — que só quem anda de moto conhece de
-              verdade.
-            </p>
-            <p className="text-cream/85 leading-relaxed mb-6">
-              De Pedra Bela, Monte Verde, Joanópolis, Salesópolis e muitos outros que estão
-              por vir, cada rolê vira história e a amizade se fortalece. Aqui a gente
-              compartilha nossos passeios, viagens, paradas e os melhores momentos da
-              estrada.
-            </p>
+            {content?.paragraph ? (
+              <p className="text-cream/85 leading-relaxed mb-6 whitespace-pre-wrap">
+                {content.paragraph}
+              </p>
+            ) : (
+              <>
+                <p className="text-cream/85 leading-relaxed mb-4">
+                  Tudo começou com um grupo de amigos, algumas motos e uma vontade enorme de
+                  pegar a estrada.
+                </p>
+                <p className="text-cream/85 leading-relaxed mb-4">
+                  Criamos esse espaço pra dividir o que move a nossa turma: o cheiro do
+                  asfalto de manhã cedo, o café quente numa parada no meio do caminho e as
+                  paisagens do interior de SP — e além — que só quem anda de moto conhece de
+                  verdade.
+                </p>
+                <p className="text-cream/85 leading-relaxed mb-6">
+                  De Pedra Bela, Monte Verde, Joanópolis, Salesópolis e muitos outros que estão
+                  por vir, cada rolê vira história e a amizade se fortalece. Aqui a gente
+                  compartilha nossos passeios, viagens, paradas e os melhores momentos da
+                  estrada.
+                </p>
+              </>
+            )}
 
             <div className="flex flex-wrap gap-2 mb-8">
               {destinos.map((d) => (

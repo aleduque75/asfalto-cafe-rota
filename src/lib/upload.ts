@@ -42,3 +42,21 @@ export const generateUploadUrl = createServerFn({ method: "POST" })
 
     return { presignedUrl, publicUrl, key };
   });
+
+export async function uploadMedia(file: File, folder: string = "media"): Promise<string> {
+  const { presignedUrl, publicUrl } = await generateUploadUrl({
+    data: { filename: file.name, contentType: file.type }
+  });
+
+  const res = await fetch(presignedUrl, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": file.type },
+  });
+
+  if (!res.ok) {
+    throw new Error("Falha ao enviar arquivo para o servidor de armazenamento.");
+  }
+
+  return publicUrl;
+}

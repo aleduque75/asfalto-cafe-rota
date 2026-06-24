@@ -1,4 +1,5 @@
 import { ArrowRight, Calendar } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import n1 from "@/assets/news-1.jpg";
@@ -99,16 +100,27 @@ export function Noticias() {
                   {p.title}
                 </h3>
                 <p className="text-cream/70 text-sm leading-relaxed mb-6 flex-1">{p.excerpt}</p>
-                <a
-                  href="#noticias"
-                  className="inline-flex items-center gap-2 text-copper text-sm uppercase tracking-[0.2em] font-semibold group-hover:gap-3 transition-all"
+                <Link
+                  to="/noticias/$slug"
+                  params={{ slug: p.slug ?? "noticia" }}
+                  className="inline-flex items-center gap-2 text-copper text-sm uppercase tracking-[0.2em] font-semibold group-hover:gap-3 transition-all mt-auto"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   Saiba mais <ArrowRight className="h-4 w-4" />
-                </a>
+                </Link>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="mt-14 text-center">
+          <Link
+            to="/noticias"
+            className="inline-flex items-center justify-center rounded-md border border-copper/50 px-7 py-3.5 text-sm uppercase tracking-[0.18em] font-semibold text-cream hover:bg-copper/10 transition"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Ver todas as notícias
+          </Link>
         </div>
       </div>
     </section>

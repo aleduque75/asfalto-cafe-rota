@@ -1,7 +1,7 @@
 import heroRoad from "@/assets/hero-road.jpg";
 import logo from "@/assets/logo-badge.png";
 
-export function Hero() {
+export function Hero({ content }: { content?: Record<string, string> }) {
   return (
     <section id="inicio" className="relative min-h-screen w-full overflow-hidden">
       <img
@@ -37,18 +37,24 @@ export function Hero() {
           />
         </div>
 
-        <p className="eyebrow mb-4">Atibaia · SP · Desde 2024</p>
+        <p className="eyebrow mb-4">{content?.eyebrow || "Atibaia · SP · Desde 2024"}</p>
         <h1
           className="text-cream text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold uppercase leading-[0.95] max-w-5xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          Café quente.
-          <br />
-          <span className="text-copper">Asfalto livre.</span>
+          {content?.title ? (
+            // If dynamic title exists, just render it (we can't easily colorize the second half dynamically without complex logic, so we just render it whole)
+            <span dangerouslySetInnerHTML={{ __html: content.title.replace(/\n/g, "<br/>") }} />
+          ) : (
+            <>
+              Café quente.
+              <br />
+              <span className="text-copper">Asfalto livre.</span>
+            </>
+          )}
         </h1>
         <p className="mt-6 max-w-2xl text-base md:text-lg text-cream/85 font-serif italic" style={{ fontFamily: "var(--font-serif)" }}>
-          "O primeiro de muitos quilômetros juntos." Um grupo de amigos, algumas motos
-          e uma vontade enorme de pegar a estrada.
+          {content?.subtitle || "\"O primeiro de muitos quilômetros juntos.\" Um grupo de amigos, algumas motos e uma vontade enorme de pegar a estrada."}
         </p>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
@@ -57,7 +63,7 @@ export function Hero() {
             className="btn-copper inline-flex items-center justify-center rounded-md px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Conheça o clube
+            {content?.cta_label || "Conheça o clube"}
           </a>
           <a
             href="#galeria"

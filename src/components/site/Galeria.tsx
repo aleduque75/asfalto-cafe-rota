@@ -1,4 +1,5 @@
 import { Instagram } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -110,6 +111,16 @@ export function Galeria() {
           <CarouselPrevious className="hidden sm:flex -left-4 bg-coffee border-copper/40 text-copper hover:bg-copper hover:text-coffee" />
           <CarouselNext className="hidden sm:flex -right-4 bg-coffee border-copper/40 text-copper hover:bg-copper hover:text-coffee" />
         </Carousel>
+
+        <div className="mt-14 text-center">
+          <Link
+            to="/galeria"
+            className="inline-flex items-center justify-center rounded-md border border-copper/50 px-7 py-3.5 text-sm uppercase tracking-[0.18em] font-semibold text-cream hover:bg-copper/10 transition"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Ver todas as fotos
+          </Link>
+        </div>
       </div>
     </section>
   );
