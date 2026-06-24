@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedGaragemRouteImport } from './routes/_authenticated/garagem'
+import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -33,30 +34,44 @@ const AuthenticatedGaragemRoute = AuthenticatedGaragemRouteImport.update({
   path: '/garagem',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGaragemIdRoute = AuthenticatedGaragemIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedGaragemRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/garagem': typeof AuthenticatedGaragemRoute
+  '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/garagem/$id': typeof AuthenticatedGaragemIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/garagem': typeof AuthenticatedGaragemRoute
+  '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/garagem/$id': typeof AuthenticatedGaragemIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/garagem': typeof AuthenticatedGaragemRoute
+  '/_authenticated/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/garagem'
+  fullPaths: '/' | '/auth' | '/garagem' | '/garagem/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/garagem'
-  id: '__root__' | '/' | '/_authenticated' | '/auth' | '/_authenticated/garagem'
+  to: '/' | '/auth' | '/garagem' | '/garagem/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/garagem'
+    | '/_authenticated/garagem/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -95,15 +110,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGaragemRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/garagem/$id': {
+      id: '/_authenticated/garagem/$id'
+      path: '/$id'
+      fullPath: '/garagem/$id'
+      preLoaderRoute: typeof AuthenticatedGaragemIdRouteImport
+      parentRoute: typeof AuthenticatedGaragemRoute
+    }
   }
 }
 
+interface AuthenticatedGaragemRouteChildren {
+  AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
+}
+
+const AuthenticatedGaragemRouteChildren: AuthenticatedGaragemRouteChildren = {
+  AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRoute,
+}
+
+const AuthenticatedGaragemRouteWithChildren =
+  AuthenticatedGaragemRoute._addFileChildren(AuthenticatedGaragemRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedGaragemRoute: typeof AuthenticatedGaragemRoute
+  AuthenticatedGaragemRoute: typeof AuthenticatedGaragemRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedGaragemRoute: AuthenticatedGaragemRoute,
+  AuthenticatedGaragemRoute: AuthenticatedGaragemRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
