@@ -17,6 +17,7 @@ import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
+import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authenticated/admin/galeria'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -58,12 +59,19 @@ const AuthenticatedAdminNoticiasRoute =
     path: '/noticias',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminGaleriaRoute =
+  AuthenticatedAdminGaleriaRouteImport.update({
+    id: '/galeria',
+    path: '/galeria',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -72,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -83,6 +92,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/garagem': typeof AuthenticatedGaragemRouteWithChildren
+  '/_authenticated/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
   '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -94,11 +104,19 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/garagem'
+    | '/admin/galeria'
     | '/admin/noticias'
     | '/garagem/$id'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/garagem' | '/admin/noticias' | '/garagem/$id' | '/admin'
+  to:
+    | '/'
+    | '/auth'
+    | '/garagem'
+    | '/admin/galeria'
+    | '/admin/noticias'
+    | '/garagem/$id'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -106,6 +124,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/garagem'
+    | '/_authenticated/admin/galeria'
     | '/_authenticated/admin/noticias'
     | '/_authenticated/garagem/$id'
     | '/_authenticated/admin/'
@@ -175,16 +194,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNoticiasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/galeria': {
+      id: '/_authenticated/admin/galeria'
+      path: '/galeria'
+      fullPath: '/admin/galeria'
+      preLoaderRoute: typeof AuthenticatedAdminGaleriaRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminGaleriaRoute: typeof AuthenticatedAdminGaleriaRoute
   AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminGaleriaRoute: AuthenticatedAdminGaleriaRoute,
     AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }
