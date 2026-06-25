@@ -83,15 +83,60 @@ function NewsArticle() {
               </p>
             )}
             
-            <div className="text-cream/80 leading-relaxed space-y-6 font-serif">
-              {article.content?.split('\n').map((paragraph, index) => (
-                paragraph.trim() ? (
-                  <p key={index} className="min-h-[1.5em]">{paragraph}</p>
-                ) : (
-                  <br key={index} />
-                )
-              ))}
-            </div>
+            {(() => {
+              let parsedBlocks: { id: string, type: string, value: string }[] | null = null;
+              try {
+                const parsed = JSON.parse(article.content || "[]");
+                if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].type) {
+                  parsedBlocks = parsed;
+                }
+              } catch {}
+
+              if (parsedBlocks) {
+                return (
+                  <div className="text-cream/80 leading-relaxed font-serif">
+                    {parsedBlocks.map(block => {
+                      if (block.type === "paragraph") {
+                        return (
+                          <div key={block.id} className="space-y-4 mb-8">
+                            {block.value.split('\n').map((paragraph, index) => (
+                              paragraph.trim() ? <p key={index}>{paragraph}</p> : <br key={index} />
+                            ))}
+                          </div>
+                        );
+                      }
+                      if (block.type === "subtitle" && block.value) {
+                        return (
+                          <h2 key={block.id} className="text-3xl md:text-4xl text-cream font-bold mt-16 mb-8" style={{ fontFamily: "var(--font-display)" }}>
+                            {block.value}
+                          </h2>
+                        );
+                      }
+                      if (block.type === "image" && block.value) {
+                        return (
+                          <figure key={block.id} className="my-12">
+                            <img src={block.value} alt="" className="w-full rounded-xl shadow-lg border border-copper/20" />
+                          </figure>
+                        );
+                      }
+                      return null;
+                    })}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="text-cream/80 leading-relaxed space-y-6 font-serif">
+                  {article.content?.split('\n').map((paragraph, index) => (
+                    paragraph.trim() ? (
+                      <p key={index} className="min-h-[1.5em]">{paragraph}</p>
+                    ) : (
+                      <br key={index} />
+                    )
+                  ))}
+                </div>
+              );
+            })()}
           </article>
         </div>
       </main>
