@@ -225,7 +225,7 @@ function AdminNoticias() {
                   {blocks.length === 0 && <p className="text-sm text-leather/60 italic text-center py-4">Nenhum bloco adicionado. Comece adicionando um texto ou subtítulo.</p>}
                   
                   {blocks.map((block, index) => (
-                    <div key={block.id} className="relative group border border-leather/20 rounded p-3 bg-white shadow-sm flex gap-3">
+                    <div key={block.id} className="relative group border border-leather/20 rounded p-3 bg-black/20 shadow-sm flex gap-3">
                       <div className="flex flex-col gap-1 pt-1 opacity-50 group-hover:opacity-100 transition-opacity">
                         <button type="button" onClick={() => moveBlock(index, -1)} disabled={index === 0} className="hover:text-copper disabled:opacity-30">▲</button>
                         <button type="button" onClick={() => moveBlock(index, 1)} disabled={index === blocks.length - 1} className="hover:text-copper disabled:opacity-30">▼</button>
