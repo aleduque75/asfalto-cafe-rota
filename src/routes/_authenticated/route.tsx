@@ -113,6 +113,9 @@ function AuthenticatedLayout() {
                         <Link to="/admin/galeria" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <ImageIcon className="h-5 w-5" /> Galeria
                         </Link>
+                        <Link to="/admin/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <Vote className="h-5 w-5" /> Enquetes
+                        </Link>
                         <Link to="/admin/conteudo" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <FileText className="h-5 w-5" /> Conteúdo do site
                         </Link>
