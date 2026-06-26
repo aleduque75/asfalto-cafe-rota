@@ -187,10 +187,10 @@ function AdminEnquetesPage() {
         <p className="text-coffee/70">Gerencie as votações do Moto Clube</p>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="active">Enquetes Ativas</TabsTrigger>
-          <TabsTrigger value="archived">Arquivadas / Resultados</TabsTrigger>
-          <TabsTrigger value="new">Criar Nova</TabsTrigger>
+        <TabsList className="flex flex-wrap h-auto">
+          <TabsTrigger value="active" className="flex-1 min-w-[120px]">Enquetes Ativas</TabsTrigger>
+          <TabsTrigger value="archived" className="flex-1 min-w-[120px]">Arquivadas / Resultados</TabsTrigger>
+          <TabsTrigger value="new" className="flex-1 min-w-[120px]">Criar Nova</TabsTrigger>
         </TabsList>
 
         {/* --- ABA: NOVA ENQUETE --- */}
