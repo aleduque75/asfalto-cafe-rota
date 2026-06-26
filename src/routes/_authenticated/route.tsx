@@ -66,55 +66,8 @@ function AuthenticatedLayout() {
             </div>
           </Link>
           <nav className="flex items-center gap-2">
-            <Link
-              to="/dashboard"
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <LayoutDashboard className="h-4 w-4" /> Painel
-            </Link>
-            <Link
-              to="/garagem"
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Bike className="h-4 w-4" /> Motos
-            </Link>
-            <Link
-              to="/rotas"
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Map className="h-4 w-4" /> Rotas
-            </Link>
-            <Link
-              to="/enquetes"
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Vote className="h-4 w-4" /> Enquetes
-            </Link>
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                <ShieldCheck className="h-4 w-4" /> Admin
-              </Link>
-            )}
-            <Link to="/" className="hidden sm:inline-block text-xs text-cream/70 hover:text-copper px-3">
-              Site
-            </Link>
-            <Link to="/perfil" className="hidden sm:flex text-cream/80 hover:text-copper items-center justify-center p-2">
-              <Settings className="h-5 w-5" />
-            </Link>
-            <Button variant="outline" size="sm" onClick={signOut} className="hidden sm:inline-flex border-copper/50 text-cream hover:bg-leather/40 hover:text-cream bg-transparent ml-2">
-              <LogOut className="h-4 w-4 mr-1" /> Sair
-            </Button>
-
-            {/* Mobile Menu */}
-            <div className="sm:hidden flex items-center">
+            {/* Menu */}
+            <div className="flex items-center">
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-cream hover:text-copper hover:bg-transparent">

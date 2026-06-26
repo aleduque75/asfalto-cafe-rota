@@ -145,12 +145,16 @@ function DashboardPage() {
         <p className="text-sm text-leather mt-2">Resumo da sua garagem, alertas de manutenção e atividades recentes.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={<Bike className="h-5 w-5" />} label="Motos cadastradas" value={String(motos.length)} />
-        <StatCard icon={<Gauge className="h-5 w-5" />} label="KM total da frota" value={totalKm.toLocaleString("pt-BR")} />
-        <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="Itens vencidos" value={String(overdueCount)} tone={overdueCount > 0 ? "danger" : undefined} />
-        <StatCard icon={<Clock className="h-5 w-5" />} label="Vencendo em breve" value={String(soonCount)} tone={soonCount > 0 ? "warn" : undefined} />
-      </div>
+      {(overdueCount > 0 || soonCount > 0) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {overdueCount > 0 && (
+            <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="Itens vencidos" value={String(overdueCount)} tone="danger" />
+          )}
+          {soonCount > 0 && (
+            <StatCard icon={<Clock className="h-5 w-5" />} label="Vencendo em breve" value={String(soonCount)} tone="warn" />
+          )}
+        </div>
+      )}
 
       {activePolls && activePolls.length > 0 && (
         <section className="mb-10">
