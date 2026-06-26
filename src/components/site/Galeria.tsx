@@ -8,7 +8,10 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
+import { cn } from "@/lib/utils";
 import g1 from "@/assets/gallery-1.jpg";
 import g2 from "@/assets/gallery-2.jpg";
 import g3 from "@/assets/gallery-3.jpg";
@@ -55,6 +58,20 @@ export function Galeria() {
     })();
   }, []);
 
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   return (
     <section id="galeria" className="relative py-24 md:py-32 border-t border-border/60" style={{ background: "var(--gradient-leather)" }}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -77,7 +94,12 @@ export function Galeria() {
           </a>
         </div>
 
-        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+        <Carousel 
+          opts={{ align: "start", loop: true }} 
+          plugins={[Autoplay({ delay: 3500, stopOnInteraction: true })]}
+          setApi={setApi}
+          className="w-full"
+        >
           <CarouselContent className="-ml-4">
             {posts.map((p, i) => (
               <CarouselItem key={i} className="pl-4 basis-full md:basis-1/2 lg:basis-1/4">
@@ -110,6 +132,18 @@ export function Galeria() {
           </CarouselContent>
           <CarouselPrevious className="hidden sm:flex -left-4 bg-coffee border-copper/40 text-copper hover:bg-copper hover:text-coffee" />
           <CarouselNext className="hidden sm:flex -right-4 bg-coffee border-copper/40 text-copper hover:bg-copper hover:text-coffee" />
+          
+          <div className="pt-6 pb-2 flex items-center justify-center gap-1.5 md:hidden">
+            {Array.from({ length: count }).map((_, i) => (
+              <div 
+                key={i} 
+                className={cn(
+                  "h-1 rounded-full transition-all duration-500", 
+                  current === i + 1 ? "w-6 bg-copper" : "w-3 bg-copper/30"
+                )}
+              />
+            ))}
+          </div>
         </Carousel>
 
         <div className="mt-14 text-center">
