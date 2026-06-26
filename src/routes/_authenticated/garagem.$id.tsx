@@ -56,13 +56,19 @@ function statusFor(item: Item, currentKm: number) {
     ? Math.min(100, Math.max(0, ((currentKm - item.last_change_km) / item.interval_km) * 100))
     : null;
 
+  const datePct = item.interval_months && item.last_change_date && dateDue
+    ? Math.min(100, Math.max(0, ((Date.now() - new Date(item.last_change_date).getTime()) / (dateDue.getTime() - new Date(item.last_change_date).getTime())) * 100))
+    : null;
+
+  const progress = Math.max(kmPct || 0, datePct || 0);
+
   const overdue = (kmRemaining != null && kmRemaining <= 0) || (daysRemaining != null && daysRemaining <= 0);
   const soon = !overdue && (
     (kmRemaining != null && kmRemaining <= (item.interval_km! * 0.15)) ||
     (daysRemaining != null && daysRemaining <= 14)
   );
 
-  return { kmDue, kmRemaining, dateDue, daysRemaining, kmPct, overdue, soon };
+  return { kmDue, kmRemaining, dateDue, daysRemaining, progress, overdue, soon };
 }
 
 function MotoDetail() {
@@ -278,14 +284,22 @@ function MotoDetail() {
                         )}
                       </div>
 
-                      {s.kmPct != null && (
+                      {(s.kmDue != null || s.dateDue != null) && (
                         <div className="mt-3">
-                          <Progress value={s.kmPct} />
-                          <p className="text-xs text-leather mt-1">
-                            {s.kmRemaining != null && s.kmRemaining > 0
-                              ? `Faltam ${s.kmRemaining.toLocaleString("pt-BR")} km (próxima troca aos ${s.kmDue!.toLocaleString("pt-BR")} km)`
-                              : `Atrasado em ${Math.abs(s.kmRemaining!).toLocaleString("pt-BR")} km`}
-                          </p>
+                          <div className="w-full bg-leather/20 rounded-full h-2 overflow-hidden">
+                            <div 
+                              className={`h-full rounded-full transition-all ${s.overdue ? 'bg-red-600' : s.progress > 85 ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                              style={{ width: `${s.progress}%` }} 
+                            />
+                          </div>
+                          
+                          {s.kmRemaining != null && (
+                            <p className="text-xs text-leather mt-1">
+                              {s.kmRemaining > 0
+                                ? `Faltam ${s.kmRemaining.toLocaleString("pt-BR")} km (próxima troca aos ${s.kmDue!.toLocaleString("pt-BR")} km)`
+                                : `Atrasado em ${Math.abs(s.kmRemaining).toLocaleString("pt-BR")} km`}
+                            </p>
+                          )}
                         </div>
                       )}
                       {s.daysRemaining != null && (

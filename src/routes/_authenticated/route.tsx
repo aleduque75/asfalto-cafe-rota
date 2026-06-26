@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster, toast } from "sonner";
 import logo from "@/assets/logo-badge.png";
-import { LogOut, Bike, ShieldCheck, LayoutDashboard, Settings, Menu } from "lucide-react";
+import { LogOut, Settings, Bike, LayoutDashboard, ShieldCheck, Menu, Map, Users, Newspaper, Image as ImageIcon, FileText, Vote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -80,6 +80,20 @@ function AuthenticatedLayout() {
             >
               <Bike className="h-4 w-4" /> Motos
             </Link>
+            <Link
+              to="/rotas"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <Map className="h-4 w-4" /> Rotas
+            </Link>
+            <Link
+              to="/enquetes"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-sm uppercase tracking-[0.18em] text-cream/80 hover:text-copper"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <Vote className="h-4 w-4" /> Enquetes
+            </Link>
             {isAdmin && (
               <Link
                 to="/admin"
@@ -120,10 +134,37 @@ function AuthenticatedLayout() {
                     <Link to="/garagem" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <Bike className="h-5 w-5" /> Minha Garagem
                     </Link>
+                    <Link to="/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <Map className="h-5 w-5" /> Rotas e Passeios
+                    </Link>
+                    <Link to="/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <Vote className="h-5 w-5" /> Enquetes
+                    </Link>
                     {isAdmin && (
-                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                        <ShieldCheck className="h-5 w-5" /> Painel Admin
-                      </Link>
+                      <div className="flex flex-col gap-3 pt-2 pb-2">
+                        <p className="text-xs uppercase tracking-[0.2em] text-copper/80 font-bold mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                          Administração
+                        </p>
+                        <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <ShieldCheck className="h-5 w-5" /> Visão Geral
+                        </Link>
+                        <Link to="/admin/usuarios" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <Users className="h-5 w-5" /> Usuários
+                        </Link>
+                        <Link to="/admin/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <Map className="h-5 w-5" /> Rotas
+                        </Link>
+                        <Link to="/admin/noticias" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <Newspaper className="h-5 w-5" /> Notícias
+                        </Link>
+                        <Link to="/admin/galeria" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <ImageIcon className="h-5 w-5" /> Galeria
+                        </Link>
+                        <Link to="/admin/conteudo" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <FileText className="h-5 w-5" /> Conteúdo do site
+                        </Link>
+                        <div className="h-px bg-border/30 my-2" />
+                      </div>
                     )}
                     <Link to="/perfil" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <Settings className="h-5 w-5" /> Meu Perfil

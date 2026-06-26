@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Image as ImageIcon, FileText, ShieldCheck, Loader2 } from "lucide-react";
+import { Newspaper, Image as ImageIcon, FileText, ShieldCheck, Loader2, Map, Users, Vote } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -83,8 +83,11 @@ function AdminLayout() {
         </p>
         <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
           <AdminLink to="/admin" icon={<ShieldCheck className="h-4 w-4" />}>Visão geral</AdminLink>
+          <AdminLink to="/admin/usuarios" icon={<Users className="h-4 w-4" />}>Usuários</AdminLink>
+          <AdminLink to="/admin/rotas" icon={<Map className="h-4 w-4" />}>Rotas</AdminLink>
           <AdminLink to="/admin/noticias" icon={<Newspaper className="h-4 w-4" />}>Notícias</AdminLink>
           <AdminLink to="/admin/galeria" icon={<ImageIcon className="h-4 w-4" />}>Galeria</AdminLink>
+          <AdminLink to="/admin/enquetes" icon={<Vote className="h-4 w-4" />}>Enquetes</AdminLink>
           <AdminLink to="/admin/conteudo" icon={<FileText className="h-4 w-4" />}>Conteúdo do site</AdminLink>
         </nav>
       </aside>

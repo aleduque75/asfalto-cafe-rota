@@ -32,6 +32,7 @@ const SECTIONS: Section[] = [
     key: "hero",
     label: "Hero (topo)",
     fields: [
+      { name: "bg_image_url", label: "Imagem de Fundo (Recomendado: 1920x1080px)", type: "image" },
       { name: "eyebrow", label: "Selo (eyebrow)", type: "text" },
       { name: "title", label: "Título", type: "text" },
       { name: "subtitle", label: "Subtítulo", type: "textarea" },

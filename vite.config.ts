@@ -15,6 +15,9 @@ export default defineConfig({
   vite: {
     server: {
       allowedHosts: true,
+      fs: {
+        allow: ["..", "/root/apps/asfalto-cafe-rota"],
+      }
     },
   },
 });

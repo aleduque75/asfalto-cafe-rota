@@ -310,12 +310,15 @@ export type Database = {
           description: string | null
           destination: string
           estimated_distance_km: number | null
+          estimated_duration_mins: number | null
           id: string
           media_url: string | null
           meeting_point: string
           meeting_time: string
           start_date: string
+          status: string
           title: string
+          visited_places: string | null
           waze_url: string | null
         }
         Insert: {
@@ -324,12 +327,15 @@ export type Database = {
           description?: string | null
           destination: string
           estimated_distance_km?: number | null
+          estimated_duration_mins?: number | null
           id?: string
           media_url?: string | null
           meeting_point: string
           meeting_time: string
           start_date: string
+          status?: string
           title: string
+          visited_places?: string | null
           waze_url?: string | null
         }
         Update: {
@@ -338,12 +344,15 @@ export type Database = {
           description?: string | null
           destination?: string
           estimated_distance_km?: number | null
+          estimated_duration_mins?: number | null
           id?: string
           media_url?: string | null
           meeting_point?: string
           meeting_time?: string
           start_date?: string
+          status?: string
           title?: string
+          visited_places?: string | null
           waze_url?: string | null
         }
         Relationships: []
@@ -396,12 +405,34 @@ export type Database = {
     }
     Functions: {
       claim_admin_if_first: { Args: never; Returns: boolean }
+      get_users_for_admin: {
+        Args: never
+        Returns: {
+          banned_until: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      set_user_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: undefined
+      }
+      toggle_user_ban: {
+        Args: { ban: boolean; target_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

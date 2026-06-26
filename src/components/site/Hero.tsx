@@ -5,7 +5,7 @@ export function Hero({ content, logoUrl }: { content?: Record<string, string>, l
   return (
     <section id="inicio" className="relative min-h-screen w-full overflow-hidden">
       <img
-        src={heroRoad}
+        src={content?.bg_image_url || heroRoad}
         alt="Estrada de montanha ao pôr do sol no interior de SP"
         width={1920}
         height={1280}

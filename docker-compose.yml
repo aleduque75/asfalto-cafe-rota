@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  asfalto-cafe-rota-preview:
+    build: .
+    container_name: asfalto-cafe-rota-preview
+    restart: always
+    ports:
+      - "8081:80"

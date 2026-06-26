@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus } from "lucide-react";
+import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Café Moto e Asfalto" }] }),
@@ -27,14 +27,20 @@ type Record_ = {
   km_at_service: number | null; cost: number | null;
 };
 
+type RouteData = {
+  id: string; title: string; destination: string; start_date: string;
+  waze_url: string | null;
+};
+
 type Alert = {
   item: Item;
   moto: Moto;
-  status: "overdue" | "soon";
+  status: "overdue" | "soon" | "ok";
   reason: string;
+  progress: number;
 };
 
-function computeStatus(item: Item, currentKm: number): { status: "overdue" | "soon" | "ok"; reason: string } {
+function computeStatus(item: Item, currentKm: number): { status: "overdue" | "soon" | "ok"; reason: string; progress: number } {
   const kmDue = item.interval_km && item.last_change_km != null ? item.last_change_km + item.interval_km : null;
   const kmRemaining = kmDue != null ? kmDue - currentKm : null;
   const dateDue = item.interval_months && item.last_change_date
@@ -44,11 +50,25 @@ function computeStatus(item: Item, currentKm: number): { status: "overdue" | "so
 
   const overdueKm = kmRemaining != null && kmRemaining <= 0;
   const overdueDate = daysRemaining != null && daysRemaining <= 0;
+  
+  let progress = 0;
+  if (item.interval_km && item.last_change_km != null) {
+    progress = ((currentKm - item.last_change_km) / item.interval_km) * 100;
+  }
+  if (item.interval_months && item.last_change_date) {
+    const start = new Date(item.last_change_date).getTime();
+    const end = new Date(start).setMonth(new Date(start).getMonth() + item.interval_months);
+    const current = Date.now();
+    const dateProgress = ((current - start) / (end - start)) * 100;
+    progress = Math.max(progress, dateProgress);
+  }
+  progress = Math.min(Math.max(progress, 0), 100);
+
   if (overdueKm || overdueDate) {
     const parts: string[] = [];
     if (overdueKm) parts.push(`${Math.abs(kmRemaining!).toLocaleString("pt-BR")} km vencidos`);
     if (overdueDate) parts.push(`${Math.abs(daysRemaining!)} dias vencidos`);
-    return { status: "overdue", reason: parts.join(" · ") };
+    return { status: "overdue", reason: parts.join(" · "), progress: 100 };
   }
 
   const soonKm = kmRemaining != null && item.interval_km != null && kmRemaining <= item.interval_km * 0.15;
@@ -57,9 +77,13 @@ function computeStatus(item: Item, currentKm: number): { status: "overdue" | "so
     const parts: string[] = [];
     if (soonKm) parts.push(`faltam ${kmRemaining!.toLocaleString("pt-BR")} km`);
     if (soonDate) parts.push(`faltam ${daysRemaining} dias`);
-    return { status: "soon", reason: parts.join(" · ") };
+    return { status: "soon", reason: parts.join(" · "), progress };
   }
-  return { status: "ok", reason: "" };
+  
+  const okParts: string[] = [];
+  if (kmRemaining != null) okParts.push(`faltam ${kmRemaining.toLocaleString("pt-BR")} km`);
+  if (daysRemaining != null) okParts.push(`faltam ${daysRemaining} dias`);
+  return { status: "ok", reason: okParts.length > 0 ? okParts.join(" · ") : "monitorando", progress };
 }
 
 function DashboardPage() {
@@ -67,22 +91,28 @@ function DashboardPage() {
   const [motos, setMotos] = useState<Moto[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [records, setRecords] = useState<Record_[]>([]);
+  const [nextRoute, setNextRoute] = useState<RouteData | null>(null);
+  const [activePolls, setActivePolls] = useState<any[]>([]);
   const [fullName, setFullName] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const [{ data: p }, { data: m }, { data: it }, { data: rc }] = await Promise.all([
+      const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }] = await Promise.all([
         supabase.from("profiles").select("full_name").eq("id", u.user.id).maybeSingle(),
         supabase.from("motorcycles").select("*").order("created_at", { ascending: false }),
         supabase.from("maintenance_items").select("*"),
         supabase.from("maintenance_records").select("*").order("service_date", { ascending: false }).limit(8),
+        supabase.from("routes").select("id, title, destination, start_date, waze_url").eq("status", "open").order("start_date", { ascending: true }).limit(1).maybeSingle(),
+        (supabase as any).from("polls").select("*").eq("status", "active"),
       ]);
       setFullName((p?.full_name as string) || u.user.email || "");
       setMotos((m ?? []) as Moto[]);
       setItems((it ?? []) as Item[]);
       setRecords((rc ?? []) as Record_[]);
+      setNextRoute(rt as RouteData | null);
+      setActivePolls(polls || []);
       setLoading(false);
     })();
   }, []);
@@ -94,11 +124,10 @@ function DashboardPage() {
       const moto = motoById.get(item.motorcycle_id);
       if (!moto) return null;
       const s = computeStatus(item, moto.current_km);
-      if (s.status === "ok") return null;
-      return { item, moto, status: s.status, reason: s.reason } as Alert;
+      return { item, moto, status: s.status, reason: s.reason, progress: s.progress } as Alert;
     })
     .filter((a): a is Alert => a !== null)
-    .sort((a, b) => (a.status === "overdue" ? -1 : 1) - (b.status === "overdue" ? -1 : 1));
+    .sort((a, b) => b.progress - a.progress);
 
   const overdueCount = alerts.filter((a) => a.status === "overdue").length;
   const soonCount = alerts.filter((a) => a.status === "soon").length;
@@ -122,6 +151,94 @@ function DashboardPage() {
         <StatCard icon={<AlertTriangle className="h-5 w-5" />} label="Itens vencidos" value={String(overdueCount)} tone={overdueCount > 0 ? "danger" : undefined} />
         <StatCard icon={<Clock className="h-5 w-5" />} label="Vencendo em breve" value={String(soonCount)} tone={soonCount > 0 ? "warn" : undefined} />
       </div>
+
+      {activePolls && activePolls.length > 0 && (
+        <section className="mb-10">
+          <Link to="/enquetes">
+            <Card className="bg-copper text-cream border-none shadow-lg overflow-hidden relative cursor-pointer hover:bg-copper/90 transition-colors">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                <Vote className="w-32 h-32" />
+              </div>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-cream/20 p-3 rounded-full">
+                      <Vote className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="font-display text-2xl mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                        Enquete Aberta!
+                      </h2>
+                      <p className="text-cream/80 text-sm">
+                        Há {activePolls.length} votação(ões) em andamento. Sua opinião é importante.
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-6 h-6" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </section>
+      )}
+
+      <section>
+        {nextRoute ? (
+          <Card className="bg-cream border-copper/30 shadow-md overflow-hidden relative mb-10">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <RouteIcon className="w-32 h-32 text-copper" />
+            </div>
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="flex-1">
+                  <Badge className="bg-copper text-cream border-none mb-3">Próximo Passeio</Badge>
+                  <h2 className="font-display text-2xl text-coffee mb-2" style={{ fontFamily: "var(--font-display)" }}>
+                    {nextRoute.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-leather">
+                    <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-copper" /> {new Date(nextRoute.start_date).toLocaleDateString("pt-BR")}</span>
+                    <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-copper" /> {nextRoute.destination}</span>
+                    <span className="flex items-center gap-1.5 font-medium text-copper">
+                      <Clock className="w-4 h-4" /> 
+                      {(() => {
+                        const days = Math.ceil((new Date(nextRoute.start_date).getTime() - Date.now()) / 86400000);
+                        return days > 0 ? `Faltam ${days} dias` : days === 0 ? "É Hoje!" : "Atrasado";
+                      })()}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 min-w-[200px]">
+                  <Link to="/rotas" className="flex-1">
+                    <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper/10">Ver Detalhes</Button>
+                  </Link>
+                  {nextRoute.waze_url && (
+                    <Button className="flex-1 btn-copper flex gap-2" onClick={() => window.open(nextRoute.waze_url!, "_blank")}>
+                      <Navigation className="h-4 w-4" /> Waze
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-cream border-dashed border-leather/30 shadow-none overflow-hidden mb-10">
+            <CardContent className="p-8 text-center flex flex-col items-center">
+              <RouteIcon className="w-10 h-10 text-copper/40 mb-3" />
+              <h2 className="font-display text-xl text-coffee mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                Sem passeios programados
+              </h2>
+              <p className="text-sm text-leather mb-4">
+                Acompanhe o histórico de rolês passados na área de rotas.
+              </p>
+              <Link to="/rotas">
+                <Button variant="outline" className="border-copper text-copper hover:bg-copper/10 px-8">
+                  Ver Histórico
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </section>
 
       <section>
         <div className="flex items-end justify-between mb-4">
@@ -188,15 +305,21 @@ function DashboardPage() {
               <ul className="space-y-3">
                 {alerts.slice(0, 6).map((a) => (
                   <li key={a.item.id}>
-                    <Link to="/garagem/$id" params={{ id: a.moto.id }} className="block rounded-md border border-leather/20 p-3 hover:border-copper transition">
-                      <div className="flex items-start justify-between gap-3">
+                    <Link to="/garagem/$id" params={{ id: a.moto.id }} className="block rounded-md border border-leather/20 p-3 hover:border-copper transition bg-white/50">
+                      <div className="flex items-start justify-between gap-3 mb-2">
                         <div>
                           <p className="text-sm font-medium text-coffee">{a.item.name}</p>
                           <p className="text-xs text-leather">{a.moto.nickname || `${a.moto.brand} ${a.moto.model}`} · {a.reason}</p>
                         </div>
-                        <Badge variant={a.status === "overdue" ? "destructive" : "secondary"} className="text-[10px] shrink-0">
-                          {a.status === "overdue" ? "Vencido" : "Em breve"}
+                        <Badge variant={a.status === "overdue" ? "destructive" : a.status === "soon" ? "secondary" : "outline"} className={`text-[10px] shrink-0 ${a.status === 'ok' ? 'border-emerald-600 text-emerald-700' : ''}`}>
+                          {a.status === "overdue" ? "Vencido" : a.status === "soon" ? "Em breve" : "Em dia"}
                         </Badge>
+                      </div>
+                      <div className="w-full bg-leather/20 rounded-full h-1.5 overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all ${a.status === 'overdue' ? 'bg-red-600' : a.progress > 85 ? 'bg-amber-500' : 'bg-emerald-500'}`} 
+                          style={{ width: `${a.progress}%` }} 
+                        />
                       </div>
                     </Link>
                   </li>
