@@ -12,8 +12,9 @@ import {
 } from "../../components/ui/card";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Label } from "../../components/ui/label";
+import { Dialog, DialogContent } from "../../components/ui/dialog";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
+import { AlertCircle, CheckCircle2, ArrowLeft, ZoomIn } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/enquetes")({
   component: EnquetesPage,
@@ -23,6 +24,7 @@ function EnquetesPage() {
   const queryClient = useQueryClient();
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
   // Perfil logado
   const { data: userProfile } = useQuery({
@@ -89,7 +91,7 @@ function EnquetesPage() {
   if (isLoading) return <div className="p-6 text-foreground">Carregando votações...</div>;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Button variant="outline" size="icon" asChild className="shrink-0 bg-white/50 border-leather/30 text-coffee hover:bg-white">
           <Link to="/dashboard">
@@ -123,12 +125,18 @@ function EnquetesPage() {
             return (
               <Card key={poll.id} className="card-leather flex flex-col overflow-hidden">
                 {poll.image_url && (
-                  <div className="w-full h-56 md:h-72 overflow-hidden bg-muted">
+                  <div 
+                    className="w-full h-56 md:h-72 overflow-hidden bg-muted relative group cursor-pointer"
+                    onClick={() => setEnlargedImage(poll.image_url)}
+                  >
                     <img
                       src={poll.image_url}
                       alt={poll.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <ZoomIn className="w-8 h-8 text-white" />
+                    </div>
                   </div>
                 )}
                 <div className="p-6 flex flex-col flex-1">
@@ -168,8 +176,17 @@ function EnquetesPage() {
                                 <div key={opt.id} className="space-y-2">
                                   <div className="flex items-center gap-4">
                                     {opt.image_url && (
-                                      <div className="w-12 h-12 rounded-md overflow-hidden shrink-0 border border-white/10 shadow-sm bg-muted">
-                                        <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover" />
+                                      <div 
+                                        className="w-12 h-12 rounded-md overflow-hidden shrink-0 border border-white/10 shadow-sm bg-muted cursor-pointer relative group"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setEnlargedImage(opt.image_url);
+                                        }}
+                                      >
+                                        <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                          <ZoomIn className="w-4 h-4 text-white" />
+                                        </div>
                                       </div>
                                     )}
                                     <div className="flex-1 space-y-1.5">
@@ -214,8 +231,18 @@ function EnquetesPage() {
                                 <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5 border-foreground/50 text-primary" />
                                 <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                   {opt.image_url && (
-                                    <div className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-white/5 shadow-sm">
-                                      <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover" />
+                                    <div 
+                                      className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-white/5 shadow-sm relative group z-10"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        setEnlargedImage(opt.image_url);
+                                      }}
+                                    >
+                                      <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <ZoomIn className="w-5 h-5 text-white" />
+                                      </div>
                                     </div>
                                   )}
                                   <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug text-foreground/90 font-medium">
@@ -245,6 +272,19 @@ function EnquetesPage() {
           })}
         </div>
       )}
+
+      {/* Modal para ampliar imagem */}
+      <Dialog open={!!enlargedImage} onOpenChange={() => setEnlargedImage(null)}>
+        <DialogContent className="max-w-3xl bg-transparent border-none shadow-none flex justify-center items-center p-0">
+          {enlargedImage && (
+            <img 
+              src={enlargedImage} 
+              alt="Imagem ampliada" 
+              className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl border border-white/20"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
