@@ -20,19 +20,19 @@ CREATE POLICY "Membros podem ver enquetes"
 CREATE POLICY "Admins podem inserir enquetes" 
     ON public.polls FOR INSERT 
     WITH CHECK (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 CREATE POLICY "Admins podem atualizar enquetes" 
     ON public.polls FOR UPDATE 
     USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 CREATE POLICY "Admins podem apagar enquetes" 
     ON public.polls FOR DELETE 
     USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 
@@ -41,6 +41,7 @@ CREATE TABLE public.poll_options (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     poll_id UUID NOT NULL REFERENCES public.polls(id) ON DELETE CASCADE,
     text TEXT NOT NULL,
+    image_url TEXT,
     "order" INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -57,19 +58,19 @@ CREATE POLICY "Membros podem ver opções"
 CREATE POLICY "Admins podem inserir opções" 
     ON public.poll_options FOR INSERT 
     WITH CHECK (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 CREATE POLICY "Admins podem atualizar opções" 
     ON public.poll_options FOR UPDATE 
     USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 CREATE POLICY "Admins podem apagar opções" 
     ON public.poll_options FOR DELETE 
     USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );
 
 
@@ -102,5 +103,5 @@ CREATE POLICY "Membros podem votar"
 CREATE POLICY "Admins podem apagar votos" 
     ON public.poll_votes FOR DELETE 
     USING (
-        EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+        public.has_role(auth.uid(), 'admin')
     );

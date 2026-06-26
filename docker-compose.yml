@@ -6,4 +6,4 @@ services:
     container_name: asfalto-cafe-rota-preview
     restart: always
     ports:
-      - "8081:80"
+      - "8085:3000"

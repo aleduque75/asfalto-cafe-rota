@@ -296,27 +296,28 @@ function AdminEnquetesPage() {
         </TabsContent>
 
         {/* --- ABA: ATIVAS --- */}
-        <TabsContent value="active" className="space-y-4">
+        <TabsContent value="active" className="space-y-6">
           {loadingActive ? (
-            <p>Carregando...</p>
+            <p className="text-coffee">Carregando...</p>
           ) : activePolls?.length === 0 ? (
-            <Card className="bg-black/20 border-dashed border-muted text-center p-8">
+            <Card className="card-leather border-dashed border-muted text-center p-8">
               <p className="text-muted-foreground">Nenhuma enquete ativa no momento.</p>
             </Card>
           ) : (
             activePolls?.map((poll: any) => (
-              <Card key={poll.id} className="bg-black/40 border-primary/20">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <Card key={poll.id} className="card-leather flex flex-col overflow-hidden">
+                <CardHeader className="flex flex-col sm:flex-row items-start justify-between space-y-4 sm:space-y-0 pb-4">
                   <div>
-                    <CardTitle className="text-xl">{poll.title}</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-2xl font-display uppercase text-primary">{poll.title}</CardTitle>
+                    <CardDescription className="text-foreground/80">
                       Criado em: {new Date(poll.created_at).toLocaleDateString("pt-BR")}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button
                       variant="secondary"
                       size="sm"
+                      className="flex-1 sm:flex-none bg-black/20 text-foreground hover:bg-black/30 border border-white/10"
                       onClick={() => archivePoll.mutate(poll.id)}
                     >
                       <Archive className="w-4 h-4 mr-2" /> Encerrar
@@ -324,45 +325,67 @@ function AdminEnquetesPage() {
                     <Button
                       variant="destructive"
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       onClick={() => {
                         if (confirm("Tem certeza que deseja apagar? Os votos serão perdidos.")) {
                           deletePoll.mutate(poll.id);
                         }
                       }}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 shrink-0 sm:mr-2" />
+                      <span className="hidden sm:inline">Apagar</span>
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-4">
+                  <div className="flex flex-col md:flex-row gap-6">
                     {poll.image_url && (
-                      <img
-                        src={poll.image_url}
-                        alt={poll.title}
-                        className="w-32 h-32 object-cover rounded-md border border-border"
-                      />
+                      <div className="w-full md:w-48 h-48 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-muted">
+                        <img
+                          src={poll.image_url}
+                          alt={poll.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     )}
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Total de Votos: {poll.poll_votes?.length || 0}
-                      </p>
-                      <ul className="space-y-2">
-                        {poll.poll_options?.map((opt: any) => {
-                          const votesCount = poll.poll_votes?.filter(
-                            (v: any) => v.option_id === opt.id
-                          ).length;
-                          return (
-                            <li
-                              key={opt.id}
-                              className="bg-black/20 p-2 rounded flex justify-between text-sm"
-                            >
-                              <span>{opt.text}</span>
-                              <span className="font-bold text-primary">{votesCount} votos</span>
-                            </li>
-                          );
-                        })}
-                      </ul>
+                    <div className="flex-1 space-y-4">
+                      {poll.description && (
+                        <p className="text-foreground/90 whitespace-pre-wrap">{poll.description}</p>
+                      )}
+                      
+                      <div className="bg-black/10 rounded-xl p-5 border border-white/5">
+                        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                          Total de Votos: {poll.poll_votes?.length || 0}
+                        </p>
+                        <ul className="space-y-3">
+                          {poll.poll_options?.sort((a: any, b: any) => {
+                                const votesA = poll.poll_votes?.filter((v: any) => v.option_id === a.id).length || 0;
+                                const votesB = poll.poll_votes?.filter((v: any) => v.option_id === b.id).length || 0;
+                                return votesB - votesA;
+                          }).map((opt: any) => {
+                            const votesCount = poll.poll_votes?.filter(
+                              (v: any) => v.option_id === opt.id
+                            ).length || 0;
+                            const totalVotes = poll.poll_votes?.length || 1;
+                            const percentage = Math.round((votesCount / totalVotes) * 100);
+
+                            return (
+                              <li
+                                key={opt.id}
+                                className="bg-black/20 border border-white/5 p-3 rounded-lg flex flex-col space-y-2"
+                              >
+                                <div className="flex justify-between items-start text-sm">
+                                  <span className="text-foreground/90 font-medium pr-4">{opt.text}</span>
+                                  <span className="font-bold text-primary shrink-0">{votesCount} votos</span>
+                                </div>
+                                <div className="h-1.5 bg-black/40 rounded-full overflow-hidden w-full">
+                                  <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -372,36 +395,42 @@ function AdminEnquetesPage() {
         </TabsContent>
 
         {/* --- ABA: ARQUIVADAS --- */}
-        <TabsContent value="archived" className="space-y-4">
+        <TabsContent value="archived" className="space-y-6">
           {loadingArchived ? (
-            <p>Carregando...</p>
+            <p className="text-coffee">Carregando...</p>
           ) : archivedPolls?.length === 0 ? (
-            <Card className="bg-black/20 border-dashed border-muted text-center p-8">
+            <Card className="card-leather border-dashed border-muted text-center p-8">
               <p className="text-muted-foreground">Nenhuma enquete arquivada.</p>
             </Card>
           ) : (
             archivedPolls?.map((poll: any) => (
-              <Card key={poll.id} className="bg-black/20 opacity-80">
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <Card key={poll.id} className="card-leather opacity-90 overflow-hidden grayscale-[30%]">
+                <CardHeader className="flex flex-col sm:flex-row items-start justify-between space-y-4 sm:space-y-0 pb-4">
                   <div>
-                    <CardTitle className="text-lg line-through">{poll.title}</CardTitle>
-                    <CardDescription>Resultado Final</CardDescription>
+                    <CardTitle className="text-xl font-display uppercase line-through text-foreground/70">{poll.title}</CardTitle>
+                    <CardDescription className="text-foreground/80 mt-1">Resultado Final</CardDescription>
                   </div>
                   <Button
                     variant="destructive"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       if (confirm("Tem certeza que deseja apagar o histórico?")) {
                         deletePoll.mutate(poll.id);
                       }
                     }}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 shrink-0 sm:mr-2" />
+                    <span className="hidden sm:inline">Apagar Histórico</span>
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    {poll.poll_options?.map((opt: any) => {
+                  <div className="bg-black/10 rounded-xl p-5 border border-white/5 space-y-4">
+                    {poll.poll_options?.sort((a: any, b: any) => {
+                        const votesA = poll.poll_votes?.filter((v: any) => v.option_id === a.id).length || 0;
+                        const votesB = poll.poll_votes?.filter((v: any) => v.option_id === b.id).length || 0;
+                        return votesB - votesA;
+                    }).map((opt: any) => {
                       const totalVotes = poll.poll_votes?.length || 1; // previne div by 0
                       const votesCount = poll.poll_votes?.filter(
                         (v: any) => v.option_id === opt.id
@@ -409,14 +438,14 @@ function AdminEnquetesPage() {
                       const percentage = Math.round((votesCount / totalVotes) * 100);
 
                       return (
-                        <div key={opt.id} className="space-y-1">
-                          <div className="flex justify-between text-sm">
-                            <span>{opt.text}</span>
-                            <span>{percentage}% ({votesCount})</span>
+                        <div key={opt.id} className="space-y-2">
+                          <div className="flex justify-between items-start text-sm">
+                            <span className="text-foreground/90 pr-4">{opt.text}</span>
+                            <span className="font-medium text-primary shrink-0">{percentage}% ({votesCount})</span>
                           </div>
-                          <div className="h-2 bg-black/40 rounded overflow-hidden">
+                          <div className="h-1.5 bg-black/30 rounded-full overflow-hidden shadow-inner w-full">
                             <div
-                              className="h-full bg-primary"
+                              className="h-full bg-primary/70"
                               style={{ width: `${percentage}%` }}
                             />
                           </div>
