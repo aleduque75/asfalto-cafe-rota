@@ -152,17 +152,26 @@ function EnquetesPage() {
 
                           return (
                             <div key={opt.id} className="space-y-1">
-                              <div className="flex justify-between text-sm">
-                                <span className={isSelected ? "font-bold text-primary" : ""}>
-                                  {opt.text} {isSelected && "(Seu voto)"}
-                                </span>
-                                <span>{percentage}%</span>
-                              </div>
-                              <div className="h-2.5 bg-black/40 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full ${isSelected ? "bg-primary" : "bg-primary/40"}`}
-                                  style={{ width: `${percentage}%` }}
-                                />
+                              <div className="flex items-center gap-3">
+                                {opt.image_url && (
+                                  <div className="w-10 h-10 rounded-md overflow-hidden shrink-0 border border-white/10">
+                                    <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover" />
+                                  </div>
+                                )}
+                                <div className="flex-1 space-y-1">
+                                  <div className="flex justify-between text-sm">
+                                    <span className={isSelected ? "font-bold text-primary" : ""}>
+                                      {opt.text} {isSelected && "(Seu voto)"}
+                                    </span>
+                                    <span>{percentage}%</span>
+                                  </div>
+                                  <div className="h-2.5 bg-black/40 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${isSelected ? "bg-primary" : "bg-primary/40"}`}
+                                      style={{ width: `${percentage}%` }}
+                                    />
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           );
@@ -186,10 +195,19 @@ function EnquetesPage() {
                             }`}
                             onClick={() => setSelectedOptions({ ...selectedOptions, [poll.id]: opt.id })}
                           >
-                            <RadioGroupItem value={opt.id} id={opt.id} />
-                            <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base">
-                              {opt.text}
-                            </Label>
+                            <div className="flex items-center space-x-3 w-full">
+                              <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5" />
+                              <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                                {opt.image_url && (
+                                  <div className="w-16 h-16 sm:w-12 sm:h-12 rounded-md overflow-hidden shrink-0">
+                                    <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover" />
+                                  </div>
+                                )}
+                                <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug">
+                                  {opt.text}
+                                </Label>
+                              </div>
+                            </div>
                           </div>
                         ))}
                       </RadioGroup>

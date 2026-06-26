@@ -31,7 +31,10 @@ function AdminEnquetesPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [options, setOptions] = useState<string[]>(["", ""]);
+  const [options, setOptions] = useState<{ text: string; file: File | null }[]>([
+    { text: "", file: null },
+    { text: "", file: null },
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Queries
@@ -67,7 +70,7 @@ function AdminEnquetesPage() {
       setIsSubmitting(true);
       try {
         if (!title.trim()) throw new Error("O título é obrigatório.");
-        const validOptions = options.filter((o) => o.trim() !== "");
+        const validOptions = options.filter((o) => o.text.trim() !== "");
         if (validOptions.length < 2) throw new Error("Mínimo de 2 opções obrigatórias.");
 
         let imageUrl = null;
@@ -89,12 +92,21 @@ function AdminEnquetesPage() {
 
         if (pollError) throw pollError;
 
-        // Inserir opções
-        const optionsData = validOptions.map((text, index) => ({
-          poll_id: poll.id,
-          text,
-          order: index,
-        }));
+        // Fazer upload das imagens das opções em paralelo
+        const optionsData = await Promise.all(
+          validOptions.map(async (opt, index) => {
+            let optImageUrl = null;
+            if (opt.file) {
+              optImageUrl = await uploadMedia(opt.file, "enquetes");
+            }
+            return {
+              poll_id: poll.id,
+              text: opt.text,
+              image_url: optImageUrl,
+              order: index,
+            };
+          })
+        );
 
         const { error: optionsError } = await (supabase as any)
           .from("poll_options")
@@ -112,7 +124,10 @@ function AdminEnquetesPage() {
       setTitle("");
       setDescription("");
       setFile(null);
-      setOptions(["", ""]);
+      setOptions([
+        { text: "", file: null },
+        { text: "", file: null },
+      ]);
       queryClient.invalidateQueries({ queryKey: ["admin-polls"] });
       setActiveTab("active");
     },
@@ -149,22 +164,27 @@ function AdminEnquetesPage() {
   });
 
   // Funções de Formulário
-  const addOption = () => setOptions([...options, ""]);
+  const addOption = () => setOptions([...options, { text: "", file: null }]);
   const removeOption = (index: number) => {
     if (options.length <= 2) return;
     setOptions(options.filter((_, i) => i !== index));
   };
-  const updateOption = (index: number, value: string) => {
+  const updateOptionText = (index: number, value: string) => {
     const newOptions = [...options];
-    newOptions[index] = value;
+    newOptions[index].text = value;
+    setOptions(newOptions);
+  };
+  const updateOptionFile = (index: number, file: File | null) => {
+    const newOptions = [...options];
+    newOptions[index].file = file;
     setOptions(newOptions);
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Enquetes</h1>
-        <p className="text-muted-foreground">Gerencie as votações do Moto Clube</p>
+        <h1 className="text-3xl font-bold text-coffee">Enquetes</h1>
+        <p className="text-coffee/70">Gerencie as votações do Moto Clube</p>
       </div>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
@@ -175,68 +195,91 @@ function AdminEnquetesPage() {
 
         {/* --- ABA: NOVA ENQUETE --- */}
         <TabsContent value="new">
-          <Card className="bg-black/40 border-primary/20">
+          <Card className="bg-white/50 border-leather/30 shadow-sm">
             <CardHeader>
-              <CardTitle>Criar Nova Votação</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-coffee">Criar Nova Votação</CardTitle>
+              <CardDescription className="text-coffee/70">
                 Esta enquete ficará visível no painel de todos os membros.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Título / Pergunta</Label>
+                <Label className="text-coffee">Título / Pergunta</Label>
                 <Input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Ex: Qual será a cor da camisa 2026?"
-                  className="bg-black/50"
+                  className="bg-white/70 border-leather/30 text-coffee"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Descrição (Opcional)</Label>
+                <Label className="text-coffee">Descrição (Opcional)</Label>
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Detalhes adicionais sobre a votação..."
-                  className="bg-black/50"
+                  className="bg-white/70 border-leather/30 text-coffee"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Foto Principal (Opcional)</Label>
-                <div className="flex items-center gap-4">
+                <Label className="text-coffee">Foto Principal (Opcional)</Label>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <Input
                     type="file"
                     accept="image/*"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    className="bg-black/50"
+                    className="bg-white/70 border-leather/30 text-coffee file:text-coffee"
                   />
-                  {file && <span className="text-sm text-primary">Arquivo anexado</span>}
+                  {file && <span className="text-sm text-copper font-medium whitespace-nowrap">Arquivo anexado</span>}
                 </div>
               </div>
 
               <div className="space-y-4">
-                <Label>Opções de Voto</Label>
+                <Label className="text-coffee">Opções de Voto</Label>
                 {options.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      value={option}
-                      onChange={(e) => updateOption(index, e.target.value)}
-                      placeholder={`Opção ${index + 1}`}
-                      className="bg-black/50"
-                    />
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => removeOption(index)}
-                      disabled={options.length <= 2}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 bg-coffee/5 p-3 rounded-md border border-leather/20">
+                    <div className="flex-1 w-full space-y-2 sm:space-y-0">
+                      <Input
+                        value={option.text}
+                        onChange={(e) => updateOptionText(index, e.target.value)}
+                        placeholder={`Opção ${index + 1}`}
+                        className="bg-white/70 border-leather/30 text-coffee mb-2 sm:mb-0"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <div className="relative flex-1 sm:flex-none">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          id={`opt-file-${index}`}
+                          className="hidden"
+                          onChange={(e) => updateOptionFile(index, e.target.files?.[0] || null)}
+                        />
+                        <Label
+                          htmlFor={`opt-file-${index}`}
+                          className={`flex items-center justify-center h-10 px-4 rounded-md border cursor-pointer transition-colors ${
+                            option.file ? 'border-copper text-copper bg-copper/10' : 'border-leather/30 text-coffee/70 bg-white/50 hover:bg-white'
+                          }`}
+                        >
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          {option.file ? 'Imagem OK' : 'Adicionar Imagem'}
+                        </Label>
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeOption(index)}
+                        disabled={options.length <= 2}
+                        className="h-10 w-10 shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
-                <Button variant="outline" onClick={addOption} className="w-full">
+                <Button variant="outline" onClick={addOption} className="w-full border-leather/30 text-coffee hover:bg-leather/10">
                   <Plus className="w-4 h-4 mr-2" /> Adicionar Opção
                 </Button>
               </div>
