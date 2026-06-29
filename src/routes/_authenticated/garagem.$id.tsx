@@ -173,13 +173,13 @@ function MotoDetail() {
               <div className="mt-6 flex flex-wrap gap-2">
                 <Dialog open={editOpen} onOpenChange={setEditOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="border-copper text-copper hover:bg-copper hover:text-white">
+                    <Button variant="outline" size="sm" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
                       <Pencil className="h-4 w-4 mr-1.5" /> Editar moto
                     </Button>
                   </DialogTrigger>
                   <EditMotoDialog moto={moto} onUpdated={() => { setEditOpen(false); loadAll(); }} />
                 </Dialog>
-                <Button variant="outline" size="sm" className="text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground" onClick={deleteMoto}>
+                <Button variant="outline" size="sm" className="bg-transparent text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground" onClick={deleteMoto}>
                   <Trash2 className="h-4 w-4 mr-1.5" /> Excluir moto
                 </Button>
               </div>
@@ -199,16 +199,16 @@ function MotoDetail() {
             </p>
             
             {!kmEditOpen ? (
-              <Button variant="outline" size="sm" onClick={() => setKmEditOpen(true)} className="mt-4 border-copper text-copper hover:bg-copper hover:text-white">
+              <Button variant="outline" size="sm" onClick={() => setKmEditOpen(true)} className="mt-4 bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
                 <Gauge className="h-4 w-4 mr-2" /> Atualizar KM
               </Button>
             ) : (
-              <div className="mt-4 p-4 border border-leather/20 rounded-md bg-white">
-                <Label className="block mb-2">Novo KM</Label>
+              <div className="mt-4 p-4 border border-leather/20 rounded-md bg-[#F0EBE1]">
+                <Label className="block mb-2 text-coffee">Novo KM</Label>
                 <div className="flex flex-wrap gap-2">
-                  <Input type="number" className="max-w-[150px]" value={kmEdit} onChange={(e) => setKmEdit(e.target.value)} />
+                  <Input type="number" className="max-w-[150px] text-coffee border-coffee/20 bg-white" value={kmEdit} onChange={(e) => setKmEdit(e.target.value)} />
                   <Button onClick={updateKm} className="btn-copper">Salvar</Button>
-                  <Button variant="ghost" onClick={() => { setKmEditOpen(false); setKmEdit(String(moto.current_km)); }}>Cancelar</Button>
+                  <Button variant="ghost" className="text-coffee hover:bg-coffee/10 hover:text-coffee" onClick={() => { setKmEditOpen(false); setKmEdit(String(moto.current_km)); }}>Cancelar</Button>
                 </div>
               </div>
             )}
@@ -233,8 +233,8 @@ function MotoDetail() {
             <div className="flex flex-wrap gap-2">
               <Dialog open={recordOpen} onOpenChange={setRecordOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
-                    <Wrench className="h-4 w-4" /> Registrar manutenção
+                  <Button variant="outline" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
+                    <Wrench className="h-4 w-4 mr-2" /> Registrar manutenção
                   </Button>
                 </DialogTrigger>
                 <NewRecordDialog motorcycleId={id} currentKm={moto.current_km} items={items} onCreated={() => { setRecordOpen(false); loadAll(); }} />

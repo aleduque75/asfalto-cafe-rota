@@ -300,16 +300,16 @@ function AdminEnquetesPage() {
           {loadingActive ? (
             <p className="text-coffee">Carregando...</p>
           ) : activePolls?.length === 0 ? (
-            <Card className="card-leather border-dashed border-muted text-center p-8">
-              <p className="text-muted-foreground">Nenhuma enquete ativa no momento.</p>
+            <Card className="bg-[#F0EBE1] border-dashed border-coffee/20 text-center p-8 shadow-sm">
+              <p className="text-coffee/60">Nenhuma enquete ativa no momento.</p>
             </Card>
           ) : (
             activePolls?.map((poll: any) => (
-              <Card key={poll.id} className="card-leather flex flex-col overflow-hidden">
+              <Card key={poll.id} className="bg-[#F0EBE1] border border-coffee/10 shadow-lg flex flex-col overflow-hidden">
                 <CardHeader className="flex flex-col sm:flex-row items-start justify-between space-y-4 sm:space-y-0 pb-4">
                   <div>
-                    <CardTitle className="text-2xl font-display uppercase text-primary">{poll.title}</CardTitle>
-                    <CardDescription className="text-foreground/80">
+                    <CardTitle className="text-2xl font-display uppercase text-coffee">{poll.title}</CardTitle>
+                    <CardDescription className="text-coffee/70">
                       Criado em: {new Date(poll.created_at).toLocaleDateString("pt-BR")}
                     </CardDescription>
                   </div>
@@ -317,7 +317,7 @@ function AdminEnquetesPage() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="flex-1 sm:flex-none bg-black/20 text-foreground hover:bg-black/30 border border-white/10"
+                      className="flex-1 sm:flex-none bg-coffee/10 text-coffee hover:bg-coffee/20 border border-coffee/10"
                       onClick={() => archivePoll.mutate(poll.id)}
                     >
                       <Archive className="w-4 h-4 mr-2" /> Encerrar
@@ -350,11 +350,11 @@ function AdminEnquetesPage() {
                     )}
                     <div className="flex-1 space-y-4">
                       {poll.description && (
-                        <p className="text-foreground/90 whitespace-pre-wrap">{poll.description}</p>
+                        <p className="text-coffee/90 whitespace-pre-wrap">{poll.description}</p>
                       )}
                       
-                      <div className="bg-black/10 rounded-xl p-5 border border-white/5">
-                        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+                      <div className="bg-coffee/5 rounded-xl p-5 border border-coffee/10">
+                        <p className="text-sm font-medium text-coffee/60 uppercase tracking-wider mb-4">
                           Total de Votos: {poll.poll_votes?.length || 0}
                         </p>
                         <ul className="space-y-3">
@@ -372,13 +372,13 @@ function AdminEnquetesPage() {
                             return (
                               <li
                                 key={opt.id}
-                                className="bg-black/20 border border-white/5 p-3 rounded-lg flex flex-col space-y-2"
+                                className="bg-[#F0EBE1] border border-coffee/10 p-3 rounded-lg flex flex-col space-y-2 shadow-sm"
                               >
                                 <div className="flex justify-between items-start text-sm">
-                                  <span className="text-foreground/90 font-medium pr-4">{opt.text}</span>
+                                  <span className="text-coffee/90 font-medium pr-4">{opt.text}</span>
                                   <span className="font-bold text-primary shrink-0">{votesCount} votos</span>
                                 </div>
-                                <div className="h-1.5 bg-black/40 rounded-full overflow-hidden w-full">
+                                <div className="h-1.5 bg-coffee/10 rounded-full overflow-hidden w-full">
                                   <div className="h-full bg-primary" style={{ width: `${percentage}%` }} />
                                 </div>
                               </li>
@@ -399,16 +399,16 @@ function AdminEnquetesPage() {
           {loadingArchived ? (
             <p className="text-coffee">Carregando...</p>
           ) : archivedPolls?.length === 0 ? (
-            <Card className="card-leather border-dashed border-muted text-center p-8">
-              <p className="text-muted-foreground">Nenhuma enquete arquivada.</p>
+            <Card className="bg-[#F0EBE1] border-dashed border-coffee/20 text-center p-8 shadow-sm">
+              <p className="text-coffee/60">Nenhuma enquete arquivada.</p>
             </Card>
           ) : (
             archivedPolls?.map((poll: any) => (
-              <Card key={poll.id} className="card-leather opacity-90 overflow-hidden grayscale-[30%]">
+              <Card key={poll.id} className="bg-[#F0EBE1]/90 border border-coffee/10 overflow-hidden grayscale-[30%] shadow-md">
                 <CardHeader className="flex flex-col sm:flex-row items-start justify-between space-y-4 sm:space-y-0 pb-4">
                   <div>
-                    <CardTitle className="text-xl font-display uppercase line-through text-foreground/70">{poll.title}</CardTitle>
-                    <CardDescription className="text-foreground/80 mt-1">Resultado Final</CardDescription>
+                    <CardTitle className="text-xl font-display uppercase line-through text-coffee/50">{poll.title}</CardTitle>
+                    <CardDescription className="text-coffee/60 mt-1">Resultado Final</CardDescription>
                   </div>
                   <Button
                     variant="destructive"
@@ -425,7 +425,7 @@ function AdminEnquetesPage() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-black/10 rounded-xl p-5 border border-white/5 space-y-4">
+                  <div className="bg-coffee/5 rounded-xl p-5 border border-coffee/10 space-y-4">
                     {poll.poll_options?.sort((a: any, b: any) => {
                         const votesA = poll.poll_votes?.filter((v: any) => v.option_id === a.id).length || 0;
                         const votesB = poll.poll_votes?.filter((v: any) => v.option_id === b.id).length || 0;
@@ -440,10 +440,10 @@ function AdminEnquetesPage() {
                       return (
                         <div key={opt.id} className="space-y-2">
                           <div className="flex justify-between items-start text-sm">
-                            <span className="text-foreground/90 pr-4">{opt.text}</span>
+                            <span className="text-coffee/90 pr-4">{opt.text}</span>
                             <span className="font-medium text-primary shrink-0">{percentage}% ({votesCount})</span>
                           </div>
-                          <div className="h-1.5 bg-black/30 rounded-full overflow-hidden shadow-inner w-full">
+                          <div className="h-1.5 bg-coffee/10 rounded-full overflow-hidden w-full">
                             <div
                               className="h-full bg-primary/70"
                               style={{ width: `${percentage}%` }}

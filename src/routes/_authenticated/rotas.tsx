@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, Navigation, Calendar, Clock, Map, Play, Image as ImageIcon, Flag, Route as RouteIcon, CheckCircle2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
+import { RouteGalleryDialog } from "@/components/RouteGalleryDialog";
+
 export const Route = createFileRoute("/_authenticated/rotas")({
   head: () => ({ meta: [{ title: "Nossas Rotas — Café Moto e Asfalto" }] }),
   component: RotasPage,
@@ -33,6 +35,8 @@ function RotasPage() {
   const [routes, setRoutes] = useState<RouteData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [galleryRouteId, setGalleryRouteId] = useState<string | null>(null);
+  const [galleryRouteTitle, setGalleryRouteTitle] = useState<string>("");
 
   async function loadRoutes() {
     setLoading(true);
@@ -173,6 +177,16 @@ function RotasPage() {
                 Finalizar
               </Button>
             )}
+
+            {isPastMode && (
+              <Button 
+                onClick={() => { setGalleryRouteId(route.id); setGalleryRouteTitle(route.title); }} 
+                className="flex-1 w-full btn-copper flex gap-2"
+              >
+                <ImageIcon className="h-4 w-4" />
+                Galeria de Fotos
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -248,6 +262,14 @@ function RotasPage() {
           </TabsContent>
         </Tabs>
       )}
+
+      <RouteGalleryDialog 
+        routeId={galleryRouteId} 
+        routeTitle={galleryRouteTitle}
+        isOpen={!!galleryRouteId} 
+        onClose={() => setGalleryRouteId(null)} 
+        isAdmin={isAdmin} 
+      />
     </div>
   );
 }

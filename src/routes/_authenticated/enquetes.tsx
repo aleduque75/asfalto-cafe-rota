@@ -105,10 +105,10 @@ function EnquetesPage() {
       </div>
 
       {activePolls?.length === 0 ? (
-        <Card className="card-leather border-dashed border-muted text-center p-8">
-          <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground">Nenhuma votação em andamento</h3>
-          <p className="text-muted-foreground">Fique de olho nas novidades.</p>
+        <Card className="bg-[#F0EBE1] border-dashed border-coffee/20 text-center p-8 shadow-sm">
+          <AlertCircle className="w-12 h-12 text-coffee/50 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-coffee">Nenhuma votação em andamento</h3>
+          <p className="text-coffee/60">Fique de olho nas novidades.</p>
         </Card>
       ) : (
         <div className="grid gap-8">
@@ -123,7 +123,7 @@ function EnquetesPage() {
             const totalVotes = poll.poll_votes?.length || 1;
 
             return (
-              <Card key={poll.id} className="card-leather flex flex-col overflow-hidden">
+              <Card key={poll.id} className="bg-[#F0EBE1] border border-coffee/10 shadow-lg flex flex-col overflow-hidden">
                 {poll.image_url && (
                   <div 
                     className="w-full h-56 md:h-72 overflow-hidden bg-muted relative group cursor-pointer"
@@ -141,9 +141,9 @@ function EnquetesPage() {
                 )}
                 <div className="p-6 flex flex-col flex-1">
                   <div className="mb-6">
-                    <CardTitle className="text-2xl font-display uppercase tracking-wide text-primary mb-2">{poll.title}</CardTitle>
+                    <CardTitle className="text-2xl font-display uppercase tracking-wide text-coffee mb-2">{poll.title}</CardTitle>
                     {poll.description && (
-                      <CardDescription className="whitespace-pre-wrap text-base text-foreground/90 leading-relaxed">
+                      <CardDescription className="whitespace-pre-wrap text-base text-coffee/80 leading-relaxed">
                         {poll.description}
                       </CardDescription>
                     )}
@@ -151,13 +151,13 @@ function EnquetesPage() {
                   
                   <div className="flex-1 flex flex-col">
                     {hasVoted ? (
-                      <div className="space-y-6 bg-black/10 rounded-xl p-5 border border-white/5">
-                        <div className="flex items-center gap-3 text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/20">
+                      <div className="space-y-6 bg-coffee/5 rounded-xl p-5 border border-coffee/10">
+                        <div className="flex items-center gap-3 text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
                           <CheckCircle2 className="w-5 h-5 shrink-0" />
                           <span className="text-sm font-medium">Você já votou! Obrigado por participar.</span>
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">
+                          <h4 className="text-sm font-medium text-coffee/60 mb-4 uppercase tracking-wider">
                             Resultado parcial ({poll.poll_votes?.length} votos)
                           </h4>
                           <div className="space-y-4">
@@ -177,7 +177,7 @@ function EnquetesPage() {
                                   <div className="flex items-center gap-4">
                                     {opt.image_url && (
                                       <div 
-                                        className="w-12 h-12 rounded-md overflow-hidden shrink-0 border border-white/10 shadow-sm bg-muted cursor-pointer relative group"
+                                        className="w-12 h-12 rounded-md overflow-hidden shrink-0 border border-coffee/10 shadow-sm bg-muted cursor-pointer relative group"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           setEnlargedImage(opt.image_url);
@@ -191,14 +191,14 @@ function EnquetesPage() {
                                     )}
                                     <div className="flex-1 space-y-1.5">
                                       <div className="flex justify-between items-start text-sm">
-                                        <span className={`pr-4 ${isSelected ? "font-bold text-primary" : "text-foreground"}`}>
-                                          {opt.text} {isSelected && <span className="text-primary/80 text-xs ml-1 font-normal uppercase tracking-wider">(Seu voto)</span>}
+                                        <span className={`pr-4 ${isSelected ? "font-bold text-coffee" : "text-coffee/80"}`}>
+                                          {opt.text} {isSelected && <span className="text-primary text-xs ml-1 font-medium uppercase tracking-wider">(Seu voto)</span>}
                                         </span>
-                                        <span className="font-medium text-foreground/80 shrink-0">{percentage}%</span>
+                                        <span className="font-medium text-coffee/70 shrink-0">{percentage}%</span>
                                       </div>
-                                      <div className="h-2 bg-black/30 rounded-full overflow-hidden shadow-inner">
+                                      <div className="h-2 bg-coffee/10 rounded-full overflow-hidden">
                                         <div
-                                          className={`h-full rounded-full transition-all duration-1000 ${isSelected ? "bg-primary" : "bg-primary/40"}`}
+                                          className={`h-full rounded-full transition-all duration-1000 ${isSelected ? "bg-primary" : "bg-primary/50"}`}
                                           style={{ width: `${percentage}%` }}
                                         />
                                       </div>
@@ -222,17 +222,17 @@ function EnquetesPage() {
                           {poll.poll_options?.map((opt: any) => (
                             <div
                               key={opt.id}
-                              className={`flex items-center space-x-3 bg-black/10 border border-white/5 p-4 rounded-xl transition-all hover:bg-black/20 hover:border-white/10 cursor-pointer ${
-                                selectedOptions[poll.id] === opt.id ? "border-primary/50 bg-primary/10 shadow-[inset_0_0_0_1px_rgba(200,137,59,0.3)]" : ""
+                              className={`flex items-center space-x-3 bg-[#F0EBE1] border border-coffee/10 p-4 rounded-xl transition-all hover:bg-coffee/5 hover:border-coffee/20 cursor-pointer shadow-sm ${
+                                selectedOptions[poll.id] === opt.id ? "border-primary bg-primary/5 shadow-md" : ""
                               }`}
                               onClick={() => setSelectedOptions({ ...selectedOptions, [poll.id]: opt.id })}
                             >
                               <div className="flex items-center space-x-4 w-full">
-                                <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5 border-foreground/50 text-primary" />
+                                <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5 border-coffee/30 text-primary data-[state=checked]:border-primary" />
                                 <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                                   {opt.image_url && (
                                     <div 
-                                      className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-white/5 shadow-sm relative group z-10"
+                                      className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-coffee/10 shadow-sm relative group z-10"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         e.preventDefault();
@@ -245,7 +245,7 @@ function EnquetesPage() {
                                       </div>
                                     </div>
                                   )}
-                                  <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug text-foreground/90 font-medium">
+                                  <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug text-coffee/90 font-medium">
                                     {opt.text}
                                   </Label>
                                 </div>
