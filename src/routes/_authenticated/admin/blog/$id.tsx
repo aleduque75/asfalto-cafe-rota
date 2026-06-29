@@ -171,7 +171,7 @@ function AdminBlogEdit() {
             <div>
               <Label className="text-coffee font-semibold">Título</Label>
               <Input 
-                className="mt-1 bg-white"
+                className="mt-1 bg-white text-coffee"
                 value={editing.title ?? ""} 
                 onChange={(e) => setEditing((p) => ({ ...p, title: e.target.value, slug: p.slug || slugify(e.target.value) }))} 
                 placeholder="Ex: Viagem para Cunha"
@@ -182,7 +182,7 @@ function AdminBlogEdit() {
               <div>
                 <Label className="text-coffee font-semibold">Slug (URL)</Label>
                 <Input 
-                  className="mt-1 bg-white"
+                  className="mt-1 bg-white text-coffee"
                   value={editing.slug ?? ""} 
                   onChange={(e) => setEditing((p) => ({ ...p, slug: slugify(e.target.value) }))} 
                 />
@@ -190,7 +190,7 @@ function AdminBlogEdit() {
               <div>
                 <Label className="text-coffee font-semibold">Tag/Categoria</Label>
                 <Input 
-                  className="mt-1 bg-white"
+                  className="mt-1 bg-white text-coffee placeholder:text-leather/40"
                   value={editing.tag ?? ""} 
                   onChange={(e) => setEditing((p) => ({ ...p, tag: e.target.value }))} 
                   placeholder="Passeio, Oficina..." 
@@ -202,8 +202,8 @@ function AdminBlogEdit() {
               <div>
                 <Label className="text-coffee font-semibold">Status</Label>
                 <Select value={editing.status ?? "draft"} onValueChange={(v) => setEditing((p) => ({ ...p, status: v as "draft" | "published" }))}>
-                  <SelectTrigger className="mt-1 bg-white"><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="mt-1 bg-white text-coffee"><SelectValue /></SelectTrigger>
+                  <SelectContent className="text-coffee bg-cream">
                     <SelectItem value="draft">Rascunho</SelectItem>
                     <SelectItem value="published">Publicado</SelectItem>
                   </SelectContent>
@@ -212,7 +212,7 @@ function AdminBlogEdit() {
               <div>
                 <Label className="text-coffee font-semibold">Data da Publicação</Label>
                 <Input 
-                  className="mt-1 bg-white"
+                  className="mt-1 bg-white text-coffee"
                   type="date" 
                   value={editing.published_at ? editing.published_at.split('T')[0] : ''} 
                   onChange={(e) => {
@@ -228,7 +228,7 @@ function AdminBlogEdit() {
             <div>
               <Label className="text-coffee font-semibold">Resumo (opcional)</Label>
               <Textarea 
-                className="mt-1 bg-white resize-none"
+                className="mt-1 bg-white resize-none text-coffee placeholder:text-leather/40"
                 rows={3} 
                 value={editing.excerpt ?? ""} 
                 onChange={(e) => setEditing((p) => ({ ...p, excerpt: e.target.value }))} 
@@ -309,7 +309,7 @@ function AdminBlogEdit() {
                         value={block.value} 
                         onChange={(e) => updateBlock(block.id, e.target.value)} 
                         placeholder="Escreva o texto aqui..." 
-                        className="border-none shadow-none focus-visible:ring-0 p-0 text-base leading-relaxed bg-transparent resize-none"
+                        className="border-none shadow-none focus-visible:ring-0 p-0 text-base leading-relaxed bg-transparent resize-none text-coffee placeholder:text-leather/40"
                       />
                     </>
                   )}
