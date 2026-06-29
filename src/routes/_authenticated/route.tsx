@@ -90,8 +90,8 @@ function AuthenticatedLayout() {
                     <Link to="/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <Map className="h-5 w-5" /> Rotas e Passeios
                     </Link>
-                    <Link to="/rotas" search={{ tab: "completed" }} onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                      <ImageIcon className="h-5 w-5" /> Galeria de Fotos
+                    <Link to="/galerias" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                      <ImageIcon className="h-5 w-5" /> Galeria de Passeios
                     </Link>
                     <Link to="/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <Vote className="h-5 w-5" /> Enquetes

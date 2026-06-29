@@ -17,6 +17,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AuthenticatedRotasRouteImport } from './routes/_authenticated/rotas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as AuthenticatedGaleriasRouteImport } from './routes/_authenticated/galerias'
 import { Route as AuthenticatedEnquetesRouteImport } from './routes/_authenticated/enquetes'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
@@ -71,6 +72,11 @@ const AuthenticatedRotasRoute = AuthenticatedRotasRouteImport.update({
 const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGaleriasRoute = AuthenticatedGaleriasRouteImport.update({
+  id: '/galerias',
+  path: '/galerias',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEnquetesRoute = AuthenticatedEnquetesRouteImport.update({
@@ -169,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enquetes': typeof AuthenticatedEnquetesRoute
+  '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enquetes': typeof AuthenticatedEnquetesRoute
+  '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/enquetes': typeof AuthenticatedEnquetesRoute
+  '/_authenticated/galerias': typeof AuthenticatedGaleriasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rotas': typeof AuthenticatedRotasRouteWithChildren
   '/blog/$slug': typeof BlogSlugRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/enquetes'
+    | '/galerias'
     | '/perfil'
     | '/rotas'
     | '/blog/$slug'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/enquetes'
+    | '/galerias'
     | '/perfil'
     | '/rotas'
     | '/blog/$slug'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/enquetes'
+    | '/_authenticated/galerias'
     | '/_authenticated/perfil'
     | '/_authenticated/rotas'
     | '/blog/$slug'
@@ -382,6 +394,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/perfil'
       preLoaderRoute: typeof AuthenticatedPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/galerias': {
+      id: '/_authenticated/galerias'
+      path: '/galerias'
+      fullPath: '/galerias'
+      preLoaderRoute: typeof AuthenticatedGaleriasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/enquetes': {
@@ -556,6 +575,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEnquetesRoute: typeof AuthenticatedEnquetesRoute
+  AuthenticatedGaleriasRoute: typeof AuthenticatedGaleriasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRotasRoute: typeof AuthenticatedRotasRouteWithChildren
   AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRouteWithChildren
@@ -567,6 +587,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEnquetesRoute: AuthenticatedEnquetesRoute,
+  AuthenticatedGaleriasRoute: AuthenticatedGaleriasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRotasRoute: AuthenticatedRotasRouteWithChildren,
   AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRouteWithChildren,
