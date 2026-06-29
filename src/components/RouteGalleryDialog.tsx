@@ -63,44 +63,64 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
   }, [isOpen, routeId]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !routeId || !currentUserId) return;
+    const files = e.target.files;
+    if (!files || files.length === 0 || !routeId || !currentUserId) return;
 
     try {
       setUploading(true);
-      toast.loading("Comprimindo imagem...", { id: "upload-toast" });
       
-      // 1. Compress image
-      const compressedFile = await compressImage(file, 1920, 1920, 0.7);
+      let successCount = 0;
+      let errorCount = 0;
 
-      toast.loading("Enviando para nuvem...", { id: "upload-toast" });
+      toast.loading(`Processando ${files.length} foto(s)...`, { id: "upload-toast" });
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        try {
+          // 1. Compress image
+          const compressedFile = await compressImage(file, 1920, 1920, 0.7);
+
+          // 2. Upload to AWS S3
+          const { presignedUrl, publicUrl } = await generateUploadUrl({
+            data: { filename: compressedFile.name, contentType: compressedFile.type }
+          });
+
+          const uploadRes = await fetch(presignedUrl, {
+            method: "PUT",
+            body: compressedFile,
+            headers: { "Content-Type": compressedFile.type },
+          });
+
+          if (!uploadRes.ok) throw new Error("Falha no upload para AWS");
+
+          // 3. Save to database
+          const { error } = await (supabase as any).from("route_photos").insert({
+            route_id: routeId,
+            profile_id: currentUserId,
+            photo_url: publicUrl
+          });
+
+          if (error) throw new Error(error.message);
+          
+          successCount++;
+        } catch (err) {
+          console.error("Erro ao enviar foto:", err);
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} foto(s) adicionada(s) com sucesso!`, { id: "upload-toast" });
+        loadPhotos();
+      } else {
+        toast.dismiss("upload-toast");
+      }
       
-      // 2. Upload to AWS S3
-      const { presignedUrl, publicUrl } = await generateUploadUrl({
-        data: { filename: compressedFile.name, contentType: compressedFile.type }
-      });
-
-      const uploadRes = await fetch(presignedUrl, {
-        method: "PUT",
-        body: compressedFile,
-        headers: { "Content-Type": compressedFile.type },
-      });
-
-      if (!uploadRes.ok) throw new Error("Falha no upload para AWS");
-
-      toast.loading("Salvando registro...", { id: "upload-toast" });
-
-      // 3. Save to database
-      const { error } = await (supabase as any).from("route_photos").insert({
-        route_id: routeId,
-        profile_id: currentUserId,
-        photo_url: publicUrl
-      });
-
-      if (error) throw new Error(error.message);
-
-      toast.success("Foto adicionada com sucesso!", { id: "upload-toast" });
-      loadPhotos();
+      if (errorCount > 0) {
+        toast.error(`${errorCount} foto(s) falharam no envio.`, { id: "upload-toast-err" });
+      }
+      
     } catch (err: any) {
       toast.error(err.message || "Erro inesperado ao enviar foto.", { id: "upload-toast" });
     } finally {
@@ -147,6 +167,7 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
                 type="file"
                 id="photo-upload"
                 accept="image/*"
+                multiple
                 className="hidden"
                 onChange={handleFileUpload}
                 disabled={uploading}
