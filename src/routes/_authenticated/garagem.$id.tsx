@@ -171,14 +171,11 @@ function MotoDetail() {
                 <p className="text-sm text-coffee"><span className="text-leather">Placa:</span> {moto.plate}</p>
               )}
               <div className="mt-6 flex flex-wrap gap-2">
-                <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
-                      <Pencil className="h-4 w-4 mr-1.5" /> Editar moto
-                    </Button>
-                  </DialogTrigger>
-                  <EditMotoDialog moto={moto} onUpdated={() => { setEditOpen(false); loadAll(); }} />
-                </Dialog>
+                <Button asChild variant="outline" size="sm" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
+                  <Link to="/garagem/$id/edit" params={{ id: moto.id }}>
+                    <Pencil className="h-4 w-4 mr-1.5" /> Editar moto
+                  </Link>
+                </Button>
                 <Button variant="outline" size="sm" className="bg-transparent text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground" onClick={deleteMoto}>
                   <Trash2 className="h-4 w-4 mr-1.5" /> Excluir moto
                 </Button>
@@ -631,123 +628,6 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
         </div>
         <DialogFooter>
           <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando…" : "Salvar"}</Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
-  );
-}
-
-function EditMotoDialog({ moto, onUpdated }: { moto: Moto; onUpdated: () => void }) {
-  const [saving, setSaving] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [form, setForm] = useState({
-    brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
-    plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
-    photo_url: moto.photo_url || "",
-  });
-
-  useEffect(() => {
-    setFile(null);
-    setForm({
-      brand: moto.brand || "", model: moto.model || "", year: moto.year ? String(moto.year) : "",
-      plate: moto.plate || "", color: moto.color || "", nickname: moto.nickname || "",
-      photo_url: moto.photo_url || "",
-    });
-  }, [moto]);
-
-  function setField<K extends keyof typeof form>(k: K, v: string) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      let finalPhotoUrl = form.photo_url.trim() || null;
-
-      if (file) {
-        const { presignedUrl, publicUrl } = await generateUploadUrl({ data: { filename: file.name, contentType: file.type } });
-        const uploadRes = await fetch(presignedUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error("Falha ao fazer upload da foto.");
-        }
-        finalPhotoUrl = publicUrl;
-      }
-
-      const { error } = await supabase.from("motorcycles").update({
-        brand: form.brand.trim(),
-        model: form.model.trim(),
-        year: form.year ? parseInt(form.year) : null,
-        plate: form.plate.trim() || null,
-        color: form.color.trim() || null,
-        nickname: form.nickname.trim() || null,
-        photo_url: finalPhotoUrl,
-      }).eq("id", moto.id);
-      
-      if (error) throw new Error(error.message);
-      
-      toast.success("Moto atualizada!");
-      onUpdated();
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <DialogContent className="max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Editar moto</DialogTitle>
-        <DialogDescription>Atualize os dados da sua moto.</DialogDescription>
-      </DialogHeader>
-      <form onSubmit={submit} className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>Marca *</Label>
-            <Input required value={form.brand} onChange={(e) => setField("brand", e.target.value)} />
-          </div>
-          <div>
-            <Label>Modelo *</Label>
-            <Input required value={form.model} onChange={(e) => setField("model", e.target.value)} />
-          </div>
-          <div>
-            <Label>Ano</Label>
-            <Input type="number" value={form.year} onChange={(e) => setField("year", e.target.value)} />
-          </div>
-          <div>
-            <Label>Cor</Label>
-            <Input value={form.color} onChange={(e) => setField("color", e.target.value)} />
-          </div>
-          <div>
-            <Label>Placa</Label>
-            <Input value={form.plate} onChange={(e) => setField("plate", e.target.value)} />
-          </div>
-          <div>
-            <Label>Apelido</Label>
-            <Input value={form.nickname} onChange={(e) => setField("nickname", e.target.value)} />
-          </div>
-          <div className="col-span-2">
-            <Label>Foto da Moto</Label>
-            <div className="flex flex-col gap-2">
-              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <div className="flex items-center text-xs text-leather gap-2">
-                <span className="shrink-0">Ou URL:</span>
-                <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} placeholder="https://…" className="h-8 text-xs" disabled={!!file} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="submit" className="btn-copper" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar alterações"}
-          </Button>
         </DialogFooter>
       </form>
     </DialogContent>

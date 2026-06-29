@@ -4,13 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus, Bike, Gauge, UploadCloud, ArrowLeft } from "lucide-react";
+import { Plus, Bike, Gauge, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { generateUploadUrl } from "@/lib/upload";
 
 export const Route = createFileRoute("/_authenticated/garagem/")({
   head: () => ({ meta: [{ title: "Minha Garagem — Café Moto e Asfalto" }] }),
@@ -52,14 +47,11 @@ function GaragemPage() {
           </h1>
           <p className="text-sm text-leather mt-2">Cadastre cada moto, controle a quilometragem e acompanhe as manutenções.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button className="btn-copper">
-              <Plus className="h-4 w-4" /> Nova moto
-            </Button>
-          </DialogTrigger>
-          <NewMotoDialog onCreated={() => { setOpen(false); load(); }} />
-        </Dialog>
+        <Button asChild className="btn-copper">
+          <Link to="/garagem/new">
+            <Plus className="h-4 w-4 mr-1" /> Nova moto
+          </Link>
+        </Button>
       </div>
 
       {loading ? (
@@ -72,8 +64,10 @@ function GaragemPage() {
               Nenhuma moto cadastrada
             </h3>
             <p className="text-sm text-leather mb-4">Cadastre sua primeira moto para começar a controlar manutenções.</p>
-            <Button className="btn-copper" onClick={() => setOpen(true)}>
-              <Plus className="h-4 w-4" /> Cadastrar moto
+            <Button asChild className="btn-copper">
+              <Link to="/garagem/new">
+                <Plus className="h-4 w-4 mr-1" /> Cadastrar moto
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -106,123 +100,5 @@ function GaragemPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function NewMotoDialog({ onCreated }: { onCreated: () => void }) {
-  const [saving, setSaving] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [form, setForm] = useState({
-    brand: "", model: "", year: "", plate: "", color: "", nickname: "", current_km: "0", photo_url: "",
-  });
-
-  function setField<K extends keyof typeof form>(k: K, v: string) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) { 
-        setSaving(false); 
-        return toast.error("Sessão expirou"); 
-      }
-
-      let finalPhotoUrl = form.photo_url.trim() || null;
-
-      if (file) {
-        const { presignedUrl, publicUrl } = await generateUploadUrl({ data: { filename: file.name, contentType: file.type } });
-        const uploadRes = await fetch(presignedUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-
-        if (!uploadRes.ok) {
-          throw new Error("Falha ao fazer upload da foto.");
-        }
-        finalPhotoUrl = publicUrl;
-      }
-
-      const { error } = await supabase.from("motorcycles").insert({
-        user_id: userData.user.id,
-        brand: form.brand.trim(),
-        model: form.model.trim(),
-        year: form.year ? parseInt(form.year) : null,
-        plate: form.plate.trim() || null,
-        color: form.color.trim() || null,
-        nickname: form.nickname.trim() || null,
-        current_km: parseInt(form.current_km) || 0,
-        photo_url: finalPhotoUrl,
-      });
-
-      if (error) throw new Error(error.message);
-      
-      toast.success("Moto cadastrada!");
-      onCreated();
-    } catch (err: any) {
-      toast.error(err.message || "Erro inesperado.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <DialogContent className="max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Nova moto</DialogTitle>
-        <DialogDescription>Cadastre os dados da sua moto.</DialogDescription>
-      </DialogHeader>
-      <form onSubmit={submit} className="space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label>Marca *</Label>
-            <Input required value={form.brand} onChange={(e) => setField("brand", e.target.value)} placeholder="Honda" />
-          </div>
-          <div>
-            <Label>Modelo *</Label>
-            <Input required value={form.model} onChange={(e) => setField("model", e.target.value)} placeholder="CB 500X" />
-          </div>
-          <div>
-            <Label>Ano</Label>
-            <Input type="number" value={form.year} onChange={(e) => setField("year", e.target.value)} placeholder="2023" />
-          </div>
-          <div>
-            <Label>Cor</Label>
-            <Input value={form.color} onChange={(e) => setField("color", e.target.value)} placeholder="Vermelha" />
-          </div>
-          <div>
-            <Label>Placa</Label>
-            <Input value={form.plate} onChange={(e) => setField("plate", e.target.value)} placeholder="ABC-1D23" />
-          </div>
-          <div>
-            <Label>Apelido</Label>
-            <Input value={form.nickname} onChange={(e) => setField("nickname", e.target.value)} placeholder="Trovão" />
-          </div>
-          <div>
-            <Label>KM atual *</Label>
-            <Input type="number" required value={form.current_km} onChange={(e) => setField("current_km", e.target.value)} />
-          </div>
-          <div className="col-span-2">
-            <Label>Foto da Moto</Label>
-            <div className="flex flex-col gap-2">
-              <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-              <div className="flex items-center text-xs text-leather gap-2">
-                <span className="shrink-0">Ou URL:</span>
-                <Input value={form.photo_url} onChange={(e) => setField("photo_url", e.target.value)} placeholder="https://…" className="h-8 text-xs" disabled={!!file} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button type="submit" className="btn-copper" disabled={saving}>
-            {saving ? "Salvando…" : "Salvar moto"}
-          </Button>
-        </DialogFooter>
-      </form>
-    </DialogContent>
   );
 }
