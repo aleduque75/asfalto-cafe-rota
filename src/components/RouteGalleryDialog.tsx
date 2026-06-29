@@ -4,7 +4,8 @@ import { generateUploadUrl } from "@/lib/upload";
 import { compressImage } from "@/lib/imageCompression";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2, Trash2, Upload, ZoomIn, Image as ImageIcon } from "lucide-react";
+import { Loader2, Trash2, Upload, ZoomIn, Image as ImageIcon, MoreVertical } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 type RoutePhoto = {
@@ -182,30 +183,30 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
                       src={photo.photo_url} 
                       alt="Passeio" 
                       loading="lazy"
-                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105" 
+                      onClick={() => setEnlargedImage(photo.photo_url)}
+                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105 cursor-pointer" 
                     />
                     
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-white hover:bg-white/20 hover:text-white mx-1"
-                        onClick={() => setEnlargedImage(photo.photo_url)}
-                      >
-                        <ZoomIn className="w-6 h-6" />
-                      </Button>
-                      
-                      {canDelete && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="text-red-400 hover:bg-red-500/20 hover:text-red-300 mx-1"
-                          onClick={() => handleDelete(photo.id)}
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </Button>
-                      )}
-                    </div>
+                    {canDelete && (
+                      <div className="absolute bottom-2 right-2 z-10">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="secondary" size="icon" className="h-8 w-8 rounded-full bg-black/60 hover:bg-black/80 text-white border-none backdrop-blur-sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-cream border-leather/20">
+                            <DropdownMenuItem 
+                              onClick={() => handleDelete(photo.id)} 
+                              className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer font-medium"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Excluir foto
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    )}
                   </div>
                 );
               })}

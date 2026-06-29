@@ -31,3 +31,6 @@ USING (
     OR 
     EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role = 'admin')
 );
+
+-- Grant privileges to the table so the Supabase roles can access it
+GRANT ALL ON TABLE public.route_photos TO anon, authenticated, service_role;

@@ -10,7 +10,14 @@ import { toast } from "sonner";
 
 import { RouteGalleryDialog } from "@/components/RouteGalleryDialog";
 
+import { useNavigate } from "@tanstack/react-router";
+
 export const Route = createFileRoute("/_authenticated/rotas")({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => {
+    return {
+      tab: search.tab as string | undefined,
+    }
+  },
   head: () => ({ meta: [{ title: "Nossas Rotas — Café Moto e Asfalto" }] }),
   component: RotasPage,
 });
@@ -37,6 +44,9 @@ function RotasPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [galleryRouteId, setGalleryRouteId] = useState<string | null>(null);
   const [galleryRouteTitle, setGalleryRouteTitle] = useState<string>("");
+  const { tab } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const activeTab = tab === "completed" ? "completed" : "open";
 
   async function loadRoutes() {
     setLoading(true);
@@ -215,7 +225,7 @@ function RotasPage() {
       {loading ? (
         <p className="text-leather">Carregando rotas…</p>
       ) : (
-        <Tabs defaultValue="open" className="w-full">
+        <Tabs value={activeTab} onValueChange={(val) => navigate({ search: { tab: val } })} className="w-full">
           <TabsList className="grid w-full grid-cols-2 max-w-[400px] mb-8 bg-cream border border-leather/20">
             <TabsTrigger value="open" className="data-[state=active]:bg-copper data-[state=active]:text-cream text-coffee">
               Em Aberto ({openRoutes.length})
