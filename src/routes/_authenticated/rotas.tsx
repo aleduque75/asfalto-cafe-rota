@@ -185,7 +185,7 @@ function RotasPage() {
 
             {isPastMode && (
               <Button asChild className="flex-1 w-full btn-copper flex gap-2">
-                <Link to="/rotas_/$id/galeria" params={{ id: route.id }}>
+                <Link to="/rotas/$id/galeria" params={{ id: route.id }}>
                   <ImageIcon className="h-4 w-4" />
                   Galeria de Fotos
                 </Link>
