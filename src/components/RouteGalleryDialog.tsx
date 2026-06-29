@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Loader2, Trash2, Upload, ZoomIn, Image as ImageIcon, MoreVertical } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { toast } from "sonner";
 
 type RoutePhoto = {
@@ -29,7 +30,7 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
+  const [enlargedImageIndex, setEnlargedImageIndex] = useState<number | null>(null);
 
   const loadPhotos = async () => {
     if (!routeId) return;
@@ -173,7 +174,7 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {photos.map(photo => {
+              {photos.map((photo, index) => {
                 const isOwner = photo.profile_id === currentUserId;
                 const canDelete = isOwner || isAdmin;
 
@@ -183,7 +184,7 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
                       src={photo.photo_url} 
                       alt="Passeio" 
                       loading="lazy"
-                      onClick={() => setEnlargedImage(photo.photo_url)}
+                      onClick={() => setEnlargedImageIndex(index)}
                       className="w-full h-full object-cover transition duration-300 group-hover:scale-105 cursor-pointer" 
                     />
                     
@@ -216,14 +217,32 @@ export function RouteGalleryDialog({ routeId, routeTitle, isOpen, onClose, isAdm
       </Dialog>
 
       {/* Enlarged Image Modal */}
-      <Dialog open={!!enlargedImage} onOpenChange={() => setEnlargedImage(null)}>
-        <DialogContent className="max-w-4xl bg-transparent border-none shadow-none p-0 flex justify-center items-center">
-          {enlargedImage && (
-            <img 
-              src={enlargedImage} 
-              alt="Ampliada" 
-              className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
-            />
+      <Dialog open={enlargedImageIndex !== null} onOpenChange={() => setEnlargedImageIndex(null)}>
+        <DialogContent className="max-w-4xl w-full bg-transparent border-none shadow-none p-0 flex justify-center items-center">
+          {enlargedImageIndex !== null && (
+            <Carousel
+              opts={{
+                align: "center",
+                startIndex: enlargedImageIndex,
+              }}
+              className="w-full max-w-3xl"
+            >
+              <CarouselContent>
+                {photos.map((photo) => (
+                  <CarouselItem key={photo.id} className="flex items-center justify-center">
+                    <img 
+                      src={photo.photo_url} 
+                      alt="Ampliada" 
+                      className="max-h-[85vh] max-w-full object-contain rounded-lg shadow-2xl"
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="hidden sm:block">
+                <CarouselPrevious className="text-white border-white/20 bg-black/50 hover:bg-black/70 hover:text-white" />
+                <CarouselNext className="text-white border-white/20 bg-black/50 hover:bg-black/70 hover:text-white" />
+              </div>
+            </Carousel>
           )}
         </DialogContent>
       </Dialog>
