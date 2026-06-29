@@ -74,13 +74,13 @@ function AuthenticatedLayout() {
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="bg-coffee border-leather/20 text-cream p-6 w-[280px]">
-                  <SheetHeader className="text-left mb-8 mt-4">
+                <SheetContent side="right" className="bg-coffee border-leather/20 text-cream p-6 w-[280px] flex flex-col">
+                  <SheetHeader className="text-left mb-8 mt-4 shrink-0">
                     <SheetTitle className="text-copper font-display uppercase tracking-widest text-lg" style={{ fontFamily: "var(--font-display)" }}>
                       Menu
                     </SheetTitle>
                   </SheetHeader>
-                  <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-6 overflow-y-auto flex-1 pb-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <LayoutDashboard className="h-5 w-5" /> Painel Principal
                     </Link>
