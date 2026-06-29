@@ -110,8 +110,8 @@ function AuthenticatedLayout() {
                         <Link to="/admin/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <Map className="h-5 w-5" /> Rotas
                         </Link>
-                        <Link to="/admin/noticias" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <Newspaper className="h-5 w-5" /> Notícias
+                        <Link to="/admin/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                          <Newspaper className="h-5 w-5" /> Blog
                         </Link>
                         <Link to="/admin/galeria" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <ImageIcon className="h-5 w-5" /> Galeria

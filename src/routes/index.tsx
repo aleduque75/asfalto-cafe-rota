@@ -4,7 +4,8 @@ import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
 import { MotoClube } from "@/components/site/MotoClube";
 import { Galeria } from "@/components/site/Galeria";
-import { Noticias } from "@/components/site/Noticias";
+import { Noticias } from "@/components/site/Noticias"; // Removed
+import { Blog } from "@/components/site/Blog";
 import { Contato } from "@/components/site/Contato";
 import { Footer } from "@/components/site/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,7 +48,7 @@ function Index() {
         <Hero content={contentMap.hero} logoUrl={contentMap.general?.logo_url} />
         <MotoClube content={contentMap.club_story} />
         <Galeria />
-        <Noticias />
+        <Blog />
         <Contato content={contentMap.contact} />
       </main>
       <Footer />

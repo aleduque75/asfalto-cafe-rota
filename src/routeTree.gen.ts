@@ -12,9 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NoticiasIndexRouteImport } from './routes/noticias/index'
 import { Route as GaleriaIndexRouteImport } from './routes/galeria.index'
-import { Route as NoticiasSlugRouteImport } from './routes/noticias/$slug'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as AuthenticatedRotasRouteImport } from './routes/_authenticated/rotas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedEnquetesRouteImport } from './routes/_authenticated/enquetes'
@@ -25,10 +25,11 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminRotasRouteImport } from './routes/_authenticated/admin/rotas'
-import { Route as AuthenticatedAdminNoticiasRouteImport } from './routes/_authenticated/admin/noticias'
 import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authenticated/admin/galeria'
 import { Route as AuthenticatedAdminEnquetesRouteImport } from './routes/_authenticated/admin/enquetes'
 import { Route as AuthenticatedAdminConteudoRouteImport } from './routes/_authenticated/admin/conteudo'
+import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin/blog/index'
+import { Route as AuthenticatedAdminBlogIdRouteImport } from './routes/_authenticated/admin/blog/$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -44,19 +45,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NoticiasIndexRoute = NoticiasIndexRouteImport.update({
-  id: '/noticias/',
-  path: '/noticias/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GaleriaIndexRoute = GaleriaIndexRouteImport.update({
   id: '/galeria/',
   path: '/galeria/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NoticiasSlugRoute = NoticiasSlugRouteImport.update({
-  id: '/noticias/$slug',
-  path: '/noticias/$slug',
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRotasRoute = AuthenticatedRotasRouteImport.update({
@@ -111,12 +112,6 @@ const AuthenticatedAdminRotasRoute = AuthenticatedAdminRotasRouteImport.update({
   path: '/rotas',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
-const AuthenticatedAdminNoticiasRoute =
-  AuthenticatedAdminNoticiasRouteImport.update({
-    id: '/noticias',
-    path: '/noticias',
-    getParentRoute: () => AuthenticatedAdminRouteRoute,
-  } as any)
 const AuthenticatedAdminGaleriaRoute =
   AuthenticatedAdminGaleriaRouteImport.update({
     id: '/galeria',
@@ -135,6 +130,18 @@ const AuthenticatedAdminConteudoRoute =
     path: '/conteudo',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminBlogIndexRoute =
+  AuthenticatedAdminBlogIndexRouteImport.update({
+    id: '/blog/',
+    path: '/blog/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminBlogIdRoute =
+  AuthenticatedAdminBlogIdRouteImport.update({
+    id: '/blog/$id',
+    path: '/blog/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,18 +151,19 @@ export interface FileRoutesByFullPath {
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
-  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
-  '/noticias/': typeof NoticiasIndexRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
-  '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/garagem/': typeof AuthenticatedGaragemIndexRoute
+  '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
+  '/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -164,18 +172,19 @@ export interface FileRoutesByTo {
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
-  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog': typeof BlogIndexRoute
   '/galeria': typeof GaleriaIndexRoute
-  '/noticias': typeof NoticiasIndexRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
-  '/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/garagem': typeof AuthenticatedGaragemIndexRoute
+  '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
+  '/admin/blog': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -187,18 +196,19 @@ export interface FileRoutesById {
   '/_authenticated/enquetes': typeof AuthenticatedEnquetesRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rotas': typeof AuthenticatedRotasRoute
-  '/noticias/$slug': typeof NoticiasSlugRoute
+  '/blog/$slug': typeof BlogSlugRoute
+  '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
-  '/noticias/': typeof NoticiasIndexRoute
   '/_authenticated/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/_authenticated/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/_authenticated/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
-  '/_authenticated/admin/noticias': typeof AuthenticatedAdminNoticiasRoute
   '/_authenticated/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/garagem/': typeof AuthenticatedGaragemIndexRoute
+  '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
+  '/_authenticated/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -210,18 +220,19 @@ export interface FileRouteTypes {
     | '/enquetes'
     | '/perfil'
     | '/rotas'
-    | '/noticias/$slug'
+    | '/blog/$slug'
+    | '/blog/'
     | '/galeria/'
-    | '/noticias/'
     | '/admin/conteudo'
     | '/admin/enquetes'
     | '/admin/galeria'
-    | '/admin/noticias'
     | '/admin/rotas'
     | '/admin/usuarios'
     | '/garagem/$id'
     | '/admin/'
     | '/garagem/'
+    | '/admin/blog/$id'
+    | '/admin/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -230,18 +241,19 @@ export interface FileRouteTypes {
     | '/enquetes'
     | '/perfil'
     | '/rotas'
-    | '/noticias/$slug'
+    | '/blog/$slug'
+    | '/blog'
     | '/galeria'
-    | '/noticias'
     | '/admin/conteudo'
     | '/admin/enquetes'
     | '/admin/galeria'
-    | '/admin/noticias'
     | '/admin/rotas'
     | '/admin/usuarios'
     | '/garagem/$id'
     | '/admin'
     | '/garagem'
+    | '/admin/blog/$id'
+    | '/admin/blog'
   id:
     | '__root__'
     | '/'
@@ -252,27 +264,28 @@ export interface FileRouteTypes {
     | '/_authenticated/enquetes'
     | '/_authenticated/perfil'
     | '/_authenticated/rotas'
-    | '/noticias/$slug'
+    | '/blog/$slug'
+    | '/blog/'
     | '/galeria/'
-    | '/noticias/'
     | '/_authenticated/admin/conteudo'
     | '/_authenticated/admin/enquetes'
     | '/_authenticated/admin/galeria'
-    | '/_authenticated/admin/noticias'
     | '/_authenticated/admin/rotas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/garagem/$id'
     | '/_authenticated/admin/'
     | '/_authenticated/garagem/'
+    | '/_authenticated/admin/blog/$id'
+    | '/_authenticated/admin/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  NoticiasSlugRoute: typeof NoticiasSlugRoute
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   GaleriaIndexRoute: typeof GaleriaIndexRoute
-  NoticiasIndexRoute: typeof NoticiasIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -298,13 +311,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/noticias/': {
-      id: '/noticias/'
-      path: '/noticias'
-      fullPath: '/noticias/'
-      preLoaderRoute: typeof NoticiasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/galeria/': {
       id: '/galeria/'
       path: '/galeria'
@@ -312,11 +318,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GaleriaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/noticias/$slug': {
-      id: '/noticias/$slug'
-      path: '/noticias/$slug'
-      fullPath: '/noticias/$slug'
-      preLoaderRoute: typeof NoticiasSlugRouteImport
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/rotas': {
@@ -389,13 +402,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRotasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/admin/noticias': {
-      id: '/_authenticated/admin/noticias'
-      path: '/noticias'
-      fullPath: '/admin/noticias'
-      preLoaderRoute: typeof AuthenticatedAdminNoticiasRouteImport
-      parentRoute: typeof AuthenticatedAdminRouteRoute
-    }
     '/_authenticated/admin/galeria': {
       id: '/_authenticated/admin/galeria'
       path: '/galeria'
@@ -417,6 +423,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminConteudoRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/blog/': {
+      id: '/_authenticated/admin/blog/'
+      path: '/blog'
+      fullPath: '/admin/blog/'
+      preLoaderRoute: typeof AuthenticatedAdminBlogIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/blog/$id': {
+      id: '/_authenticated/admin/blog/$id'
+      path: '/blog/$id'
+      fullPath: '/admin/blog/$id'
+      preLoaderRoute: typeof AuthenticatedAdminBlogIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
@@ -424,10 +444,11 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminConteudoRoute: typeof AuthenticatedAdminConteudoRoute
   AuthenticatedAdminEnquetesRoute: typeof AuthenticatedAdminEnquetesRoute
   AuthenticatedAdminGaleriaRoute: typeof AuthenticatedAdminGaleriaRoute
-  AuthenticatedAdminNoticiasRoute: typeof AuthenticatedAdminNoticiasRoute
   AuthenticatedAdminRotasRoute: typeof AuthenticatedAdminRotasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminBlogIdRoute: typeof AuthenticatedAdminBlogIdRoute
+  AuthenticatedAdminBlogIndexRoute: typeof AuthenticatedAdminBlogIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
@@ -435,10 +456,11 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminConteudoRoute: AuthenticatedAdminConteudoRoute,
     AuthenticatedAdminEnquetesRoute: AuthenticatedAdminEnquetesRoute,
     AuthenticatedAdminGaleriaRoute: AuthenticatedAdminGaleriaRoute,
-    AuthenticatedAdminNoticiasRoute: AuthenticatedAdminNoticiasRoute,
     AuthenticatedAdminRotasRoute: AuthenticatedAdminRotasRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminBlogIdRoute: AuthenticatedAdminBlogIdRoute,
+    AuthenticatedAdminBlogIndexRoute: AuthenticatedAdminBlogIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =
@@ -473,9 +495,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  NoticiasSlugRoute: NoticiasSlugRoute,
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
   GaleriaIndexRoute: GaleriaIndexRoute,
-  NoticiasIndexRoute: NoticiasIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

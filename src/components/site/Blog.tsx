@@ -8,7 +8,7 @@ import n3 from "@/assets/news-3.jpg";
 
 type NewsCard = { img: string; date: string; tag: string; title: string; excerpt: string; slug?: string };
 
-export function Noticias() {
+export function Blog() {
   const [noticias, setNoticias] = useState<NewsCard[]>([]);
 
   useEffect(() => {
@@ -41,13 +41,13 @@ export function Noticias() {
   if (noticias.length === 0) return null;
 
   return (
-    <section id="noticias" className="relative py-24 md:py-32">
+    <section id="blog" className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <p className="eyebrow mb-3">Diário de bordo</p>
-          <h2 className="section-title text-4xl md:text-6xl">Notícias</h2>
+          <h2 className="section-title text-4xl md:text-6xl">Blog</h2>
           <p className="mt-3 text-cream/70">
-            Histórias da estrada, próximos rolês e tudo que rola no clube.
+            Histórias da estrada, diário de bordo e tudo que rola no clube.
           </p>
         </div>
 
@@ -80,8 +80,8 @@ export function Noticias() {
                 </h3>
                 <p className="text-cream/70 text-sm leading-relaxed mb-6 flex-1">{p.excerpt}</p>
                 <Link
-                  to="/noticias/$slug"
-                  params={{ slug: p.slug ?? "noticia" }}
+                  to="/blog/$slug"
+                  params={{ slug: p.slug ?? "post" }}
                   className="inline-flex items-center gap-2 text-copper text-sm uppercase tracking-[0.2em] font-semibold group-hover:gap-3 transition-all mt-auto"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
@@ -94,11 +94,11 @@ export function Noticias() {
 
         <div className="mt-14 text-center">
           <Link
-            to="/noticias"
+            to="/blog"
             className="inline-flex items-center justify-center rounded-md border border-copper/50 px-7 py-3.5 text-sm uppercase tracking-[0.18em] font-semibold text-cream hover:bg-copper/10 transition"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Ver todas as notícias
+            Ver todos os posts
           </Link>
         </div>
       </div>

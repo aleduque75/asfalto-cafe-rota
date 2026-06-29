@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calendar, ArrowRight, ArrowLeft } from "lucide-react";
 import n1 from "@/assets/news-1.jpg";
 
-export const Route = createFileRoute("/noticias/")({
+export const Route = createFileRoute("/blog/")({
   loader: async () => {
     const [newsRes, contentRes] = await Promise.all([
       supabase
@@ -28,7 +28,7 @@ function NoticiasList() {
   const { news, logoUrl } = Route.useLoaderData();
 
   return (
-    <div className="min-h-screen bg-coffee scroll-smooth flex flex-col">
+    <div className="min-h-screen bg-cream scroll-smooth flex flex-col">
       <Navbar logoUrl={logoUrl} />
       
       <main className="flex-1 pt-32 pb-24">
@@ -36,22 +36,22 @@ function NoticiasList() {
           <div className="mb-12">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-cream/60 hover:text-copper transition-colors uppercase tracking-[0.2em] text-xs font-semibold mb-6"
+              className="inline-flex items-center gap-2 text-leather hover:text-copper transition-colors uppercase tracking-[0.2em] text-xs font-semibold mb-6"
               style={{ fontFamily: "var(--font-display)" }}
             >
               <ArrowLeft className="h-4 w-4" /> Voltar ao Início
             </Link>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl text-cream font-bold uppercase leading-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl text-coffee font-bold uppercase leading-tight mb-4" style={{ fontFamily: "var(--font-display)" }}>
               Blog do Clube
             </h1>
-            <p className="text-cream/70 text-lg max-w-2xl font-serif italic">
+            <p className="text-leather text-lg max-w-2xl font-serif italic">
               Histórias da estrada, diário de bordo e novidades sobre os próximos rolês do Café Moto e Asfalto.
             </p>
           </div>
 
           {news.length === 0 ? (
-            <div className="py-24 text-center border border-dashed border-leather/30 rounded-xl bg-leather/5">
-              <p className="text-cream/60 font-serif italic">Nenhuma notícia publicada ainda.</p>
+            <div className="py-24 text-center border border-dashed border-leather/30 rounded-xl bg-white/50">
+              <p className="text-leather font-serif italic">Nenhum post publicado ainda.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -63,9 +63,9 @@ function NoticiasList() {
                 return (
                   <article
                     key={p.slug}
-                    className="card-leather rounded-xl overflow-hidden flex flex-col group hover:border-copper/60 transition shadow-lg"
+                    className="bg-white/60 border border-leather/20 rounded-xl overflow-hidden flex flex-col group hover:border-copper/60 transition shadow-sm hover:shadow-md"
                   >
-                    <div className="aspect-[4/3] overflow-hidden bg-leather/20">
+                    <div className="aspect-[4/3] overflow-hidden bg-leather/10">
                       <img
                         src={p.cover_url || n1}
                         alt={p.title}
@@ -79,19 +79,19 @@ function NoticiasList() {
                         </span>
                         {p.tag && (
                           <>
-                            <span className="text-cream/40">·</span>
+                            <span className="text-leather/40">·</span>
                             <span>{p.tag}</span>
                           </>
                         )}
                       </div>
-                      <h3 className="text-cream text-2xl leading-snug mb-3 uppercase" style={{ fontFamily: "var(--font-display)" }}>
+                      <h3 className="text-coffee text-2xl leading-snug mb-3 uppercase" style={{ fontFamily: "var(--font-display)" }}>
                         {p.title}
                       </h3>
-                      <p className="text-cream/70 text-sm leading-relaxed mb-6 flex-1 line-clamp-3">
+                      <p className="text-leather text-sm leading-relaxed mb-6 flex-1 line-clamp-3">
                         {p.excerpt || p.title}
                       </p>
                       <Link
-                        to="/noticias/$slug"
+                        to="/blog/$slug"
                         params={{ slug: p.slug }}
                         className="inline-flex items-center gap-2 text-copper text-sm uppercase tracking-[0.2em] font-semibold group-hover:gap-3 transition-all mt-auto w-fit"
                         style={{ fontFamily: "var(--font-display)" }}

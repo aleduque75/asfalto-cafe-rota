@@ -85,7 +85,7 @@ function AdminLayout() {
           <AdminLink to="/admin" icon={<ShieldCheck className="h-4 w-4" />}>Visão geral</AdminLink>
           <AdminLink to="/admin/usuarios" icon={<Users className="h-4 w-4" />}>Usuários</AdminLink>
           <AdminLink to="/admin/rotas" icon={<Map className="h-4 w-4" />}>Rotas</AdminLink>
-          <AdminLink to="/admin/noticias" icon={<Newspaper className="h-4 w-4" />}>Notícias</AdminLink>
+          <AdminLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />}>Blog</AdminLink>
           <AdminLink to="/admin/galeria" icon={<ImageIcon className="h-4 w-4" />}>Galeria</AdminLink>
           <AdminLink to="/admin/enquetes" icon={<Vote className="h-4 w-4" />}>Enquetes</AdminLink>
           <AdminLink to="/admin/conteudo" icon={<FileText className="h-4 w-4" />}>Conteúdo do site</AdminLink>

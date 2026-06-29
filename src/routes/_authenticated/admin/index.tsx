@@ -33,7 +33,7 @@ function AdminHome() {
         <p className="text-leather/80 mt-2">Gerencie o conteúdo público do site.</p>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Stat icon={<Newspaper className="h-5 w-5" />} label="Notícias publicadas" value={counts.news} sub={`${counts.newsDraft} rascunho(s)`} to="/admin/noticias" />
+        <Stat icon={<Newspaper className="h-5 w-5" />} label="Posts do blog" value={counts.news} sub={`${counts.newsDraft} rascunho(s)`} to="/admin/blog" />
         <Stat icon={<ImageIcon className="h-5 w-5" />} label="Galeria publicada" value={counts.gallery} sub={`${counts.galleryDraft} rascunho(s)`} to="/admin/galeria" />
         <Stat icon={<FileText className="h-5 w-5" />} label="Conteúdo do site" value="—" sub="Hero, história, etc." to="/admin/conteudo" />
       </div>
