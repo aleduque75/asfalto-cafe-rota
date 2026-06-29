@@ -11,7 +11,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
-export const Route = createFileRoute("/_authenticated/rotas/$id/galeria")({
+export const Route = createFileRoute("/_authenticated/rotas_/$id/galeria")({
   head: () => ({ meta: [{ title: "Galeria da Rota — Café Moto e Asfalto" }] }),
   component: RouteGalleryPage,
 });

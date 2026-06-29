@@ -40,7 +40,7 @@ function GaleriasPasseiosPage() {
     const date = new Date(route.start_date);
     
     return (
-      <Link key={route.id} to="/rotas/$id/galeria" params={{ id: route.id }} className="group">
+      <Link key={route.id} to="/rotas_/$id/galeria" params={{ id: route.id }} className="group">
         <Card className="overflow-hidden border-leather/30 hover:border-copper transition h-full flex flex-col bg-cream shadow-sm hover:shadow-md">
           <CardHeader className="bg-gradient-to-br from-coffee to-leather p-5 pb-8 relative">
             <Badge variant="secondary" className="absolute top-4 right-4 bg-cream/20 text-cream border-none backdrop-blur-sm group-hover:bg-copper transition">

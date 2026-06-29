@@ -31,7 +31,7 @@ import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminEnquetesRouteImport } from './routes/_authenticated/admin/enquetes'
 import { Route as AuthenticatedAdminConteudoRouteImport } from './routes/_authenticated/admin/conteudo'
 import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin/blog/index'
-import { Route as AuthenticatedRotasIdGaleriaRouteImport } from './routes/_authenticated/rotas.$id.galeria'
+import { Route as AuthenticatedRotasIdGaleriaRouteImport } from './routes/_authenticated/rotas_.$id.galeria'
 import { Route as AuthenticatedGaragemIdEditRouteImport } from './routes/_authenticated/garagem.$id.edit'
 import { Route as AuthenticatedAdminBlogIdRouteImport } from './routes/_authenticated/admin/blog/$id'
 
@@ -152,9 +152,9 @@ const AuthenticatedAdminBlogIndexRoute =
   } as any)
 const AuthenticatedRotasIdGaleriaRoute =
   AuthenticatedRotasIdGaleriaRouteImport.update({
-    id: '/$id/galeria',
-    path: '/$id/galeria',
-    getParentRoute: () => AuthenticatedRotasRoute,
+    id: '/rotas_/$id/galeria',
+    path: '/rotas/$id/galeria',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedGaragemIdEditRoute =
   AuthenticatedGaragemIdEditRouteImport.update({
@@ -177,7 +177,7 @@ export interface FileRoutesByFullPath {
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/rotas': typeof AuthenticatedRotasRouteWithChildren
+  '/rotas': typeof AuthenticatedRotasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
@@ -202,7 +202,7 @@ export interface FileRoutesByTo {
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
-  '/rotas': typeof AuthenticatedRotasRouteWithChildren
+  '/rotas': typeof AuthenticatedRotasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog': typeof BlogIndexRoute
   '/galeria': typeof GaleriaIndexRoute
@@ -230,7 +230,7 @@ export interface FileRoutesById {
   '/_authenticated/enquetes': typeof AuthenticatedEnquetesRoute
   '/_authenticated/galerias': typeof AuthenticatedGaleriasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
-  '/_authenticated/rotas': typeof AuthenticatedRotasRouteWithChildren
+  '/_authenticated/rotas': typeof AuthenticatedRotasRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
@@ -245,7 +245,7 @@ export interface FileRoutesById {
   '/_authenticated/garagem/': typeof AuthenticatedGaragemIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
   '/_authenticated/garagem/$id/edit': typeof AuthenticatedGaragemIdEditRoute
-  '/_authenticated/rotas/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
+  '/_authenticated/rotas_/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
   '/_authenticated/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -325,7 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/garagem/'
     | '/_authenticated/admin/blog/$id'
     | '/_authenticated/garagem/$id/edit'
-    | '/_authenticated/rotas/$id/galeria'
+    | '/_authenticated/rotas_/$id/galeria'
     | '/_authenticated/admin/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -494,12 +494,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBlogIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/rotas/$id/galeria': {
-      id: '/_authenticated/rotas/$id/galeria'
-      path: '/$id/galeria'
+    '/_authenticated/rotas_/$id/galeria': {
+      id: '/_authenticated/rotas_/$id/galeria'
+      path: '/rotas/$id/galeria'
       fullPath: '/rotas/$id/galeria'
       preLoaderRoute: typeof AuthenticatedRotasIdGaleriaRouteImport
-      parentRoute: typeof AuthenticatedRotasRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/garagem/$id/edit': {
       id: '/_authenticated/garagem/$id/edit'
@@ -546,17 +546,6 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
-interface AuthenticatedRotasRouteChildren {
-  AuthenticatedRotasIdGaleriaRoute: typeof AuthenticatedRotasIdGaleriaRoute
-}
-
-const AuthenticatedRotasRouteChildren: AuthenticatedRotasRouteChildren = {
-  AuthenticatedRotasIdGaleriaRoute: AuthenticatedRotasIdGaleriaRoute,
-}
-
-const AuthenticatedRotasRouteWithChildren =
-  AuthenticatedRotasRoute._addFileChildren(AuthenticatedRotasRouteChildren)
-
 interface AuthenticatedGaragemIdRouteChildren {
   AuthenticatedGaragemIdEditRoute: typeof AuthenticatedGaragemIdEditRoute
 }
@@ -577,10 +566,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEnquetesRoute: typeof AuthenticatedEnquetesRoute
   AuthenticatedGaleriasRoute: typeof AuthenticatedGaleriasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
-  AuthenticatedRotasRoute: typeof AuthenticatedRotasRouteWithChildren
+  AuthenticatedRotasRoute: typeof AuthenticatedRotasRoute
   AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRouteWithChildren
   AuthenticatedGaragemNewRoute: typeof AuthenticatedGaragemNewRoute
   AuthenticatedGaragemIndexRoute: typeof AuthenticatedGaragemIndexRoute
+  AuthenticatedRotasIdGaleriaRoute: typeof AuthenticatedRotasIdGaleriaRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -589,10 +579,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEnquetesRoute: AuthenticatedEnquetesRoute,
   AuthenticatedGaleriasRoute: AuthenticatedGaleriasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
-  AuthenticatedRotasRoute: AuthenticatedRotasRouteWithChildren,
+  AuthenticatedRotasRoute: AuthenticatedRotasRoute,
   AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRouteWithChildren,
   AuthenticatedGaragemNewRoute: AuthenticatedGaragemNewRoute,
   AuthenticatedGaragemIndexRoute: AuthenticatedGaragemIndexRoute,
+  AuthenticatedRotasIdGaleriaRoute: AuthenticatedRotasIdGaleriaRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
