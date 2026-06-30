@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
-import { Loader2, Instagram } from "lucide-react";
+import { Loader2, Instagram, ArrowLeft } from "lucide-react";
 import fallbackImg from "@/assets/gallery-1.jpg";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/galeria/")({
   loader: async () => {
@@ -51,9 +52,15 @@ function GaleriaPage() {
       
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <p className="eyebrow mb-3">Na estrada</p>
-            <h1 className="section-title text-4xl md:text-6xl text-cream">Galeria de Fotos</h1>
+          <div className="mb-6 max-w-4xl mx-auto flex justify-start">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm text-copper hover:text-cream transition-colors uppercase tracking-widest font-medium" style={{ fontFamily: "var(--font-display)" }}>
+              <ArrowLeft className="h-4 w-4" /> Voltar ao Início
+            </Link>
+          </div>
+          
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <p className="eyebrow mb-3">No Instagram</p>
+            <h1 className="section-title text-4xl md:text-6xl text-cream">Galeria de Posts</h1>
             <p className="mt-3 text-cream/70">
               Registros das nossas viagens, paradas e momentos na estrada.
             </p>

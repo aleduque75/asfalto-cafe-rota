@@ -78,9 +78,9 @@ export function Galeria() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
           <div>
             <p className="eyebrow mb-3">@cafe_moto_asfalto</p>
-            <h2 className="section-title text-4xl md:text-6xl">Galeria</h2>
+            <h2 className="section-title text-4xl md:text-6xl">Galeria de Posts</h2>
             <p className="mt-3 text-cream/70 max-w-xl">
-              Os melhores momentos da estrada, registrados pela turma.
+              Os melhores posts e momentos da estrada, registrados pela turma.
             </p>
           </div>
           <a
