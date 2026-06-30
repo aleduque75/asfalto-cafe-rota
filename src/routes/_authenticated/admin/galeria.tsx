@@ -115,10 +115,28 @@ function AdminGaleria() {
             <DialogHeader><DialogTitle>{editing.id ? "Editar foto" : "Nova foto"}</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Imagem</Label>
-                <div className="flex items-center gap-3">
-                  <Input type="file" accept="image/*" onChange={handleFile} disabled={uploading} />
-                  {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                <Label>Imagem (Upload ou Escolher Capa)</Label>
+                <div className="flex flex-col gap-3 mt-1.5">
+                  <div className="flex items-center gap-3">
+                    <Input type="file" accept="image/*" onChange={handleFile} disabled={uploading} className="max-w-[250px]" />
+                    {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                  </div>
+                  
+                  <div className="pt-2">
+                    <p className="text-xs text-leather/70 mb-2">Ou escolha uma capa padrão:</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => setEditing(p => ({ ...p, image_url: `/gallery-${num}.jpg` }))}
+                          className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${editing.image_url === `/gallery-${num}.jpg` ? 'border-copper scale-110 shadow-md' : 'border-transparent hover:border-leather/40'}`}
+                        >
+                          <img src={`/gallery-${num}.jpg`} alt={`Capa ${num}`} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
                 {editing.image_url && (
                   <img 
