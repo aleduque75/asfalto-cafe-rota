@@ -75,32 +75,37 @@ function GaleriaPage() {
               Nenhuma foto publicada ainda.
             </div>
           ) : (
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-3 gap-1 md:gap-2">
-                {items.map((item) => (
-                  <div key={item.id} className="group relative aspect-square overflow-hidden bg-leather/20">
-                    <img
-                      src={item.img}
-                      alt={item.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = fallbackImg;
-                      }}
-                    />
-                    <a
-                      href={item.instagram_url || "#"}
-                      target={item.instagram_url ? "_blank" : "_self"}
-                      rel="noopener noreferrer"
-                      className="absolute inset-0 bg-coffee/80 opacity-0 transition-opacity duration-200 group-hover:opacity-100 flex flex-col justify-center items-center p-4 text-center cursor-pointer"
-                    >
-                      <Instagram className="h-8 w-8 text-cream mb-3 opacity-90" />
-                      {item.title && <h3 className="font-display text-cream text-sm md:text-lg leading-tight mb-2" style={{ fontFamily: "var(--font-display)" }}>{item.title}</h3>}
-                    </a>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {items.map((item) => (
+                <div key={item.id} className="group relative aspect-square overflow-hidden rounded-lg bg-leather/20">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackImg;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-coffee/90 via-coffee/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-4">
+                    {item.title && <h3 className="font-display text-cream text-lg leading-tight mb-1" style={{ fontFamily: "var(--font-display)" }}>{item.title}</h3>}
+                    {item.caption && <p className="text-cream/80 text-xs line-clamp-2 mb-3">{item.caption}</p>}
+                    
+                    {item.instagram_url && (
+                      <a
+                        href={item.instagram_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-cream/20 text-cream hover:bg-copper hover:text-white transition backdrop-blur-sm"
+                        title="Ver no Instagram"
+                      >
+                        <Instagram className="h-4 w-4" />
+                      </a>
+                    )}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
