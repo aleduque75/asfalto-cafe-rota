@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { Loader2, Instagram } from "lucide-react";
+import fallbackImg from "@/assets/gallery-1.jpg";
 
 export const Route = createFileRoute("/galeria/")({
   loader: async () => {
@@ -69,12 +70,16 @@ function GaleriaPage() {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {items.map((item) => (
-                <div key={item.id} className="group relative aspect-square overflow-hidden rounded-lg bg-leather/10">
+                <div key={item.id} className="group relative aspect-square overflow-hidden rounded-lg bg-leather/20">
                   <img
                     src={item.img}
                     alt={item.title}
                     loading="lazy"
                     className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackImg;
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-coffee/90 via-coffee/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-4">
                     {item.title && <h3 className="font-display text-cream text-lg leading-tight mb-1" style={{ fontFamily: "var(--font-display)" }}>{item.title}</h3>}

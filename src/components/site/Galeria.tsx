@@ -116,7 +116,11 @@ export function Galeria() {
                       width={800}
                       height={800}
                       loading="lazy"
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105 bg-leather/20"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = defaultPosts[i % defaultPosts.length].src;
+                      }}
                     />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-coffee via-coffee/20 to-transparent opacity-90" style={{ background: "linear-gradient(to top, var(--coffee), transparent 60%)" }} />

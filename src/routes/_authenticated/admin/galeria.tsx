@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { uploadMedia } from "@/lib/upload";
+import fallbackImg from "@/assets/gallery-1.jpg";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 type Item = Tables<"gallery_items">;
@@ -120,7 +121,15 @@ function AdminGaleria() {
                   {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
                 </div>
                 {editing.image_url && (
-                  <img src={editing.image_url} alt="" className="mt-2 h-40 rounded border border-leather/30 object-cover" />
+                  <img 
+                    src={editing.image_url} 
+                    alt="" 
+                    className="mt-2 h-40 rounded border border-leather/30 object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackImg;
+                    }}
+                  />
                 )}
               </div>
               <div>
@@ -169,7 +178,15 @@ function AdminGaleria() {
           {items.map((i) => (
             <div key={i.id} className="border border-leather/30 rounded-lg overflow-hidden bg-cream shadow-sm">
               <div className="aspect-square overflow-hidden bg-leather/10">
-                <img src={i.image_url} alt={i.title ?? ""} className="h-full w-full object-cover" />
+                <img 
+                  src={i.image_url} 
+                  alt={i.title ?? ""} 
+                  className="h-full w-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = fallbackImg;
+                  }}
+                />
               </div>
               <div className="p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2">
