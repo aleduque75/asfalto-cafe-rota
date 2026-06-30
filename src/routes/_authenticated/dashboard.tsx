@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight } from "lucide-react";
+import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Café Moto e Asfalto" }] }),
@@ -93,19 +93,21 @@ function DashboardPage() {
   const [records, setRecords] = useState<Record_[]>([]);
   const [nextRoute, setNextRoute] = useState<RouteData | null>(null);
   const [activePolls, setActivePolls] = useState<any[]>([]);
+  const [birthdays, setBirthdays] = useState<any[]>([]);
   const [fullName, setFullName] = useState<string>("");
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }] = await Promise.all([
+      const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }] = await Promise.all([
         supabase.from("profiles").select("full_name").eq("id", u.user.id).maybeSingle(),
         supabase.from("motorcycles").select("*").order("created_at", { ascending: false }),
         supabase.from("maintenance_items").select("*"),
         supabase.from("maintenance_records").select("*").order("service_date", { ascending: false }).limit(8),
         supabase.from("routes").select("id, title, destination, start_date, waze_url").eq("status", "open").order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
+        supabase.rpc("get_todays_birthdays"),
       ]);
       setFullName((p?.full_name as string) || u.user.email || "");
       setMotos((m ?? []) as Moto[]);
@@ -113,6 +115,7 @@ function DashboardPage() {
       setRecords((rc ?? []) as Record_[]);
       setNextRoute(rt as RouteData | null);
       setActivePolls(polls || []);
+      setBirthdays(bdays || []);
       setLoading(false);
     })();
   }, []);
@@ -154,6 +157,32 @@ function DashboardPage() {
             <StatCard icon={<Clock className="h-5 w-5" />} label="Vencendo em breve" value={String(soonCount)} tone="warn" />
           )}
         </div>
+      )}
+
+      {birthdays.length > 0 && (
+        <section className="mb-10">
+          <Card className="bg-gradient-to-r from-copper to-copper-glow text-coffee border-none shadow-warm overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none">
+              <Gift className="w-32 h-32" />
+            </div>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="bg-coffee/10 p-3 rounded-full shrink-0">
+                  <Gift className="w-8 h-8 text-coffee" />
+                </div>
+                <div>
+                  <h2 className="font-display text-2xl mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                    Feliz Aniversário! 🎉
+                  </h2>
+                  <p className="text-coffee/80 font-medium">
+                    Hoje é o dia de comemorar com:{" "}
+                    {birthdays.map(b => b.nickname || b.full_name?.split(" ")[0]).join(", ")}. Deixe seus parabéns!
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
       )}
 
       {activePolls && activePolls.length > 0 && (

@@ -270,6 +270,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          birthdate: string | null
           city: string | null
           created_at: string
           full_name: string | null
@@ -281,6 +282,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          birthdate?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
@@ -292,6 +294,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          birthdate?: string | null
           city?: string | null
           created_at?: string
           full_name?: string | null
@@ -426,6 +429,16 @@ export type Database = {
       delete_user_completely: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      get_todays_birthdays: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          full_name: string | null
+          nickname: string | null
+          avatar_url: string | null
+          birthdate: string | null
+        }[]
       }
       set_user_role: {
         Args: {

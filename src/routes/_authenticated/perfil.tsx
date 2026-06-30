@@ -23,7 +23,8 @@ function PerfilPage() {
     nickname: "",
     phone: "",
     city: "",
-    instagram: ""
+    instagram: "",
+    birthdate: ""
   });
 
   const [pwd, setPwd] = useState({
@@ -48,7 +49,8 @@ function PerfilPage() {
           nickname: data.nickname || "",
           phone: data.phone || "",
           city: data.city || "",
-          instagram: data.instagram || ""
+          instagram: data.instagram || "",
+          birthdate: data.birthdate || ""
         });
       }
       setLoading(false);
@@ -77,7 +79,8 @@ function PerfilPage() {
         nickname: form.nickname.trim() || null,
         phone: cleanPhone || null,
         city: form.city.trim() || null,
-        instagram: form.instagram.trim() || null
+        instagram: form.instagram.trim() || null,
+        birthdate: form.birthdate || null
       })
       .eq("id", u.user.id);
 
@@ -152,6 +155,16 @@ function PerfilPage() {
                     placeholder="João"
                   />
                 </div>
+                <div>
+                  <Label>Data de Nascimento</Label>
+                  <Input 
+                    type="date"
+                    value={form.birthdate} 
+                    onChange={(e) => setForm({...form, birthdate: e.target.value})} 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>WhatsApp (DDD + Número)</Label>
                   <Input 
