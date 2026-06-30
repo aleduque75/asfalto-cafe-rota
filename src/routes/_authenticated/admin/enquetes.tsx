@@ -365,8 +365,10 @@ function AdminEnquetesPage() {
                         setEditingPoll({ id: poll.id, title: poll.title, description: poll.description || "" });
                         setEditDialogOpen(true);
                       }}
+                      title="Editar"
                     >
-                      <Pencil className="w-4 h-4 mr-2" /> Editar
+                      <Pencil className="w-4 h-4 shrink-0 sm:mr-2" />
+                      <span className="hidden sm:inline">Editar</span>
                     </Button>
                     <Button
                       variant="outline"
@@ -377,16 +379,20 @@ function AdminEnquetesPage() {
                           restartPoll.mutate(poll.id);
                         }
                       }}
+                      title="Reiniciar"
                     >
-                      <RotateCcw className="w-4 h-4 mr-2" /> Reiniciar
+                      <RotateCcw className="w-4 h-4 shrink-0 sm:mr-2" />
+                      <span className="hidden sm:inline">Reiniciar</span>
                     </Button>
                     <Button
                       variant="secondary"
                       size="sm"
                       className="flex-1 sm:flex-none bg-coffee/10 text-coffee hover:bg-coffee/20 border border-coffee/10"
                       onClick={() => archivePoll.mutate(poll.id)}
+                      title="Encerrar"
                     >
-                      <Archive className="w-4 h-4 mr-2" /> Encerrar
+                      <Archive className="w-4 h-4 shrink-0 sm:mr-2" />
+                      <span className="hidden sm:inline">Encerrar</span>
                     </Button>
                     <Button
                       variant="destructive"
