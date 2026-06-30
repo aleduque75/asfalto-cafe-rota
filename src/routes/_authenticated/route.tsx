@@ -19,7 +19,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<"admin" | "blog_admin" | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
@@ -31,9 +31,9 @@ function AuthenticatedLayout() {
         .from("user_roles")
         .select("role")
         .eq("user_id", u.user.id)
-        .eq("role", "admin")
+        .in("role", ["admin", "blog_admin"])
         .maybeSingle();
-      setIsAdmin(!!data);
+      setUserRole(data ? (data.role as "admin" | "blog_admin") : null);
 
       const { data: contentData } = await supabase
         .from("site_content")
@@ -96,7 +96,7 @@ function AuthenticatedLayout() {
                     <Link to="/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                       <Vote className="h-5 w-5" /> Enquetes
                     </Link>
-                    {isAdmin && (
+                    {userRole && (
                       <div className="flex flex-col gap-3 pt-2 pb-2">
                         <p className="text-xs uppercase tracking-[0.2em] text-copper/80 font-bold mb-1" style={{ fontFamily: "var(--font-display)" }}>
                           Administração
@@ -104,24 +104,32 @@ function AuthenticatedLayout() {
                         <Link to="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <ShieldCheck className="h-5 w-5" /> Visão Geral
                         </Link>
-                        <Link to="/admin/usuarios" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <Users className="h-5 w-5" /> Usuários
-                        </Link>
-                        <Link to="/admin/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <Map className="h-5 w-5" /> Rotas
-                        </Link>
+                        {userRole === "admin" && (
+                          <>
+                            <Link to="/admin/usuarios" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                              <Users className="h-5 w-5" /> Usuários
+                            </Link>
+                            <Link to="/admin/rotas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                              <Map className="h-5 w-5" /> Rotas
+                            </Link>
+                          </>
+                        )}
                         <Link to="/admin/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
                           <Newspaper className="h-5 w-5" /> Blog
                         </Link>
-                        <Link to="/admin/galeria" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <ImageIcon className="h-5 w-5" /> Galeria
-                        </Link>
-                        <Link to="/admin/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <Vote className="h-5 w-5" /> Enquetes
-                        </Link>
-                        <Link to="/admin/conteudo" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
-                          <FileText className="h-5 w-5" /> Conteúdo do site
-                        </Link>
+                        {userRole === "admin" && (
+                          <>
+                            <Link to="/admin/galeria" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                              <ImageIcon className="h-5 w-5" /> Galeria
+                            </Link>
+                            <Link to="/admin/enquetes" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                              <Vote className="h-5 w-5" /> Enquetes
+                            </Link>
+                            <Link to="/admin/conteudo" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-base text-cream/90 hover:text-copper">
+                              <FileText className="h-5 w-5" /> Conteúdo do site
+                            </Link>
+                          </>
+                        )}
                         <div className="h-px bg-border/30 my-2" />
                       </div>
                     )}
