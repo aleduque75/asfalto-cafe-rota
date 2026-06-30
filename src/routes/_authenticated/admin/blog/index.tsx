@@ -102,11 +102,11 @@ function AdminBlogList() {
                       {n.status === "published" ? "Publicado" : "Rascunho"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/admin/blog/$id", params: { id: n.id } })}>
+                  <TableCell className="text-right space-x-1 sm:space-x-2 whitespace-nowrap">
+                    <Button size="icon" variant="default" className="shrink-0" onClick={() => navigate({ to: "/admin/blog/$id", params: { id: n.id } })}>
                       <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => remove(n.id)}>
+                    <Button size="icon" variant="ghost" className="shrink-0" onClick={() => remove(n.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
                   </TableCell>
