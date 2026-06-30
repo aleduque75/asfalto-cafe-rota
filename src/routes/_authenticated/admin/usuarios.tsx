@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, ShieldAlert, ShieldCheck, UserX, UserCheck } from "lucide-react";
+import { Loader2, ShieldAlert, ShieldCheck, UserX, UserCheck, Trash2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
@@ -83,7 +83,25 @@ function AdminUsuarios() {
       toast.error(error.message);
       load(); // revert select UI
     } else {
-      toast.success(`Cargo de ${user.full_name || user.email} alterado para ${newRole}.`);
+      toast.success(`Cargo de ${user.full_name || user.email} alterado para ${newRole === 'blog_admin' ? 'Membro Blog' : newRole}.`);
+      load();
+    }
+  }
+
+  async function deleteUser(user: AdminUser) {
+    if (!confirm(`CUIDADO: Tem certeza que deseja APAGAR COMPLETAMENTE a conta de ${user.full_name || user.email}?\n\nIsso irá excluir também o perfil, as motos e todo o histórico deste usuário. Essa ação não pode ser desfeita.`)) return;
+    if (!confirm(`ÚLTIMO AVISO: Confirma a exclusão de ${user.full_name || user.email}?`)) return;
+
+    setProcessingId(user.id);
+    const { error } = await supabase.rpc("delete_user_completely", {
+      target_user_id: user.id,
+    });
+    setProcessingId(null);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(`Usuário ${user.full_name || user.email} excluído permanentemente.`);
       load();
     }
   }
@@ -149,6 +167,7 @@ function AdminUsuarios() {
                         <SelectContent className="bg-white text-coffee border-leather/20">
                           <SelectItem value="member" className="focus:bg-copper/20 focus:text-coffee cursor-pointer">Membro Comum</SelectItem>
                           <SelectItem value="admin" className="focus:bg-copper/20 focus:text-coffee cursor-pointer">Administrador</SelectItem>
+                          <SelectItem value="blog_admin" className="focus:bg-copper/20 focus:text-coffee cursor-pointer">Membro Blog</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
@@ -163,7 +182,7 @@ function AdminUsuarios() {
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right space-x-2 whitespace-nowrap">
                       {isBanned ? (
                         <Button 
                           size="sm" 
@@ -185,6 +204,16 @@ function AdminUsuarios() {
                           <UserX className="h-4 w-4 mr-1.5" /> Desabilitar
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => deleteUser(user)}
+                        disabled={isProcessing}
+                        className="h-8 px-2"
+                        title="Excluir usuário"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );

@@ -15,7 +15,13 @@ import {
 } from "../../../components/ui/card";
 import { Label } from "../../../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import { Plus, Trash2, Image as ImageIcon, Archive } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../../components/ui/dialog";
+import { Plus, Trash2, Image as ImageIcon, Archive, Pencil, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { uploadMedia } from "../../../lib/upload";
 
@@ -26,6 +32,10 @@ export const Route = createFileRoute("/_authenticated/admin/enquetes")({
 function AdminEnquetesPage() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("active");
+
+  // Edit Poll State
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingPoll, setEditingPoll] = useState<{ id: string; title: string; description: string } | null>(null);
 
   // Formulário State
   const [title, setTitle] = useState("");
@@ -161,6 +171,39 @@ function AdminEnquetesPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-polls"] });
     },
     onError: () => toast.error("Erro ao apagar enquete."),
+  });
+
+  const restartPoll = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await (supabase as any)
+        .from("poll_votes")
+        .delete()
+        .eq("poll_id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Enquete reiniciada! Todos os votos foram zerados.");
+      queryClient.invalidateQueries({ queryKey: ["admin-polls"] });
+    },
+    onError: () => toast.error("Erro ao reiniciar enquete."),
+  });
+
+  const updatePoll = useMutation({
+    mutationFn: async ({ id, title, description }: { id: string; title: string; description: string }) => {
+      if (!title.trim()) throw new Error("O título é obrigatório.");
+      const { error } = await (supabase as any)
+        .from("polls")
+        .update({ title, description })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Enquete atualizada com sucesso!");
+      setEditDialogOpen(false);
+      setEditingPoll(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-polls"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
   // Funções de Formulário
@@ -313,7 +356,30 @@ function AdminEnquetesPage() {
                       Criado em: {new Date(poll.created_at).toLocaleDateString("pt-BR")}
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
+                  <div className="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 sm:flex-none border-leather/30 text-coffee hover:bg-leather/10"
+                      onClick={() => {
+                        setEditingPoll({ id: poll.id, title: poll.title, description: poll.description || "" });
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Pencil className="w-4 h-4 mr-2" /> Editar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 sm:flex-none border-leather/30 text-coffee hover:bg-leather/10"
+                      onClick={() => {
+                        if (confirm("Tem certeza que deseja reiniciar? TODOS os votos serão apagados.")) {
+                          restartPoll.mutate(poll.id);
+                        }
+                      }}
+                    >
+                      <RotateCcw className="w-4 h-4 mr-2" /> Reiniciar
+                    </Button>
                     <Button
                       variant="secondary"
                       size="sm"
@@ -459,6 +525,41 @@ function AdminEnquetesPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-cream border-leather/30">
+          <DialogHeader>
+            <DialogTitle className="text-coffee font-display">Editar Enquete</DialogTitle>
+          </DialogHeader>
+          {editingPoll && (
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label className="text-coffee">Título / Pergunta</Label>
+                <Input
+                  value={editingPoll.title}
+                  onChange={(e) => setEditingPoll({ ...editingPoll, title: e.target.value })}
+                  className="bg-white/70 border-leather/30 text-coffee"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-coffee">Descrição</Label>
+                <Textarea
+                  value={editingPoll.description}
+                  onChange={(e) => setEditingPoll({ ...editingPoll, description: e.target.value })}
+                  className="bg-white/70 border-leather/30 text-coffee"
+                />
+              </div>
+              <Button
+                className="w-full mt-4"
+                onClick={() => updatePoll.mutate(editingPoll)}
+                disabled={updatePoll.isPending}
+              >
+                {updatePoll.isPending ? "Salvando..." : "Salvar Alterações"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

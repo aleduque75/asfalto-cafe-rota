@@ -12,6 +12,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminLayout() {
   const navigate = useNavigate();
   const [state, setState] = useState<"loading" | "ok" | "denied">("loading");
+  const [userRole, setUserRole] = useState<"admin" | "blog_admin" | null>(null);
   const [claiming, setClaiming] = useState(false);
 
   async function check() {
@@ -21,14 +22,21 @@ function AdminLayout() {
       .from("user_roles")
       .select("role")
       .eq("user_id", u.user.id)
-      .eq("role", "admin")
+      .in("role", ["admin", "blog_admin"])
       .maybeSingle();
     if (error) {
       toast.error(error.message);
       setState("denied");
       return;
     }
-    setState(data ? "ok" : "denied");
+    
+    if (data) {
+      // Store the user role in state to use it for rendering the menu
+      setUserRole(data.role as "admin" | "blog_admin");
+      setState("ok");
+    } else {
+      setState("denied");
+    }
   }
 
   useEffect(() => {
@@ -83,12 +91,20 @@ function AdminLayout() {
         </p>
         <nav className="flex flex-row lg:flex-col gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
           <AdminLink to="/admin" icon={<ShieldCheck className="h-4 w-4" />}>Visão geral</AdminLink>
-          <AdminLink to="/admin/usuarios" icon={<Users className="h-4 w-4" />}>Usuários</AdminLink>
-          <AdminLink to="/admin/rotas" icon={<Map className="h-4 w-4" />}>Rotas</AdminLink>
+          {userRole === "admin" && (
+            <>
+              <AdminLink to="/admin/usuarios" icon={<Users className="h-4 w-4" />}>Usuários</AdminLink>
+              <AdminLink to="/admin/rotas" icon={<Map className="h-4 w-4" />}>Rotas</AdminLink>
+            </>
+          )}
           <AdminLink to="/admin/blog" icon={<Newspaper className="h-4 w-4" />}>Blog</AdminLink>
-          <AdminLink to="/admin/galeria" icon={<ImageIcon className="h-4 w-4" />}>Galeria</AdminLink>
-          <AdminLink to="/admin/enquetes" icon={<Vote className="h-4 w-4" />}>Enquetes</AdminLink>
-          <AdminLink to="/admin/conteudo" icon={<FileText className="h-4 w-4" />}>Conteúdo do site</AdminLink>
+          {userRole === "admin" && (
+            <>
+              <AdminLink to="/admin/galeria" icon={<ImageIcon className="h-4 w-4" />}>Galeria</AdminLink>
+              <AdminLink to="/admin/enquetes" icon={<Vote className="h-4 w-4" />}>Enquetes</AdminLink>
+              <AdminLink to="/admin/conteudo" icon={<FileText className="h-4 w-4" />}>Conteúdo do site</AdminLink>
+            </>
+          )}
         </nav>
       </aside>
       <section className="min-w-0">

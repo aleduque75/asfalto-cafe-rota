@@ -423,6 +423,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      delete_user_completely: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       set_user_role: {
         Args: {
           new_role: Database["public"]["Enums"]["app_role"]
@@ -436,7 +440,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "member"
+      app_role: "admin" | "member" | "blog_admin"
       content_status: "draft" | "published"
     }
     CompositeTypes: {
@@ -568,7 +572,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      app_role: ["admin", "member"],
+      app_role: ["admin", "member", "blog_admin"],
       content_status: ["draft", "published"],
     },
   },
