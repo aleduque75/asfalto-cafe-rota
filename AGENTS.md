@@ -1,10 +1,10 @@
-<!-- LOVABLE:BEGIN -->
 > [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
+> **PROJETO MIGRADO DA LOVABLE PARA VPS**
 >
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+> Este projeto não está mais atrelado ao Lovable. Ele está implantado diretamente em uma VPS.
+> 
+> **CONTEXTO DO AMBIENTE (Sempre lembre disso nas próximas sessões):**
+> 1. O frontend roda em Docker (como listado em `docker-compose.yml`) com o nome `asfalto-cafe-rota-preview`. Para fazer deploy das alterações do front, rode `docker compose up --build -d` na raiz.
+> 2. O **Supabase é self-hosted** e está rodando em containers Docker locais nesta mesma VPS (ex: `supabase_db_dphpnagvizyphgehussx`).
+> 3. Ao fazer alterações no banco de dados (migrations), NÃO dependa de sincronizações de plataformas. Você deve aplicar os scripts SQL diretamente no banco self-hosted via terminal (ou solicitar que o usuário aplique).
+> 4. Não se preocupe mais com o alerta antigo de "Lovable Git History", mas sempre mantenha o código versionado no repositório GitHub.

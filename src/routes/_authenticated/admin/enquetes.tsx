@@ -360,7 +360,7 @@ function AdminEnquetesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 sm:flex-none border-leather/30 text-coffee hover:bg-leather/10"
+                      className="flex-1 sm:flex-none bg-white/50 border-coffee/20 text-coffee hover:bg-white/80"
                       onClick={() => {
                         setEditingPoll({ id: poll.id, title: poll.title, description: poll.description || "" });
                         setEditDialogOpen(true);
@@ -371,7 +371,7 @@ function AdminEnquetesPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 sm:flex-none border-leather/30 text-coffee hover:bg-leather/10"
+                      className="flex-1 sm:flex-none bg-white/50 border-coffee/20 text-coffee hover:bg-white/80"
                       onClick={() => {
                         if (confirm("Tem certeza que deseja reiniciar? TODOS os votos serão apagados.")) {
                           restartPoll.mutate(poll.id);
