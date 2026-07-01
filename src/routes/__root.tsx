@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 function NotFoundComponent() {
   return (
@@ -99,9 +100,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         rel: "icon",
-        type: "image/svg+xml",
-        href: "/favicon.svg",
+        type: "image/png",
+        href: "/favicon.png",
       },
+      {
+        rel: "apple-touch-icon",
+        href: "/pwa-192x192.png",
+      },
+      {
+        rel: "manifest",
+        href: "/manifest.webmanifest",
+      }
     ],
   }),
   shellComponent: RootShell,
@@ -126,6 +135,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  
+  // Register service worker for PWA
+  useRegisterSW({ immediate: true });
 
   return (
     <QueryClientProvider client={queryClient}>

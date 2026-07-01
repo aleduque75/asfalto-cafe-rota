@@ -5,6 +5,7 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   tanstackStart: {
@@ -13,6 +14,38 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    plugins: [
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.png', 'favicon.svg'],
+        manifest: {
+          name: 'Café Moto e Asfalto',
+          short_name: 'Café Moto',
+          description: 'Plataforma oficial do motoclube.',
+          theme_color: '#0c0b0a',
+          background_color: '#0c0b0a',
+          display: 'standalone',
+          icons: [
+            {
+              src: 'pwa-192x192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ]
+        }
+      })
+    ],
     server: {
       allowedHosts: true,
       fs: {
