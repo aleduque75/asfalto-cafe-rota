@@ -43,7 +43,8 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { contentMap } = Route.useLoaderData();
   
-  if (Capacitor.isNativePlatform()) {
+  const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+  if (isNative) {
     return (
       <div className="min-h-screen scroll-smooth">
         <Hero content={contentMap.hero} logoUrl={contentMap.general?.logo_url} isAppWelcomeScreen />

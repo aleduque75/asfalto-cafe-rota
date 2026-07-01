@@ -11,7 +11,6 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { useRegisterSW } from 'virtual:pwa-register/react';
 
 function NotFoundComponent() {
   return (
@@ -137,8 +136,14 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   
-  // Register service worker for PWA
-  useRegisterSW({ immediate: true });
+  // Register service worker for PWA (Client side only to prevent SSR crashes)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      import('virtual:pwa-register').then(({ registerSW }) => {
+        registerSW({ immediate: true });
+      }).catch(console.error);
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
