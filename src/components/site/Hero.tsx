@@ -33,13 +33,13 @@ export function Hero({ content, logoUrl }: { content?: Record<string, string>, l
             alt="Brasão Café Moto e Asfalto"
             width={1024}
             height={1024}
-            className="relative h-44 w-44 sm:h-56 sm:w-56 md:h-72 md:w-72 object-contain"
+            className="relative h-32 w-32 sm:h-44 sm:w-44 md:h-72 md:w-72 object-contain"
           />
         </div>
 
         <p className="eyebrow mb-4">{content?.eyebrow || "Atibaia · SP · Desde 2024"}</p>
         <h1
-          className="text-cream text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold uppercase leading-[0.95] max-w-5xl"
+          className="text-cream text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold uppercase leading-tight sm:leading-[0.95] max-w-5xl"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {content?.title ? (
@@ -57,7 +57,7 @@ export function Hero({ content, logoUrl }: { content?: Record<string, string>, l
           {content?.subtitle || "\"O primeiro de muitos quilômetros juntos.\" Um grupo de amigos, algumas motos e uma vontade enorme de pegar a estrada."}
         </p>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href="#moto-clube"
             className="btn-copper inline-flex items-center justify-center rounded-md px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold"
@@ -74,7 +74,7 @@ export function Hero({ content, logoUrl }: { content?: Record<string, string>, l
           </a>
         </div>
 
-        <div className="mt-14 flex items-center gap-6 text-cream/70 text-xs uppercase tracking-[0.32em]" style={{ fontFamily: "var(--font-display)" }}>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-cream/70 text-[10px] sm:text-xs uppercase tracking-[0.32em]" style={{ fontFamily: "var(--font-display)" }}>
           <span>Respeito</span>
           <span className="text-copper">·</span>
           <span>Liberdade</span>
