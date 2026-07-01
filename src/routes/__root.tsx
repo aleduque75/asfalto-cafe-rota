@@ -78,6 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "color-scheme", content: "dark" },
       { title: "Café Moto e Asfalto — Moto Clube Atibaia" },
       { name: "description", content: "Moto clube Café Moto e Asfalto de Atibaia/SP. Passeios, paisagens, café quente e estrada. Respeito · Liberdade · Estrada." },
       { name: "author", content: "Café Moto e Asfalto" },
