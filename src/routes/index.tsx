@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Capacitor } from '@capacitor/core';
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/site/Navbar";
 import { Hero } from "@/components/site/Hero";
@@ -41,6 +42,16 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { contentMap } = Route.useLoaderData();
+  
+  if (Capacitor.isNativePlatform()) {
+    return (
+      <div className="min-h-screen scroll-smooth">
+        <Hero content={contentMap.hero} logoUrl={contentMap.general?.logo_url} isAppWelcomeScreen />
+        <Toaster />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen scroll-smooth">
       <Navbar logoUrl={contentMap.general?.logo_url} />

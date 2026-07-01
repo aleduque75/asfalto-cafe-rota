@@ -1,7 +1,9 @@
 import heroRoad from "@/assets/hero-road.jpg";
 import logo from "@/assets/logo-badge.png";
 
-export function Hero({ content, logoUrl }: { content?: Record<string, string>, logoUrl?: string }) {
+import { Link } from "@tanstack/react-router";
+
+export function Hero({ content, logoUrl, isAppWelcomeScreen }: { content?: Record<string, string>, logoUrl?: string, isAppWelcomeScreen?: boolean }) {
   return (
     <section id="inicio" className="relative min-h-screen w-full overflow-hidden">
       <img
@@ -58,20 +60,32 @@ export function Hero({ content, logoUrl }: { content?: Record<string, string>, l
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a
-            href="#moto-clube"
-            className="btn-copper inline-flex items-center justify-center rounded-md px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {content?.cta_label || "Conheça o clube"}
-          </a>
-          <a
-            href="#galeria"
-            className="inline-flex items-center justify-center rounded-md border border-copper/50 px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold text-cream hover:bg-copper/10 transition"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Ver galeria
-          </a>
+          {isAppWelcomeScreen ? (
+            <Link
+              to="/auth"
+              className="btn-copper inline-flex items-center justify-center rounded-md px-10 py-4 text-base uppercase tracking-[0.18em] font-semibold"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              ENTRAR NA CONTA
+            </Link>
+          ) : (
+            <>
+              <a
+                href="#moto-clube"
+                className="btn-copper inline-flex items-center justify-center rounded-md px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {content?.cta_label || "Conheça o clube"}
+              </a>
+              <a
+                href="#galeria"
+                className="inline-flex items-center justify-center rounded-md border border-copper/50 px-7 py-3.5 text-sm md:text-base uppercase tracking-[0.18em] font-semibold text-cream hover:bg-copper/10 transition"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Ver galeria
+              </a>
+            </>
+          )}
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-cream/70 text-[10px] sm:text-xs uppercase tracking-[0.32em]" style={{ fontFamily: "var(--font-display)" }}>

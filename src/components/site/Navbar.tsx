@@ -75,7 +75,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-cream hover:bg-leather/50"
+            className="lg:hidden inline-flex items-center justify-center rounded-lg p-2 text-cream border border-copper/40 bg-coffee hover:bg-leather/50 transition-colors"
             aria-label="Abrir menu"
           >
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
