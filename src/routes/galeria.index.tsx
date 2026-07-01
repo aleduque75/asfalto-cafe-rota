@@ -75,7 +75,7 @@ function GaleriaPage() {
               Nenhuma foto publicada ainda.
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-4">
               {items.map((item) => (
                 <div key={item.id} className="group relative aspect-square overflow-hidden rounded-lg bg-leather/20">
                   <img
