@@ -36,3 +36,5 @@ supabase/.branches/
 supabase/.temp/
 
 .env
+\nandroid/gradle.properties
+\n*.jks
