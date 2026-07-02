@@ -244,11 +244,12 @@ function DashboardPage() {
                   <Link to="/rotas" className="flex-1">
                     <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper/10">Ver Detalhes</Button>
                   </Link>
-                  {nextRoute.waze_url && (
-                    <Button className="flex-1 btn-copper flex gap-2" onClick={() => window.open(nextRoute.waze_url!, "_blank")}>
-                      <Navigation className="h-4 w-4" /> Waze
-                    </Button>
-                  )}
+                  <Button className="flex-1 btn-copper flex gap-2" onClick={() => {
+                    const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
+                    window.open(wazeLink, "_blank");
+                  }}>
+                    <Navigation className="h-4 w-4" /> Waze
+                  </Button>
                 </div>
               </div>
             </CardContent>

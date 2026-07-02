@@ -72,12 +72,9 @@ function RotasPage() {
     loadRoutes();
   }, []);
 
-  const openWaze = (url: string | null) => {
-    if (!url) {
-      toast.error("Link do Waze não disponível para esta rota.");
-      return;
-    }
-    window.open(url, "_blank");
+  const openWaze = (route: RouteData) => {
+    const wazeLink = route.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(route.destination)}&navigate=yes`;
+    window.open(wazeLink, "_blank");
   };
 
   const handleFinalize = async (id: string) => {
@@ -160,7 +157,7 @@ function RotasPage() {
 
           <div className="flex flex-col sm:flex-row items-center gap-3 mt-auto">
             {!isPastMode && (
-              <Button onClick={() => openWaze(route.waze_url)} className="flex-1 w-full btn-copper flex gap-2">
+              <Button onClick={() => openWaze(route)} className="flex-1 w-full btn-copper flex gap-2">
                 <Navigation className="h-4 w-4" />
                 Iniciar Passeio (Waze)
               </Button>
@@ -176,12 +173,6 @@ function RotasPage() {
               </Button>
             )}
             
-            {isAdmin && !isPastMode && (
-              <Button variant="secondary" onClick={() => handleFinalize(route.id)} className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white flex gap-2 border-none">
-                <CheckCircle2 className="h-4 w-4" />
-                Finalizar
-              </Button>
-            )}
 
             {isPastMode && (
               <Button asChild className="flex-1 w-full btn-copper flex gap-2">

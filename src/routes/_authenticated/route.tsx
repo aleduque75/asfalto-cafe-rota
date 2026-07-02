@@ -6,6 +6,7 @@ import logo from "@/assets/logo-badge.png";
 import { LogOut, Settings, Bike, LayoutDashboard, ShieldCheck, Menu, Map, Users, Newspaper, Image as ImageIcon, FileText, Vote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { BottomNav } from "@/components/app/BottomNav";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -53,7 +54,7 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--cream)" }}>
+    <div className="min-h-screen relative pb-16 md:pb-0" style={{ background: "var(--cream)" }}>
       <header className="border-b border-leather/20 bg-coffee">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-3 group">
@@ -150,9 +151,10 @@ function AuthenticatedLayout() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 mb-4">
         <Outlet />
       </main>
+      <BottomNav />
       <Toaster />
     </div>
   );
