@@ -70,7 +70,7 @@ function RotasPage() {
         const dateA = new Date(a.start_date).getTime();
         const dateB = new Date(b.start_date).getTime();
         
-        if (a.status === 'open') {
+        if (a.status === 'open' || a.status === 'planning') {
            return dateA - dateB; // Mais próxima primeiro
         } else {
            return dateB - dateA; // Mais recente primeiro
@@ -254,23 +254,23 @@ function RotasPage() {
           <TabsContent value="open">
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
               <Button 
-                variant={filterType === 'all' ? 'default' : 'outline'} 
+                variant="outline" 
                 onClick={() => setFilterType('all')}
-                className={`rounded-full h-8 px-4 text-xs ${filterType === 'all' ? 'bg-coffee hover:bg-coffee/90 text-cream' : 'border-leather/30 text-leather hover:text-coffee'}`}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'all' ? 'bg-coffee border-coffee hover:bg-coffee/90 text-cream hover:text-cream' : 'bg-transparent border-leather/30 text-coffee hover:bg-leather/10 hover:text-coffee'}`}
               >
                 Todos
               </Button>
               <Button 
-                variant={filterType === 'open' ? 'default' : 'outline'} 
+                variant="outline" 
                 onClick={() => setFilterType('open')}
-                className={`rounded-full h-8 px-4 text-xs ${filterType === 'open' ? 'bg-copper hover:bg-copper/90 text-white' : 'border-leather/30 text-leather hover:text-coffee'}`}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'open' ? 'bg-copper border-copper hover:bg-copper/90 text-white hover:text-white' : 'bg-transparent border-leather/30 text-coffee hover:bg-leather/10 hover:text-coffee'}`}
               >
                 Próximos Passeios
               </Button>
               <Button 
-                variant={filterType === 'planning' ? 'default' : 'outline'} 
+                variant="outline" 
                 onClick={() => setFilterType('planning')}
-                className={`rounded-full h-8 px-4 text-xs ${filterType === 'planning' ? 'bg-copper hover:bg-copper/90 text-white' : 'border-leather/30 text-leather hover:text-coffee'}`}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'planning' ? 'bg-copper border-copper hover:bg-copper/90 text-white hover:text-white' : 'bg-transparent border-leather/30 text-coffee hover:bg-leather/10 hover:text-coffee'}`}
               >
                 Em Planejamento
               </Button>
