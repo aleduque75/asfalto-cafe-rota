@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/admin/rotas")({
 const EMPTY: Partial<RouteData> = {
   title: "", destination: "", start_date: "", meeting_point: "", meeting_time: "",
   description: "", estimated_distance_km: null, estimated_duration_mins: null,
-  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio",
+  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio", has_financial_plan: false
 };
 
 function AdminRotas() {
@@ -120,6 +120,7 @@ function AdminRotas() {
       media_url: editing.media_url?.trim() || null,
       status: editing.status || "open",
       route_type: editing.route_type || "passeio",
+      has_financial_plan: editing.has_financial_plan || false,
     };
 
     const res = editing.id
@@ -276,9 +277,22 @@ function AdminRotas() {
                 </div>
               </div>
 
+              <div className="flex items-center space-x-2 mt-4">
+                <input 
+                  type="checkbox" 
+                  id="has_financial_plan"
+                  className="w-4 h-4 rounded border-leather/30 text-copper focus:ring-copper"
+                  checked={editing.has_financial_plan || false}
+                  onChange={(e) => setEditing((p) => ({ ...p, has_financial_plan: e.target.checked }))}
+                />
+                <label htmlFor="has_financial_plan" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Habilitar recurso de Planejamento Financeiro para esta rota?
+                </label>
+              </div>
+
             </div>
             <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-leather/20">
-              <Button variant="outline" onClick={() => setOpen(false)} className="border-leather/40 text-coffee hover:bg-leather/10">Cancelar</Button>
+              <Button variant="outline" onClick={() => setOpen(false)} className="bg-white/50 border-white/50 text-coffee hover:bg-white hover:text-coffee">Cancelar</Button>
               <Button onClick={save} disabled={saving} className="btn-copper px-8">
                 {saving ? "Salvando..." : "Salvar Rota"}
               </Button>

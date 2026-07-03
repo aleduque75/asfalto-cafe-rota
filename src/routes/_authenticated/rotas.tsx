@@ -34,6 +34,7 @@ type RouteData = {
   route_type: string;
   estimated_duration_mins: number | null;
   visited_places: string | null;
+  has_financial_plan?: boolean | null;
 };
 
 function RotasPage() {
@@ -43,6 +44,7 @@ function RotasPage() {
   const { tab } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const activeTab = tab === "completed" ? "completed" : "open";
+  const [filterType, setFilterType] = useState<'all' | 'open' | 'planning'>('all');
 
   async function loadRoutes() {
     setLoading(true);
@@ -113,6 +115,10 @@ function RotasPage() {
   };
 
   const openRoutes = routes.filter(r => r.status === 'open' || r.status === 'planning');
+  const filteredOpenRoutes = openRoutes.filter(r => {
+    if (filterType === 'all') return true;
+    return r.status === filterType;
+  });
   const completedRoutes = routes.filter(r => r.status === 'completed');
 
   const renderRouteCard = (route: RouteData, isPastMode: boolean = false) => {
@@ -198,7 +204,7 @@ function RotasPage() {
               </Button>
             )}
           </div>
-          {route.route_type === 'viagem' && (
+          {route.has_financial_plan && (
             <div className="mt-3">
                <Button asChild variant="outline" className="w-full border-copper text-copper hover:bg-copper hover:text-white flex gap-2">
                   <Link to="/rotas/$id/financeiro" params={{ id: route.id }}>
@@ -246,19 +252,43 @@ function RotasPage() {
           </TabsList>
           
           <TabsContent value="open">
-            {openRoutes.length === 0 ? (
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+              <Button 
+                variant={filterType === 'all' ? 'default' : 'outline'} 
+                onClick={() => setFilterType('all')}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'all' ? 'bg-coffee hover:bg-coffee/90 text-cream' : 'border-leather/30 text-leather hover:text-coffee'}`}
+              >
+                Todos
+              </Button>
+              <Button 
+                variant={filterType === 'open' ? 'default' : 'outline'} 
+                onClick={() => setFilterType('open')}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'open' ? 'bg-copper hover:bg-copper/90 text-white' : 'border-leather/30 text-leather hover:text-coffee'}`}
+              >
+                Próximos Passeios
+              </Button>
+              <Button 
+                variant={filterType === 'planning' ? 'default' : 'outline'} 
+                onClick={() => setFilterType('planning')}
+                className={`rounded-full h-8 px-4 text-xs ${filterType === 'planning' ? 'bg-copper hover:bg-copper/90 text-white' : 'border-leather/30 text-leather hover:text-coffee'}`}
+              >
+                Em Planejamento
+              </Button>
+            </div>
+
+            {filteredOpenRoutes.length === 0 ? (
               <Card className="border-dashed border-leather/40 bg-cream">
                 <CardContent className="py-16 text-center">
                   <Map className="h-12 w-12 mx-auto mb-4 text-copper" />
                   <h3 className="font-display text-xl text-coffee mb-2" style={{ fontFamily: "var(--font-display)" }}>
-                    Nenhuma rota em aberto
+                    Nenhuma rota encontrada
                   </h3>
-                  <p className="text-sm text-leather">A turma ainda não planejou o próximo passeio.</p>
+                  <p className="text-sm text-leather">Tente alterar os filtros acima.</p>
                 </CardContent>
               </Card>
             ) : (
               <div className="grid lg:grid-cols-2 gap-6">
-                {openRoutes.map((route) => renderRouteCard(route, false))}
+                {filteredOpenRoutes.map((route) => renderRouteCard(route, false))}
               </div>
             )}
           </TabsContent>
