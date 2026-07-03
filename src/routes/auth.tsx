@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import logo from "@/assets/logo-badge.png";
 
 export const Route = createFileRoute("/auth")({
@@ -22,6 +23,7 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [memberType, setMemberType] = useState("piloto");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -47,7 +49,7 @@ function AuthPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { full_name: fullName },
+        data: { full_name: fullName, member_type: memberType },
       },
     });
     setLoading(false);
@@ -101,6 +103,18 @@ function AuthPage() {
                   <div>
                     <Label htmlFor="email-up" className="text-coffee font-medium">E-mail</Label>
                     <Input id="email-up" type="email" placeholder="seu@email.com" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
+                  </div>
+                  <div>
+                    <Label className="text-coffee font-medium mb-1 block">Tipo de Membro</Label>
+                    <Select value={memberType} onValueChange={setMemberType}>
+                      <SelectTrigger className="w-full bg-white text-coffee border-leather/30">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="piloto">Sou Piloto</SelectItem>
+                        <SelectItem value="garupa">Sou Garupa</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="pwd-up" className="text-coffee font-medium">Senha</Label>

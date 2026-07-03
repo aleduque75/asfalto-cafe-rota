@@ -276,7 +276,9 @@ export type Database = {
           full_name: string | null
           id: string
           instagram: string | null
+          member_type: string | null
           nickname: string | null
+          partner_id: string | null
           phone: string | null
           updated_at: string
         }
@@ -288,7 +290,9 @@ export type Database = {
           full_name?: string | null
           id: string
           instagram?: string | null
+          member_type?: string | null
           nickname?: string | null
+          partner_id?: string | null
           phone?: string | null
           updated_at?: string
         }
@@ -300,11 +304,21 @@ export type Database = {
           full_name?: string | null
           id?: string
           instagram?: string | null
+          member_type?: string | null
           nickname?: string | null
+          partner_id?: string | null
           phone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       routes: {
         Row: {
@@ -318,6 +332,7 @@ export type Database = {
           media_url: string | null
           meeting_point: string
           meeting_time: string
+          route_type: string
           start_date: string
           status: string
           title: string
@@ -335,6 +350,7 @@ export type Database = {
           media_url?: string | null
           meeting_point: string
           meeting_time: string
+          route_type?: string
           start_date: string
           status?: string
           title: string
@@ -352,6 +368,7 @@ export type Database = {
           media_url?: string | null
           meeting_point?: string
           meeting_time?: string
+          route_type?: string
           start_date?: string
           status?: string
           title?: string
@@ -380,6 +397,57 @@ export type Database = {
           value?: Json
         }
         Relationships: []
+      }
+      trip_financial_plans: {
+        Row: {
+          costs: Json
+          created_at: string
+          fuel_calc: Json
+          has_passenger: boolean
+          id: string
+          observations: Json
+          profile_id: string
+          route_id: string
+          updated_at: string
+        }
+        Insert: {
+          costs?: Json
+          created_at?: string
+          fuel_calc?: Json
+          has_passenger?: boolean
+          id?: string
+          observations?: Json
+          profile_id: string
+          route_id: string
+          updated_at?: string
+        }
+        Update: {
+          costs?: Json
+          created_at?: string
+          fuel_calc?: Json
+          has_passenger?: boolean
+          id?: string
+          observations?: Json
+          profile_id?: string
+          route_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_financial_plans_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_financial_plans_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_roles: {
         Row: {

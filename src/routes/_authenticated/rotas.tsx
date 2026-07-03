@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Navigation, Calendar, Clock, Map, Play, Image as ImageIcon, Flag, Route as RouteIcon, CheckCircle2, ArrowLeft } from "lucide-react";
+import { MapPin, Navigation, Calendar, Clock, Map, Play, Image as ImageIcon, Flag, Route as RouteIcon, CheckCircle2, ArrowLeft, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -30,7 +30,8 @@ type RouteData = {
   estimated_distance_km: number | null;
   waze_url: string | null;
   media_url: string | null;
-  status: 'open' | 'completed';
+  status: 'open' | 'completed' | 'planning';
+  route_type: string;
   estimated_duration_mins: number | null;
   visited_places: string | null;
 };
@@ -57,13 +58,23 @@ function RotasPage() {
 
     const { data, error } = await supabase
       .from("routes")
-      .select("*")
-      .order("start_date", { ascending: false });
+      .select("*");
 
     if (error) {
       toast.error(error.message);
     } else {
-      setRoutes((data as RouteData[]) || []);
+      let sortedData = (data as RouteData[]) || [];
+      sortedData.sort((a, b) => {
+        const dateA = new Date(a.start_date).getTime();
+        const dateB = new Date(b.start_date).getTime();
+        
+        if (a.status === 'open') {
+           return dateA - dateB; // Mais próxima primeiro
+        } else {
+           return dateB - dateA; // Mais recente primeiro
+        }
+      });
+      setRoutes(sortedData);
     }
     setLoading(false);
   }
@@ -101,7 +112,7 @@ function RotasPage() {
     return `${m} min`;
   };
 
-  const openRoutes = routes.filter(r => r.status === 'open');
+  const openRoutes = routes.filter(r => r.status === 'open' || r.status === 'planning');
   const completedRoutes = routes.filter(r => r.status === 'completed');
 
   const renderRouteCard = (route: RouteData, isPastMode: boolean = false) => {
@@ -109,13 +120,18 @@ function RotasPage() {
     
     return (
       <Card key={route.id} className="overflow-hidden border-leather/30 hover:border-copper transition h-full flex flex-col bg-cream">
-        <CardHeader className="bg-gradient-to-br from-coffee to-leather p-5 pb-8 relative">
-          <Badge variant={isPastMode ? "secondary" : "default"} className="absolute top-4 right-4 bg-copper text-cream border-none">
-            {isPastMode ? "Finalizado" : "Em Aberto"}
+        <CardHeader className={`p-5 pb-8 relative ${route.route_type === 'viagem' ? 'bg-gradient-to-br from-copper/80 to-coffee' : 'bg-gradient-to-br from-coffee to-leather'}`}>
+          <Badge variant={isPastMode ? "secondary" : "default"} className="absolute top-4 right-4 bg-copper text-cream border-none z-10">
+            {isPastMode ? "Finalizado" : (route.status === 'planning' ? "Em Planejamento" : "Próximo Passeio")}
           </Badge>
-          <CardTitle className="text-cream text-2xl" style={{ fontFamily: "var(--font-display)" }}>
-            {route.title}
-          </CardTitle>
+          <div className="flex flex-col">
+            {route.route_type === 'viagem' && (
+              <span className="text-[10px] uppercase tracking-wider text-cream/90 font-bold mb-1">Viagem Completa</span>
+            )}
+            <CardTitle className="text-cream text-2xl pr-24 relative z-0" style={{ fontFamily: "var(--font-display)" }}>
+              {route.title}
+            </CardTitle>
+          </div>
           <p className="text-cream/80 text-sm flex items-center gap-1.5 mt-2">
             <Flag className="h-4 w-4" /> Destino: {route.destination}
           </p>
@@ -172,7 +188,6 @@ function RotasPage() {
                 )}
               </Button>
             )}
-            
 
             {isPastMode && (
               <Button asChild className="flex-1 w-full btn-copper flex gap-2">
@@ -183,6 +198,16 @@ function RotasPage() {
               </Button>
             )}
           </div>
+          {route.route_type === 'viagem' && (
+            <div className="mt-3">
+               <Button asChild variant="outline" className="w-full border-copper text-copper hover:bg-copper hover:text-white flex gap-2">
+                  <Link to="/rotas/$id/financeiro" params={{ id: route.id }}>
+                    <Calculator className="h-4 w-4" />
+                    Planejamento Financeiro
+                  </Link>
+               </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -191,7 +216,7 @@ function RotasPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4">
-        <Link to="/dashboard" className="sm:hidden self-start">
+        <Link to="/dashboard" className="self-start">
           <Button variant="ghost" size="sm" className="pl-0 text-leather hover:text-copper hover:bg-transparent -ml-2">
             <ArrowLeft className="h-4 w-4 mr-1.5" /> Voltar para a garagem
           </Button>

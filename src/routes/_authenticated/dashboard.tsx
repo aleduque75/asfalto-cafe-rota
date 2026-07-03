@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight, Gift } from "lucide-react";
+import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight, Gift, Calculator } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Café Moto e Asfalto" }] }),
@@ -29,7 +29,7 @@ type Record_ = {
 
 type RouteData = {
   id: string; title: string; destination: string; start_date: string;
-  waze_url: string | null;
+  waze_url: string | null; route_type: string;
 };
 
 type Alert = {
@@ -95,19 +95,21 @@ function DashboardPage() {
   const [activePolls, setActivePolls] = useState<any[]>([]);
   const [birthdays, setBirthdays] = useState<any[]>([]);
   const [fullName, setFullName] = useState<string>("");
+  const [activePlan, setActivePlan] = useState<{ id: string, routeId: string, routeTitle: string, total: number } | null>(null);
 
   useEffect(() => {
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }] = await Promise.all([
-        supabase.from("profiles").select("full_name").eq("id", u.user.id).maybeSingle(),
+      const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }, { data: plansData }] = await Promise.all([
+        supabase.from("profiles").select("full_name, partner_id").eq("id", u.user.id).maybeSingle(),
         supabase.from("motorcycles").select("*").order("created_at", { ascending: false }),
         supabase.from("maintenance_items").select("*"),
         supabase.from("maintenance_records").select("*").order("service_date", { ascending: false }).limit(8),
-        supabase.from("routes").select("id, title, destination, start_date, waze_url").eq("status", "open").order("start_date", { ascending: true }).limit(1).maybeSingle(),
+        supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
         supabase.rpc("get_todays_birthdays"),
+        supabase.from("trip_financial_plans").select(`id, costs, profile_id, route:routes(id, title, status)`)
       ]);
       setFullName((p?.full_name as string) || u.user.email || "");
       setMotos((m ?? []) as Moto[]);
@@ -116,6 +118,17 @@ function DashboardPage() {
       setNextRoute(rt as RouteData | null);
       setActivePolls(polls || []);
       setBirthdays(bdays || []);
+      
+      const partnerId = p?.partner_id || null;
+      const myPlan = (plansData as any[])?.find(plan => 
+        (plan.profile_id === u.user.id || plan.profile_id === partnerId) &&
+        (plan.route?.status === 'open' || plan.route?.status === 'planning')
+      );
+      if (myPlan && myPlan.route && myPlan.costs && typeof myPlan.costs === 'object') {
+        const total = Object.values(myPlan.costs).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
+        setActivePlan({ id: myPlan.id, routeId: myPlan.route.id, routeTitle: myPlan.route.title, total });
+      }
+      
       setLoading(false);
     })();
   }, []);
@@ -216,6 +229,35 @@ function DashboardPage() {
       )}
 
       <section>
+        {activePlan && (
+          <Card className="bg-copper/5 border-copper/30 shadow-md overflow-hidden relative mb-10">
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <Calculator className="w-32 h-32 text-copper" />
+            </div>
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="flex-1">
+                  <Badge className="bg-copper text-cream border-none mb-3">Meu Planejamento</Badge>
+                  <h2 className="font-display text-2xl text-coffee mb-1" style={{ fontFamily: "var(--font-display)" }}>
+                    {activePlan.routeTitle}
+                  </h2>
+                  <p className="text-sm text-leather mb-2">Custo total planejado para a viagem</p>
+                  <p className="text-3xl font-bold text-coffee">
+                    {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3 min-w-[200px]">
+                  <Link to="/rotas/$id/financeiro" params={{ id: activePlan.routeId }} className="flex-1">
+                    <Button className="w-full btn-copper flex gap-2">
+                      <Calculator className="h-4 w-4" /> Abrir Planilha
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {nextRoute ? (
           <Card className="bg-cream border-copper/30 shadow-md overflow-hidden relative mb-10">
             <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
@@ -244,6 +286,13 @@ function DashboardPage() {
                   <Link to="/rotas" className="flex-1">
                     <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper/10">Ver Detalhes</Button>
                   </Link>
+                  {nextRoute.route_type === 'viagem' && (
+                    <Link to="/rotas/$id/financeiro" params={{ id: nextRoute.id }} className="flex-1">
+                      <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper hover:text-white flex gap-2">
+                        <Calculator className="h-4 w-4" /> Planejamento
+                      </Button>
+                    </Link>
+                  )}
                   <Button className="flex-1 btn-copper flex gap-2" onClick={() => {
                     const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
                     window.open(wazeLink, "_blank");

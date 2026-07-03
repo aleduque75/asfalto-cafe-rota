@@ -6,9 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
+
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -16,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin } from "lucide-react";
+import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin, X } from "lucide-react";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 type RouteData = Tables<"routes">;
@@ -28,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/admin/rotas")({
 const EMPTY: Partial<RouteData> = {
   title: "", destination: "", start_date: "", meeting_point: "", meeting_time: "",
   description: "", estimated_distance_km: null, estimated_duration_mins: null,
-  visited_places: "", waze_url: "", media_url: "", status: "open",
+  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio",
 };
 
 function AdminRotas() {
@@ -42,11 +40,27 @@ function AdminRotas() {
     setLoading(true);
     const { data, error } = await supabase
       .from("routes")
-      .select("*")
-      .order("start_date", { ascending: false });
+      .select("*");
+    
     setLoading(false);
     if (error) return toast.error(error.message);
-    setItems(data ?? []);
+    
+    let sortedData = data ?? [];
+    sortedData.sort((a, b) => {
+      if (a.status === 'open' && b.status === 'completed') return -1;
+      if (a.status === 'completed' && b.status === 'open') return 1;
+      
+      const dateA = new Date(a.start_date).getTime();
+      const dateB = new Date(b.start_date).getTime();
+      
+      if (a.status === 'open') {
+         return dateA - dateB; // Mais próxima primeiro
+      } else {
+         return dateB - dateA; // Mais recente primeiro
+      }
+    });
+    
+    setItems(sortedData);
   }
 
   useEffect(() => { load(); }, []);
@@ -105,6 +119,7 @@ function AdminRotas() {
       waze_url: editing.waze_url?.trim() || null,
       media_url: editing.media_url?.trim() || null,
       status: editing.status || "open",
+      route_type: editing.route_type || "passeio",
     };
 
     const res = editing.id
@@ -145,15 +160,22 @@ function AdminRotas() {
           <h1 className="text-3xl md:text-4xl font-display" style={{ fontFamily: "var(--font-display)" }}>Rotas e Passeios</h1>
           <p className="text-leather/70 mt-1">Gerencie os próximos destinos do motoclube.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={startNew}><Plus className="h-4 w-4 mr-1" /> Criar nova rota</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editing.id ? "Editar Rota" : "Nova Rota"}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-2">
+        {!open && (
+          <Button onClick={startNew} className="btn-copper"><Plus className="h-4 w-4 mr-1" /> Criar nova rota</Button>
+        )}
+      </div>
+
+      {open && (
+        <div className="bg-[#d9cec1] text-coffee border border-leather/30 rounded-xl p-6 shadow-md mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold font-display" style={{ fontFamily: "var(--font-display)" }}>
+              {editing.id ? "Editar Rota" : "Nova Rota"}
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => setOpen(false)} className="text-coffee hover:bg-leather/10">
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          <div className="space-y-5">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <Label>Título do Passeio *</Label>
@@ -230,27 +252,39 @@ function AdminRotas() {
                 </div>
               </div>
 
-              <div>
-                <Label>Status</Label>
-                <Select value={editing.status ?? "open"} onValueChange={(v) => setEditing((p) => ({ ...p, status: v as "open" | "completed" }))}>
-                  <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="open">Em Aberto</SelectItem>
-                    <SelectItem value="completed">Finalizada (Concluída)</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <Label>Tipo de Rota</Label>
+                  <Select value={editing.route_type ?? "passeio"} onValueChange={(v) => setEditing((p) => ({ ...p, route_type: v as "passeio" | "viagem" }))}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="passeio">Bate e Volta / Passeio</SelectItem>
+                      <SelectItem value="viagem">Viagem Completa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-coffee/90 font-semibold mb-1 block">Status</Label>
+                  <Select value={editing.status ?? "open"} onValueChange={(v) => setEditing((p) => ({ ...p, status: v as "open" | "completed" | "planning" }))}>
+                    <SelectTrigger className="w-full bg-cream border-leather/30 text-coffee focus:ring-copper"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Em Aberto</SelectItem>
+                      <SelectItem value="planning">Em Planejamento</SelectItem>
+                      <SelectItem value="completed">Finalizada (Concluída)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-              <Button onClick={save} disabled={saving} className="btn-copper">
+            <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-leather/20">
+              <Button variant="outline" onClick={() => setOpen(false)} className="border-leather/40 text-coffee hover:bg-leather/10">Cancelar</Button>
+              <Button onClick={save} disabled={saving} className="btn-copper px-8">
                 {saving ? "Salvando..." : "Salvar Rota"}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </div>
+        </div>
+      )}
 
       <div className="border border-leather/30 rounded-lg bg-cream shadow-sm">
         {loading ? (
@@ -275,7 +309,12 @@ function AdminRotas() {
                   <TableRow key={r.id}>
                     <TableCell className="font-medium min-w-[200px]">
                       <div className="flex flex-col gap-0.5">
-                        <span className="truncate flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-copper shrink-0" /> {r.title}</span>
+                        <span className="truncate flex items-center gap-1.5 font-semibold">
+                          <MapPin className="h-3.5 w-3.5 text-copper shrink-0" /> {r.title}
+                          {r.route_type === 'viagem' && (
+                            <Badge variant="outline" className="bg-coffee/10 text-coffee border-coffee/20 ml-2 text-[10px] uppercase py-0 px-1.5 h-4">Viagem</Badge>
+                          )}
+                        </span>
                         <span className="text-xs text-leather truncate opacity-80">{r.destination}</span>
                       </div>
                     </TableCell>
@@ -292,7 +331,7 @@ function AdminRotas() {
                         className="cursor-pointer whitespace-nowrap"
                         onClick={() => toggleStatus(r)}
                       >
-                        {r.status === "completed" ? "Finalizada" : "Em Aberto"}
+                        {r.status === "completed" ? "Finalizada" : (r.status === "planning" ? "Planejamento" : "Em Aberto")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-1 whitespace-nowrap">
