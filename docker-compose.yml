@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   asfalto-cafe-rota-preview:
-    build: .
+    image: ghcr.io/aleduque75/asfalto-cafe-rota:latest
     container_name: asfalto-cafe-rota-preview
     restart: always
     ports:
