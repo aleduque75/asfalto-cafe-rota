@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin, X } from "lucide-react";
+import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin, X, ArrowLeft } from "lucide-react";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 type RouteData = Tables<"routes">;
@@ -156,6 +156,11 @@ function AdminRotas() {
 
   return (
     <div className="space-y-6">
+      <Link to="/dashboard" className="self-start">
+        <Button variant="ghost" size="sm" className="pl-0 text-leather hover:text-copper hover:bg-transparent -ml-2 mb-2">
+          <ArrowLeft className="h-4 w-4 mr-1.5" /> Voltar para a garagem
+        </Button>
+      </Link>
       <div className="flex items-end justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl md:text-4xl font-display" style={{ fontFamily: "var(--font-display)" }}>Rotas e Passeios</h1>
