@@ -24,8 +24,15 @@ function GaragemPage() {
   const [open, setOpen] = useState(false);
 
   async function load() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user?.id) return;
+
     const { data, error } = await supabase
-      .from("motorcycles").select("*").order("created_at", { ascending: false });
+      .from("motorcycles")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false });
+      
     if (error) toast.error(error.message);
     else setMotos((data ?? []) as Moto[]);
     setLoading(false);
