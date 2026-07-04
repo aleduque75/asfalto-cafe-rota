@@ -103,7 +103,7 @@ function DashboardPage() {
       if (!u.user) return;
       const [{ data: p }, { data: m }, { data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }, { data: plansData }] = await Promise.all([
         supabase.from("profiles").select("full_name, partner_id").eq("id", u.user.id).maybeSingle(),
-        supabase.from("motorcycles").select("*").order("created_at", { ascending: false }),
+        supabase.from("motorcycles").select("*").eq("user_id", u.user.id).order("created_at", { ascending: false }),
         supabase.from("maintenance_items").select("*"),
         supabase.from("maintenance_records").select("*").order("service_date", { ascending: false }).limit(8),
         supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
