@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as GaleriaIndexRouteImport } from './routes/galeria.index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
 import { Route as AuthenticatedRotasRouteImport } from './routes/_authenticated/rotas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedGaleriasRouteImport } from './routes/_authenticated/galerias'
@@ -63,6 +64,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRotasRoute = AuthenticatedRotasRouteImport.update({
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog': typeof BlogIndexRoute
   '/galeria': typeof GaleriaIndexRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/_authenticated/galerias': typeof AuthenticatedGaleriasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rotas': typeof AuthenticatedRotasRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/galerias'
     | '/perfil'
     | '/rotas'
+    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog/'
     | '/galeria/'
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/galerias'
     | '/perfil'
     | '/rotas'
+    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog'
     | '/galeria'
@@ -323,6 +334,7 @@ export interface FileRouteTypes {
     | '/_authenticated/galerias'
     | '/_authenticated/perfil'
     | '/_authenticated/rotas'
+    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog/'
     | '/galeria/'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   GaleriaIndexRoute: typeof GaleriaIndexRoute
@@ -386,6 +399,13 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog/'
       preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -615,6 +635,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   GaleriaIndexRoute: GaleriaIndexRoute,
