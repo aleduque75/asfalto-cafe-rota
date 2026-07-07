@@ -27,10 +27,13 @@ function GaragemPage() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user?.id) return;
 
+    const { data: p } = await supabase.from("profiles").select("partner_id").eq("id", session.user.id).maybeSingle();
+    const userIds = [session.user.id, p?.partner_id].filter(Boolean);
+
     const { data, error } = await supabase
       .from("motorcycles")
       .select("*")
-      .eq("user_id", session.user.id)
+      .in("user_id", userIds)
       .order("created_at", { ascending: false });
       
     if (error) toast.error(error.message);
