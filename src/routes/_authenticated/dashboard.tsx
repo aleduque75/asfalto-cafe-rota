@@ -231,34 +231,7 @@ function DashboardPage() {
       )}
 
       <section>
-        {activePlan && (
-          <Card className="bg-copper/5 border-copper/30 shadow-md overflow-hidden relative mb-10">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <Calculator className="w-32 h-32 text-copper" />
-            </div>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-                <div className="flex-1">
-                  <Badge className="bg-copper text-cream border-none mb-3">Meu Planejamento</Badge>
-                  <h2 className="font-display text-2xl text-coffee mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                    {activePlan.routeTitle}
-                  </h2>
-                  <p className="text-sm text-leather mb-2">Custo total planejado para a viagem</p>
-                  <p className="text-3xl font-bold text-coffee">
-                    {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 min-w-[200px]">
-                  <Link to="/rotas/$id/financeiro" params={{ id: activePlan.routeId }} className="flex-1">
-                    <Button className="w-full btn-copper flex gap-2">
-                      <Calculator className="h-4 w-4" /> Abrir Planilha
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
         {nextRoute ? (
           <Card className="bg-cream border-copper/30 shadow-md overflow-hidden relative mb-10">
@@ -283,6 +256,14 @@ function DashboardPage() {
                       })()}
                     </span>
                   </div>
+                  {activePlan && activePlan.routeId === nextRoute.id && (
+                    <div className="mt-4 pt-4 border-t border-leather/15">
+                      <p className="text-xs uppercase tracking-wider text-leather mb-1">Custo Planejado</p>
+                      <p className="text-2xl font-bold text-coffee">
+                        {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 min-w-[200px]">
                   <Link to="/rotas" className="flex-1">
