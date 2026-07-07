@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
-export const Route = createFileRoute("/_authenticated/garagem/$id/edit")({
+export const Route = createFileRoute("/_authenticated/garagem_/$id/edit")({
   head: () => ({ meta: [{ title: "Editar Moto — Café Moto e Asfalto" }] }),
   component: EditMotoPage,
 });
