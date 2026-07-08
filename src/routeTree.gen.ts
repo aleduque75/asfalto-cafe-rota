@@ -9,13 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GaleriaIndexRouteImport } from './routes/galeria.index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
-import { Route as PoliticaDePrivacidadeRouteImport } from './routes/politica-de-privacidade'
 import { Route as AuthenticatedRotasRouteImport } from './routes/_authenticated/rotas'
 import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
 import { Route as AuthenticatedGaleriasRouteImport } from './routes/_authenticated/galerias'
@@ -28,15 +29,26 @@ import { Route as AuthenticatedGaragemNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
 import { Route as AuthenticatedAdminRotasRouteImport } from './routes/_authenticated/admin/rotas'
+import { Route as AuthenticatedAdminLogsRouteImport } from './routes/_authenticated/admin/logs'
 import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authenticated/admin/galeria'
 import { Route as AuthenticatedAdminEnquetesRouteImport } from './routes/_authenticated/admin/enquetes'
 import { Route as AuthenticatedAdminConteudoRouteImport } from './routes/_authenticated/admin/conteudo'
 import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin/blog/index'
 import { Route as AuthenticatedRotasIdGaleriaRouteImport } from './routes/_authenticated/rotas_.$id.galeria'
 import { Route as AuthenticatedRotasIdFinanceiroRouteImport } from './routes/_authenticated/rotas_.$id.financeiro'
-import { Route as AuthenticatedGaragemIdEditRouteImport } from './routes/_authenticated/garagem.$id.edit'
+import { Route as AuthenticatedGaragemIdEditRouteImport } from './routes/_authenticated/garagem_.$id.edit'
 import { Route as AuthenticatedAdminBlogIdRouteImport } from './routes/_authenticated/admin/blog/$id'
 
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
+  id: '/politica-de-privacidade',
+  path: '/politica-de-privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -64,11 +76,6 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoliticaDePrivacidadeRoute = PoliticaDePrivacidadeRouteImport.update({
-  id: '/politica-de-privacidade',
-  path: '/politica-de-privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRotasRoute = AuthenticatedRotasRouteImport.update({
@@ -133,6 +140,11 @@ const AuthenticatedAdminRotasRoute = AuthenticatedAdminRotasRouteImport.update({
   path: '/rotas',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminLogsRoute = AuthenticatedAdminLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAdminGaleriaRoute =
   AuthenticatedAdminGaleriaRouteImport.update({
     id: '/galeria',
@@ -171,9 +183,9 @@ const AuthenticatedRotasIdFinanceiroRoute =
   } as any)
 const AuthenticatedGaragemIdEditRoute =
   AuthenticatedGaragemIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => AuthenticatedGaragemIdRoute,
+    id: '/garagem_/$id/edit',
+    path: '/garagem/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminBlogIdRoute =
   AuthenticatedAdminBlogIdRouteImport.update({
@@ -185,22 +197,24 @@ const AuthenticatedAdminBlogIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
-  '/garagem/$id': typeof AuthenticatedGaragemIdRouteWithChildren
+  '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/garagem/new': typeof AuthenticatedGaragemNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/garagem/': typeof AuthenticatedGaragemIndexRoute
@@ -213,21 +227,23 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enquetes': typeof AuthenticatedEnquetesRoute
   '/galerias': typeof AuthenticatedGaleriasRoute
   '/perfil': typeof AuthenticatedPerfilRoute
   '/rotas': typeof AuthenticatedRotasRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog': typeof BlogIndexRoute
   '/galeria': typeof GaleriaIndexRoute
   '/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
-  '/garagem/$id': typeof AuthenticatedGaragemIdRouteWithChildren
+  '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/garagem/new': typeof AuthenticatedGaragemNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/garagem': typeof AuthenticatedGaragemIndexRoute
@@ -242,27 +258,29 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/enquetes': typeof AuthenticatedEnquetesRoute
   '/_authenticated/galerias': typeof AuthenticatedGaleriasRoute
   '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
   '/_authenticated/rotas': typeof AuthenticatedRotasRoute
-  '/politica-de-privacidade': typeof PoliticaDePrivacidadeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/galeria/': typeof GaleriaIndexRoute
   '/_authenticated/admin/conteudo': typeof AuthenticatedAdminConteudoRoute
   '/_authenticated/admin/enquetes': typeof AuthenticatedAdminEnquetesRoute
   '/_authenticated/admin/galeria': typeof AuthenticatedAdminGaleriaRoute
+  '/_authenticated/admin/logs': typeof AuthenticatedAdminLogsRoute
   '/_authenticated/admin/rotas': typeof AuthenticatedAdminRotasRoute
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
-  '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRouteWithChildren
+  '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/_authenticated/garagem/new': typeof AuthenticatedGaragemNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/garagem/': typeof AuthenticatedGaragemIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
-  '/_authenticated/garagem/$id/edit': typeof AuthenticatedGaragemIdEditRoute
+  '/_authenticated/garagem_/$id/edit': typeof AuthenticatedGaragemIdEditRoute
   '/_authenticated/rotas_/$id/financeiro': typeof AuthenticatedRotasIdFinanceiroRoute
   '/_authenticated/rotas_/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
   '/_authenticated/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
@@ -272,19 +290,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/politica-de-privacidade'
+    | '/reset-password'
     | '/admin'
     | '/dashboard'
     | '/enquetes'
     | '/galerias'
     | '/perfil'
     | '/rotas'
-    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog/'
     | '/galeria/'
     | '/admin/conteudo'
     | '/admin/enquetes'
     | '/admin/galeria'
+    | '/admin/logs'
     | '/admin/rotas'
     | '/admin/usuarios'
     | '/garagem/$id'
@@ -300,18 +320,20 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/politica-de-privacidade'
+    | '/reset-password'
     | '/dashboard'
     | '/enquetes'
     | '/galerias'
     | '/perfil'
     | '/rotas'
-    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog'
     | '/galeria'
     | '/admin/conteudo'
     | '/admin/enquetes'
     | '/admin/galeria'
+    | '/admin/logs'
     | '/admin/rotas'
     | '/admin/usuarios'
     | '/garagem/$id'
@@ -328,19 +350,21 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/politica-de-privacidade'
+    | '/reset-password'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/enquetes'
     | '/_authenticated/galerias'
     | '/_authenticated/perfil'
     | '/_authenticated/rotas'
-    | '/politica-de-privacidade'
     | '/blog/$slug'
     | '/blog/'
     | '/galeria/'
     | '/_authenticated/admin/conteudo'
     | '/_authenticated/admin/enquetes'
     | '/_authenticated/admin/galeria'
+    | '/_authenticated/admin/logs'
     | '/_authenticated/admin/rotas'
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/garagem/$id'
@@ -348,7 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/garagem/'
     | '/_authenticated/admin/blog/$id'
-    | '/_authenticated/garagem/$id/edit'
+    | '/_authenticated/garagem_/$id/edit'
     | '/_authenticated/rotas_/$id/financeiro'
     | '/_authenticated/rotas_/$id/galeria'
     | '/_authenticated/admin/blog/'
@@ -359,6 +383,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   PoliticaDePrivacidadeRoute: typeof PoliticaDePrivacidadeRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   GaleriaIndexRoute: typeof GaleriaIndexRoute
@@ -366,6 +391,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/politica-de-privacidade': {
+      id: '/politica-de-privacidade'
+      path: '/politica-de-privacidade'
+      fullPath: '/politica-de-privacidade'
+      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -399,13 +438,6 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog/'
       preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/politica-de-privacidade': {
-      id: '/politica-de-privacidade'
-      path: '/politica-de-privacidade'
-      fullPath: '/politica-de-privacidade'
-      preLoaderRoute: typeof PoliticaDePrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
@@ -499,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRotasRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/logs': {
+      id: '/_authenticated/admin/logs'
+      path: '/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AuthenticatedAdminLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/galeria': {
       id: '/_authenticated/admin/galeria'
       path: '/galeria'
@@ -541,12 +580,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRotasIdFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/garagem/$id/edit': {
-      id: '/_authenticated/garagem/$id/edit'
-      path: '/edit'
+    '/_authenticated/garagem_/$id/edit': {
+      id: '/_authenticated/garagem_/$id/edit'
+      path: '/garagem/$id/edit'
       fullPath: '/garagem/$id/edit'
       preLoaderRoute: typeof AuthenticatedGaragemIdEditRouteImport
-      parentRoute: typeof AuthenticatedGaragemIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/blog/$id': {
       id: '/_authenticated/admin/blog/$id'
@@ -562,6 +601,7 @@ interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminConteudoRoute: typeof AuthenticatedAdminConteudoRoute
   AuthenticatedAdminEnquetesRoute: typeof AuthenticatedAdminEnquetesRoute
   AuthenticatedAdminGaleriaRoute: typeof AuthenticatedAdminGaleriaRoute
+  AuthenticatedAdminLogsRoute: typeof AuthenticatedAdminLogsRoute
   AuthenticatedAdminRotasRoute: typeof AuthenticatedAdminRotasRoute
   AuthenticatedAdminUsuariosRoute: typeof AuthenticatedAdminUsuariosRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -574,6 +614,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
     AuthenticatedAdminConteudoRoute: AuthenticatedAdminConteudoRoute,
     AuthenticatedAdminEnquetesRoute: AuthenticatedAdminEnquetesRoute,
     AuthenticatedAdminGaleriaRoute: AuthenticatedAdminGaleriaRoute,
+    AuthenticatedAdminLogsRoute: AuthenticatedAdminLogsRoute,
     AuthenticatedAdminRotasRoute: AuthenticatedAdminRotasRoute,
     AuthenticatedAdminUsuariosRoute: AuthenticatedAdminUsuariosRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -586,20 +627,6 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
-interface AuthenticatedGaragemIdRouteChildren {
-  AuthenticatedGaragemIdEditRoute: typeof AuthenticatedGaragemIdEditRoute
-}
-
-const AuthenticatedGaragemIdRouteChildren: AuthenticatedGaragemIdRouteChildren =
-  {
-    AuthenticatedGaragemIdEditRoute: AuthenticatedGaragemIdEditRoute,
-  }
-
-const AuthenticatedGaragemIdRouteWithChildren =
-  AuthenticatedGaragemIdRoute._addFileChildren(
-    AuthenticatedGaragemIdRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -607,9 +634,10 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGaleriasRoute: typeof AuthenticatedGaleriasRoute
   AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
   AuthenticatedRotasRoute: typeof AuthenticatedRotasRoute
-  AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRouteWithChildren
+  AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
   AuthenticatedGaragemNewRoute: typeof AuthenticatedGaragemNewRoute
   AuthenticatedGaragemIndexRoute: typeof AuthenticatedGaragemIndexRoute
+  AuthenticatedGaragemIdEditRoute: typeof AuthenticatedGaragemIdEditRoute
   AuthenticatedRotasIdFinanceiroRoute: typeof AuthenticatedRotasIdFinanceiroRoute
   AuthenticatedRotasIdGaleriaRoute: typeof AuthenticatedRotasIdGaleriaRoute
 }
@@ -621,9 +649,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGaleriasRoute: AuthenticatedGaleriasRoute,
   AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
   AuthenticatedRotasRoute: AuthenticatedRotasRoute,
-  AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRouteWithChildren,
+  AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRoute,
   AuthenticatedGaragemNewRoute: AuthenticatedGaragemNewRoute,
   AuthenticatedGaragemIndexRoute: AuthenticatedGaragemIndexRoute,
+  AuthenticatedGaragemIdEditRoute: AuthenticatedGaragemIdEditRoute,
   AuthenticatedRotasIdFinanceiroRoute: AuthenticatedRotasIdFinanceiroRoute,
   AuthenticatedRotasIdGaleriaRoute: AuthenticatedRotasIdGaleriaRoute,
 }
@@ -636,6 +665,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   PoliticaDePrivacidadeRoute: PoliticaDePrivacidadeRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   GaleriaIndexRoute: GaleriaIndexRoute,

@@ -34,6 +34,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          id: string
+          user_id: string | null
+          action_type: string
+          entity_id: string | null
+          details: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          action_type: string
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          action_type?: string
+          entity_id?: string | null
+          details?: Json | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       gallery_items: {
         Row: {
           caption: string | null

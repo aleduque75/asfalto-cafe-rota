@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, Link, useNavigate } from "@tanstack/react-rout
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Newspaper, Image as ImageIcon, FileText, ShieldCheck, Loader2, Map, Users, Vote } from "lucide-react";
+import { Newspaper, Image as ImageIcon, FileText, ShieldCheck, Loader2, Map, Users, Vote, Activity } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -103,6 +103,7 @@ function AdminLayout() {
               <AdminLink to="/admin/galeria" icon={<ImageIcon className="h-4 w-4" />}>Galeria</AdminLink>
               <AdminLink to="/admin/enquetes" icon={<Vote className="h-4 w-4" />}>Enquetes</AdminLink>
               <AdminLink to="/admin/conteudo" icon={<FileText className="h-4 w-4" />}>Conteúdo do site</AdminLink>
+              <AdminLink to="/admin/logs" icon={<Activity className="h-4 w-4" />}>Logs</AdminLink>
             </>
           )}
         </nav>
