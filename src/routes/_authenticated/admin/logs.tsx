@@ -38,6 +38,28 @@ function formatActionType(action: string) {
   return map[action] || action;
 }
 
+function formatDetails(details: any) {
+  if (!details) return "-";
+  
+  // Os detalhes podem vir em new_data (inserts/updates) ou old_data (deletes)
+  const data = details.new_data || details.old_data || details;
+  
+  // Tentar encontrar um nome ou título legível na carga de dados
+  const identifier = 
+    data.item_name || // Manutenção
+    data.title || // Rotas e Notícias
+    data.full_name || // Perfis
+    (data.brand && data.model ? `${data.brand} ${data.model}` : null) || // Motos
+    data.plate || 
+    data.name; // Itens
+
+  if (identifier) {
+    return <span className="font-medium">{identifier}</span>;
+  }
+
+  return <span className="text-leather/50 italic text-xs">Registro interno</span>;
+}
+
 function AdminLogsPage() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ["admin-activity-logs"],
@@ -85,7 +107,6 @@ function AdminLogsPage() {
                   <TableHead>Data e Hora</TableHead>
                   <TableHead>Usuário</TableHead>
                   <TableHead>Ação</TableHead>
-                  <TableHead>ID da Entidade</TableHead>
                   <TableHead>Detalhes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -99,16 +120,13 @@ function AdminLogsPage() {
                       {/* @ts-ignore */}
                       {log.profiles?.full_name || "Sistema"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">
                       <span className="px-2 py-1 rounded text-xs font-semibold bg-coffee/10 text-coffee border border-coffee/20">
                         {formatActionType(log.action_type)}
                       </span>
                     </TableCell>
-                    <TableCell className="text-xs font-mono text-leather/70">
-                      {log.entity_id || "-"}
-                    </TableCell>
-                    <TableCell className="max-w-[300px] truncate text-xs text-leather">
-                      {log.details ? JSON.stringify(log.details) : "-"}
+                    <TableCell className="max-w-[400px] truncate text-sm text-leather">
+                      {formatDetails(log.details)}
                     </TableCell>
                   </TableRow>
                 ))}
