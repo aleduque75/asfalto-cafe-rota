@@ -47,7 +47,7 @@ function AdminLogsPage() {
         </h1>
       </div>
 
-      <Card className="border-leather/20 shadow-sm">
+      <Card className="border-leather/20 shadow-sm bg-cream">
         <CardHeader className="bg-cream border-b border-leather/10">
           <CardTitle className="text-xl text-coffee font-display">Histórico de Atividades</CardTitle>
           <CardDescription>
