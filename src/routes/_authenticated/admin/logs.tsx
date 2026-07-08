@@ -17,6 +17,27 @@ export const Route = createFileRoute("/_authenticated/admin/logs")({
   component: AdminLogsPage,
 });
 
+function formatActionType(action: string) {
+  const map: Record<string, string> = {
+    "MOTORCYCLES_INSERT": "Adicionou uma Moto",
+    "MOTORCYCLES_UPDATE": "Editou uma Moto",
+    "MOTORCYCLES_DELETE": "Excluiu uma Moto",
+    "ROUTES_INSERT": "Criou uma Rota",
+    "ROUTES_UPDATE": "Editou uma Rota",
+    "ROUTES_DELETE": "Excluiu uma Rota",
+    "PROFILES_INSERT": "Criou um Perfil",
+    "PROFILES_UPDATE": "Editou o Perfil",
+    "PROFILES_DELETE": "Excluiu um Perfil",
+    "MAINTENANCE_RECORDS_INSERT": "Registrou uma Manutenção",
+    "MAINTENANCE_RECORDS_UPDATE": "Editou uma Manutenção",
+    "MAINTENANCE_RECORDS_DELETE": "Excluiu uma Manutenção",
+    "MAINTENANCE_ITEMS_INSERT": "Criou um Item de Manutenção",
+    "MAINTENANCE_ITEMS_UPDATE": "Editou um Item de Manutenção",
+    "MAINTENANCE_ITEMS_DELETE": "Excluiu um Item de Manutenção",
+  };
+  return map[action] || action;
+}
+
 function AdminLogsPage() {
   const { data: logs, isLoading } = useQuery({
     queryKey: ["admin-activity-logs"],
@@ -80,7 +101,7 @@ function AdminLogsPage() {
                     </TableCell>
                     <TableCell>
                       <span className="px-2 py-1 rounded text-xs font-semibold bg-coffee/10 text-coffee border border-coffee/20">
-                        {log.action_type}
+                        {formatActionType(log.action_type)}
                       </span>
                     </TableCell>
                     <TableCell className="text-xs font-mono text-leather/70">
