@@ -24,6 +24,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [memberType, setMemberType] = useState("piloto");
+  const [activeTab, setActiveTab] = useState("signin");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -57,6 +58,17 @@ function AuthPage() {
     toast.success("Conta criada! Confirme seu e-mail para entrar.");
   }
 
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--coffee)" }}>
       <div className="w-full max-w-md">
@@ -74,7 +86,7 @@ function AuthPage() {
             <CardDescription>Entre para gerenciar suas motos e manutenções.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="signin">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-2 w-full">
                 <TabsTrigger value="signin">Entrar</TabsTrigger>
                 <TabsTrigger value="signup">Cadastrar</TabsTrigger>
@@ -86,12 +98,34 @@ function AuthPage() {
                     <Input id="email-in" type="email" placeholder="seu@email.com" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
                   </div>
                   <div>
-                    <Label htmlFor="pwd-in" className="text-coffee font-medium">Senha</Label>
-                    <Input id="pwd-in" type="password" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
+                    <div className="flex justify-between items-center mb-1">
+                      <Label htmlFor="pwd-in" className="text-coffee font-medium">Senha</Label>
+                      <button type="button" onClick={() => setActiveTab("recovery")} className="text-xs text-copper hover:underline">
+                        Esqueci a senha
+                      </button>
+                    </div>
+                    <Input id="pwd-in" type="password" placeholder="••••••••" required value={password} onChange={(e) => setPassword(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50" />
                   </div>
                   <Button type="submit" disabled={loading} className="w-full btn-copper mt-6">
                     {loading ? "Entrando..." : "Entrar"}
                   </Button>
+                </form>
+              </TabsContent>
+              <TabsContent value="recovery">
+                <form onSubmit={handleResetPassword} className="space-y-4 mt-4">
+                  <div>
+                    <Label htmlFor="email-rec" className="text-coffee font-medium">E-mail para recuperação</Label>
+                    <Input id="email-rec" type="email" placeholder="seu@email.com" required value={email} onChange={(e) => setEmail(e.target.value)} className="bg-white text-coffee border-leather/30 placeholder:text-leather/50 mt-1" />
+                    <p className="text-xs text-leather/70 mt-2">Você receberá um link para redefinir sua senha.</p>
+                  </div>
+                  <Button type="submit" disabled={loading} className="w-full btn-copper mt-6">
+                    {loading ? "Enviando..." : "Enviar link de recuperação"}
+                  </Button>
+                  <div className="text-center mt-4">
+                    <button type="button" onClick={() => setActiveTab("signin")} className="text-xs text-leather hover:text-copper underline-offset-2 hover:underline">
+                      ← Voltar para o login
+                    </button>
+                  </div>
                 </form>
               </TabsContent>
               <TabsContent value="signup">
