@@ -35,6 +35,7 @@ function AdminRotas() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<RouteData>>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -202,19 +203,43 @@ function AdminRotas() {
                       type="button"
                       variant="outline" 
                       size="sm" 
-                      onClick={() => setEditing(p => ({ ...p, cover_url: `https://image.pollinations.ai/prompt/${encodeURIComponent(p.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}` }))}
+                      disabled={isGenerating}
+                      onClick={() => {
+                        setIsGenerating(true);
+                        toast.info("Gerando nova imagem... isso pode levar uns 5 segundos.", { id: "generating" });
+                        const newUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}&cb=${Date.now()}`;
+                        
+                        // Pre-load the image so the UI updates only when it's ready
+                        const img = new Image();
+                        img.onload = () => {
+                          setEditing(p => ({ ...p, cover_url: newUrl }));
+                          setIsGenerating(false);
+                          toast.success("Nova imagem gerada com sucesso!", { id: "generating" });
+                        };
+                        img.onerror = () => {
+                          setIsGenerating(false);
+                          toast.error("Erro ao gerar imagem, tente novamente.", { id: "generating" });
+                        };
+                        img.src = newUrl;
+                      }}
                       className="h-7 text-xs border-copper text-copper hover:bg-copper hover:text-white"
                     >
-                      Gerar Nova Imagem com IA
+                      {isGenerating ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Gerando...</> : "Gerar Nova Imagem com IA"}
                     </Button>
                   </div>
                   <div className="relative w-full h-40 bg-coffee/10 rounded-md overflow-hidden shadow-inner mb-3">
-                    <img 
-                      src={editing.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
-                      alt="Preview IA" 
-                      className="w-full h-full object-cover opacity-80" 
-                      loading="lazy"
-                    />
+                    {isGenerating ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                        <Loader2 className="h-6 w-6 animate-spin text-copper" />
+                      </div>
+                    ) : (
+                      <img 
+                        src={editing.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
+                        alt="Preview IA" 
+                        className="w-full h-full object-cover opacity-80" 
+                        loading="lazy"
+                      />
+                    )}
                   </div>
                   <Input 
                     placeholder="URL da imagem (se quiser usar uma foto própria)" 
