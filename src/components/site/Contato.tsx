@@ -31,7 +31,7 @@ export function Contato({ content }: { content?: Record<string, string> }) {
       });
 
       if (response.ok) {
-        toast.success("Mensagem enviada! Verifique seu e-mail caso seja o primeiro envio para ativar o recebimento. 🤝", { duration: 6000 });
+        toast.success("Mensagem enviada! A turma vai responder em breve. 🤝", { duration: 5000 });
         (e.target as HTMLFormElement).reset();
       } else {
         throw new Error("Erro no envio");
