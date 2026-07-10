@@ -128,7 +128,7 @@ function RotasPage() {
       <Card key={route.id} className="overflow-hidden border-leather/20 hover:border-copper hover:shadow-lg transition-all h-full flex flex-col bg-cream group">
         <div className="relative h-48 sm:h-56 w-full bg-coffee">
           <img 
-            src={route.route_type === 'viagem' ? "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"}
+            src={`https://image.pollinations.ai/prompt/${encodeURIComponent(route.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`}
             alt="Route cover"
             className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500"
           />

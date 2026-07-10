@@ -192,6 +192,23 @@ function AdminRotas() {
                   <Input value={editing.destination ?? ""} onChange={(e) => setEditing((p) => ({ ...p, destination: e.target.value }))} placeholder="Ex: Monte Verde - MG" />
                 </div>
               </div>
+
+              {editing.destination && editing.destination.trim() !== "" && (
+                <div className="p-4 border border-leather/20 rounded-lg bg-black/5">
+                  <Label className="mb-2 block text-coffee/80">Preview da Capa (Gerada automaticamente por IA)</Label>
+                  <div className="relative w-full h-32 bg-coffee/10 rounded-md overflow-hidden shadow-inner">
+                    <img 
+                      src={`https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=800&height=400&nologo=true`} 
+                      alt="Preview IA" 
+                      className="w-full h-full object-cover opacity-80" 
+                      loading="lazy"
+                    />
+                  </div>
+                  <p className="text-[10px] text-leather mt-2 uppercase tracking-wide">
+                    A imagem muda de acordo com o destino e será visível para todos os membros.
+                  </p>
+                </div>
+              )}
               
               <div className="grid sm:grid-cols-3 gap-4 border border-leather/20 bg-black/5 p-4 rounded-lg">
                 <div>

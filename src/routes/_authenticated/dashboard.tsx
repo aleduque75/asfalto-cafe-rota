@@ -240,7 +240,7 @@ function DashboardPage() {
           <Card className="border-none shadow-xl overflow-hidden relative mb-10 group bg-coffee">
             <div className="absolute inset-0 z-0">
               <img 
-                src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" 
+                src={`https://image.pollinations.ai/prompt/${encodeURIComponent(nextRoute.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
                 alt="Route cover" 
                 className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-500"
               />
