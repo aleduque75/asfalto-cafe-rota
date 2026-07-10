@@ -11,9 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil } from "lucide-react";
+
+import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -218,16 +217,13 @@ function MotoDetail() {
         </Card>
       </div>
 
-      <Tabs defaultValue="items">
-        <TabsList>
-          <TabsTrigger value="items">Itens de manutenção</TabsTrigger>
-          <TabsTrigger value="history">Histórico</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="items" className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 gap-4">
-            <p className="text-sm text-leather">Cadastre cada item e seu intervalo de troca por KM e/ou por tempo.</p>
-            <div className="flex flex-wrap gap-2">
+      <section className="mt-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <div>
+            <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Lembretes de Manutenção</h2>
+            <p className="text-sm text-leather mt-1">Cadastre cada item e seu intervalo de troca por KM e/ou por tempo.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
               <Dialog open={recordOpen} onOpenChange={setRecordOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
@@ -333,45 +329,60 @@ function MotoDetail() {
               })}
             </div>
           )}
-        </TabsContent>
+      </section>
 
-        <TabsContent value="history">
-          {records.length === 0 ? (
-            <Card className="border-dashed border-leather/40 bg-cream mt-4">
-              <CardContent className="py-12 text-center text-leather">
-                Nenhum registro de manutenção ainda.
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="border-leather/30 mt-4 bg-cream text-coffee">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Item</TableHead>
-                    <TableHead>KM</TableHead>
-                    <TableHead>Oficina</TableHead>
-                    <TableHead className="text-right">Custo</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {records.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell>{new Date(r.service_date).toLocaleDateString("pt-BR")}</TableCell>
-                      <TableCell className="font-medium">{r.item_name}</TableCell>
-                      <TableCell>{r.km_at_service?.toLocaleString("pt-BR") ?? "—"}</TableCell>
-                      <TableCell>{r.workshop ?? "—"}</TableCell>
-                      <TableCell className="text-right">
-                        {r.cost != null ? `R$ ${Number(r.cost).toFixed(2).replace(".", ",")}` : "—"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
+      <section className="mt-12">
+        <h2 className="font-display text-2xl text-coffee mb-6" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
+        
+        {records.length === 0 ? (
+          <Card className="border-dashed border-leather/40 bg-cream">
+            <CardContent className="py-12 text-center text-leather">
+              Nenhum registro de manutenção ainda.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {records.map((r) => (
+              <Card key={r.id} className="border-leather/30 bg-cream hover:border-copper transition-colors">
+                <CardContent className="p-5">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-display text-lg text-coffee" style={{ fontFamily: "var(--font-display)" }}>{r.item_name}</h3>
+                      <p className="text-sm text-leather flex items-center gap-1.5 mt-1">
+                        <Calendar className="w-4 h-4 text-copper" /> {new Date(r.service_date).toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                    {r.cost != null && (
+                      <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5 font-medium">
+                        R$ {Number(r.cost).toFixed(2).replace(".", ",")}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm mt-4 pt-4 border-t border-leather/15">
+                    <div>
+                      <p className="text-xs text-leather mb-1 uppercase tracking-wider">Quilometragem</p>
+                      <p className="font-medium text-coffee flex items-center gap-1.5">
+                        <Gauge className="w-4 h-4 text-copper" /> {r.km_at_service?.toLocaleString("pt-BR") ?? "—"} km
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-leather mb-1 uppercase tracking-wider">Oficina</p>
+                      <p className="font-medium text-coffee flex items-center gap-1.5">
+                        <Wrench className="w-4 h-4 text-copper" /> {r.workshop || "—"}
+                      </p>
+                    </div>
+                  </div>
+                  {r.notes && (
+                    <p className="text-xs text-coffee/80 mt-3 pt-3 border-t border-leather/10 italic">
+                      {r.notes}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

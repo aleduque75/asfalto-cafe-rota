@@ -104,14 +104,14 @@ function DashboardPage() {
       
       const { data: p } = await supabase.from("profiles").select("full_name, partner_id").eq("id", u.user.id).maybeSingle();
       const partnerId = p?.partner_id || null;
-      const userIds = [u.user.id, partnerId].filter(Boolean);
+      const userIds = [u.user.id, partnerId].filter((id): id is string => Boolean(id));
 
       const { data: m } = await supabase.from("motorcycles").select("*").in("user_id", userIds).order("created_at", { ascending: false });
       const motoIds = (m || []).map(moto => moto.id);
       
       const [{ data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }, { data: plansData }] = await Promise.all([
         motoIds.length > 0 ? supabase.from("maintenance_items").select("*").in("motorcycle_id", motoIds) : Promise.resolve({ data: [] }),
-        motoIds.length > 0 ? supabase.from("maintenance_records").select("*").in("motorcycle_id", motoIds).order("service_date", { ascending: false }).limit(8) : Promise.resolve({ data: [] }),
+        motoIds.length > 0 ? supabase.from("maintenance_records").select("*").in("motorcycle_id", motoIds).order("service_date", { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
         supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
         supabase.rpc("get_todays_birthdays"),
@@ -237,54 +237,74 @@ function DashboardPage() {
 
 
         {nextRoute ? (
-          <Card className="bg-cream border-copper/30 shadow-md overflow-hidden relative mb-10">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <RouteIcon className="w-32 h-32 text-copper" />
+          <Card className="border-none shadow-xl overflow-hidden relative mb-10 group bg-coffee">
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" 
+                alt="Route cover" 
+                className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-coffee via-coffee/80 to-transparent md:bg-gradient-to-r md:from-coffee md:via-coffee/90 md:to-transparent" />
             </div>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            
+            <CardContent className="p-6 md:p-8 relative z-10">
+              <div className="flex flex-col md:flex-row gap-6 md:gap-10">
                 <div className="flex-1">
-                  <Badge className="bg-copper text-cream border-none mb-3">Próximo Passeio</Badge>
-                  <h2 className="font-display text-2xl text-coffee mb-2" style={{ fontFamily: "var(--font-display)" }}>
+                  <Badge className="bg-copper text-cream border-none mb-4">Próximo Passeio</Badge>
+                  <h2 className="font-display text-3xl md:text-4xl text-cream mb-3" style={{ fontFamily: "var(--font-display)" }}>
                     {nextRoute.title}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-leather">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-cream/80 mb-6">
                     <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-copper" /> {new Date(nextRoute.start_date).toLocaleDateString("pt-BR")}</span>
                     <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-copper" /> {nextRoute.destination}</span>
-                    <span className="flex items-center gap-1.5 font-medium text-copper">
-                      <Clock className="w-4 h-4" /> 
-                      {(() => {
-                        const days = Math.ceil((new Date(nextRoute.start_date).getTime() - Date.now()) / 86400000);
-                        return days > 0 ? `Faltam ${days} dias` : days === 0 ? "É Hoje!" : "Atrasado";
-                      })()}
-                    </span>
                   </div>
+                  
                   {activePlan && activePlan.routeId === nextRoute.id && (
-                    <div className="mt-4 pt-4 border-t border-leather/15">
-                      <p className="text-xs uppercase tracking-wider text-leather mb-1">Custo Planejado</p>
-                      <p className="text-2xl font-bold text-coffee">
+                    <div className="mb-6 inline-block bg-cream/10 backdrop-blur-sm border border-cream/20 rounded-lg p-3">
+                      <p className="text-xs uppercase tracking-wider text-cream/70 mb-1">Custo Planejado</p>
+                      <p className="text-xl font-bold text-cream">
                         {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                       </p>
                     </div>
                   )}
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 min-w-[200px]">
-                  <Link to="/rotas" className="flex-1">
-                    <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper/10">Ver Detalhes</Button>
-                  </Link>
-                  {nextRoute.route_type === 'viagem' && (
-                    <Link to="/rotas/$id/financeiro" params={{ id: nextRoute.id }} className="flex-1">
-                      <Button variant="outline" className="w-full border-copper text-copper hover:bg-copper hover:text-white flex gap-2">
-                        <Calculator className="h-4 w-4" /> Planejamento
-                      </Button>
+
+                  <div className="flex flex-col sm:flex-row gap-3 max-w-xl">
+                    <Link to="/rotas" className="flex-1">
+                      <Button variant="outline" className="w-full border-copper text-cream bg-copper/20 hover:bg-copper hover:text-white backdrop-blur-sm">Ver Detalhes</Button>
                     </Link>
-                  )}
-                  <Button className="flex-1 btn-copper flex gap-2" onClick={() => {
-                    const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
-                    window.open(wazeLink, "_blank");
-                  }}>
-                    <Navigation className="h-4 w-4" /> Waze
-                  </Button>
+                    {nextRoute.route_type === 'viagem' && (
+                      <Link to="/rotas/$id/financeiro" params={{ id: nextRoute.id }} className="flex-1">
+                        <Button variant="outline" className="w-full border-copper text-cream bg-copper/20 hover:bg-copper hover:text-white backdrop-blur-sm flex gap-2">
+                          <Calculator className="h-4 w-4" /> Planejamento
+                        </Button>
+                      </Link>
+                    )}
+                    <Button className="flex-1 btn-copper flex gap-2 shadow-lg" onClick={() => {
+                      const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
+                      window.open(wazeLink, "_blank");
+                    }}>
+                      <Navigation className="h-4 w-4" /> Waze
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="md:w-48 shrink-0 flex flex-col justify-center items-center bg-cream/10 backdrop-blur-md border border-cream/20 rounded-xl p-6 text-center shadow-lg">
+                  <Clock className="w-8 h-8 text-copper mb-3" />
+                  {(() => {
+                    const days = Math.ceil((new Date(nextRoute.start_date).getTime() - Date.now()) / 86400000);
+                    if (days > 0) {
+                      return (
+                        <>
+                          <span className="font-display text-5xl text-cream leading-none mb-1" style={{ fontFamily: "var(--font-display)" }}>{days}</span>
+                          <span className="text-sm font-medium text-copper uppercase tracking-widest">Dias</span>
+                        </>
+                      );
+                    } else if (days === 0) {
+                      return <span className="font-display text-3xl text-copper" style={{ fontFamily: "var(--font-display)" }}>É Hoje!</span>;
+                    } else {
+                      return <span className="font-display text-2xl text-cream/60" style={{ fontFamily: "var(--font-display)" }}>Atrasado</span>;
+                    }
+                  })()}
                 </div>
               </div>
             </CardContent>
@@ -365,8 +385,11 @@ function DashboardPage() {
         <Card className="bg-cream border-leather/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Alertas de manutenção</h2>
-              <AlertTriangle className="h-5 w-5 text-copper" />
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-copper" />
+                <h2 className="font-display text-xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Alertas de manutenção</h2>
+              </div>
+              <Link to="/garagem"><Button variant="link" className="text-copper p-0 h-auto text-sm">Gerenciar</Button></Link>
             </div>
             {alerts.length === 0 ? (
               <p className="text-sm text-leather flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-700" /> Tudo em dia. Boa pilotagem!</p>
@@ -401,8 +424,11 @@ function DashboardPage() {
         <Card className="bg-cream border-leather/30">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display text-xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Últimos lançamentos</h2>
-              <Wrench className="h-5 w-5 text-copper" />
+              <div className="flex items-center gap-2">
+                <Wrench className="h-5 w-5 text-copper" />
+                <h2 className="font-display text-xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Últimos lançamentos</h2>
+              </div>
+              <Link to="/garagem"><Button variant="link" className="text-copper p-0 h-auto text-sm">Veja mais</Button></Link>
             </div>
             {records.length === 0 ? (
               <p className="text-sm text-leather">Nenhuma manutenção registrada ainda.</p>
