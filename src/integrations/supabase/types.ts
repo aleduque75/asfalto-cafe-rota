@@ -374,6 +374,7 @@ export type Database = {
           visited_places: string | null
           waze_url: string | null
           has_financial_plan: boolean | null
+          cover_url: string | null
         }
         Insert: {
           created_at?: string | null
@@ -393,6 +394,7 @@ export type Database = {
           visited_places?: string | null
           waze_url?: string | null
           has_financial_plan?: boolean | null
+          cover_url?: string | null
         }
         Update: {
           created_at?: string | null
@@ -412,6 +414,7 @@ export type Database = {
           visited_places?: string | null
           waze_url?: string | null
           has_financial_plan?: boolean | null
+          cover_url?: string | null
         }
         Relationships: []
       }

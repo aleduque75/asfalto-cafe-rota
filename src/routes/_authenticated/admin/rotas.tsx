@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/admin/rotas")({
 const EMPTY: Partial<RouteData> = {
   title: "", destination: "", start_date: "", meeting_point: "", meeting_time: "",
   description: "", estimated_distance_km: null, estimated_duration_mins: null,
-  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio", has_financial_plan: false
+  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio", has_financial_plan: false, cover_url: ""
 };
 
 function AdminRotas() {
@@ -121,6 +121,7 @@ function AdminRotas() {
       status: editing.status || "open",
       route_type: editing.route_type || "passeio",
       has_financial_plan: editing.has_financial_plan || false,
+      cover_url: editing.cover_url || null,
     };
 
     const res = editing.id
@@ -195,17 +196,34 @@ function AdminRotas() {
 
               {editing.destination && editing.destination.trim() !== "" && (
                 <div className="p-4 border border-leather/20 rounded-lg bg-black/5">
-                  <Label className="mb-2 block text-coffee/80">Preview da Capa (Gerada automaticamente por IA)</Label>
-                  <div className="relative w-full h-32 bg-coffee/10 rounded-md overflow-hidden shadow-inner">
+                  <div className="flex justify-between items-center mb-2">
+                    <Label className="text-coffee/80">Capa do Passeio</Label>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setEditing(p => ({ ...p, cover_url: `https://image.pollinations.ai/prompt/${encodeURIComponent(p.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}` }))}
+                      className="h-7 text-xs border-copper text-copper hover:bg-copper hover:text-white"
+                    >
+                      Gerar Nova Imagem com IA
+                    </Button>
+                  </div>
+                  <div className="relative w-full h-40 bg-coffee/10 rounded-md overflow-hidden shadow-inner mb-3">
                     <img 
-                      src={`https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=800&height=400&nologo=true`} 
+                      src={editing.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
                       alt="Preview IA" 
                       className="w-full h-full object-cover opacity-80" 
                       loading="lazy"
                     />
                   </div>
+                  <Input 
+                    placeholder="URL da imagem (se quiser usar uma foto própria)" 
+                    value={editing.cover_url ?? ""} 
+                    onChange={(e) => setEditing((p) => ({ ...p, cover_url: e.target.value }))}
+                    className="text-xs"
+                  />
                   <p className="text-[10px] text-leather mt-2 uppercase tracking-wide">
-                    A imagem muda de acordo com o destino e será visível para todos os membros.
+                    Clique em Gerar para criar imagens diferentes com a IA ou cole a URL de uma foto real.
                   </p>
                 </div>
               )}

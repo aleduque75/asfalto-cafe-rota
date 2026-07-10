@@ -29,7 +29,7 @@ type Record_ = {
 
 type RouteData = {
   id: string; title: string; destination: string; start_date: string;
-  waze_url: string | null; route_type: string;
+  waze_url: string | null; route_type: string; cover_url?: string | null;
 };
 
 type Alert = {
@@ -112,7 +112,7 @@ function DashboardPage() {
       const [{ data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }, { data: plansData }] = await Promise.all([
         motoIds.length > 0 ? supabase.from("maintenance_items").select("*").in("motorcycle_id", motoIds) : Promise.resolve({ data: [] }),
         motoIds.length > 0 ? supabase.from("maintenance_records").select("*").in("motorcycle_id", motoIds).order("service_date", { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
-        supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
+        supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type, cover_url").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
         supabase.rpc("get_todays_birthdays"),
         supabase.from("trip_financial_plans").select(`id, costs, profile_id, route:routes(id, title, status)`)
@@ -240,7 +240,7 @@ function DashboardPage() {
           <Card className="border-none shadow-xl overflow-hidden relative mb-10 group bg-coffee">
             <div className="absolute inset-0 z-0">
               <img 
-                src={`https://image.pollinations.ai/prompt/${encodeURIComponent(nextRoute.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
+                src={nextRoute.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(nextRoute.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
                 alt="Route cover" 
                 className="w-full h-full object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-500"
               />

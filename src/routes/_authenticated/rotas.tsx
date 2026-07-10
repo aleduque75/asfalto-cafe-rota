@@ -35,6 +35,7 @@ type RouteData = {
   estimated_duration_mins: number | null;
   visited_places: string | null;
   has_financial_plan?: boolean | null;
+  cover_url?: string | null;
 };
 
 function RotasPage() {
@@ -128,7 +129,7 @@ function RotasPage() {
       <Card key={route.id} className="overflow-hidden border-leather/20 hover:border-copper hover:shadow-lg transition-all h-full flex flex-col bg-cream group">
         <div className="relative h-48 sm:h-56 w-full bg-coffee">
           <img 
-            src={`https://image.pollinations.ai/prompt/${encodeURIComponent(route.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`}
+            src={route.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(route.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`}
             alt="Route cover"
             className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500"
           />
