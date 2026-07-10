@@ -125,55 +125,64 @@ function RotasPage() {
     const date = new Date(route.start_date);
     
     return (
-      <Card key={route.id} className="overflow-hidden border-leather/30 hover:border-copper transition h-full flex flex-col bg-cream">
-        <CardHeader className={`p-5 pb-8 relative ${route.route_type === 'viagem' ? 'bg-gradient-to-br from-copper/80 to-coffee' : 'bg-gradient-to-br from-coffee to-leather'}`}>
-          <Badge variant={isPastMode ? "secondary" : "default"} className="absolute top-4 right-4 bg-copper text-cream border-none z-10">
+      <Card key={route.id} className="overflow-hidden border-leather/20 hover:border-copper hover:shadow-lg transition-all h-full flex flex-col bg-cream group">
+        <div className="relative h-48 sm:h-56 w-full bg-coffee">
+          <img 
+            src={route.route_type === 'viagem' ? "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop" : "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop"}
+            alt="Route cover"
+            className="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-coffee via-coffee/40 to-transparent opacity-90" />
+          
+          <Badge variant={isPastMode ? "secondary" : "default"} className="absolute top-4 right-4 bg-copper text-cream border-none z-10 shadow-sm">
             {isPastMode ? "Finalizado" : (route.status === 'planning' ? "Em Planejamento" : "Próximo Passeio")}
           </Badge>
-          <div className="flex flex-col">
+          
+          <div className="absolute bottom-4 left-5 right-5 z-10">
             {route.route_type === 'viagem' && (
-              <span className="text-[10px] uppercase tracking-wider text-cream/90 font-bold mb-1">Viagem Completa</span>
+              <span className="inline-block px-2 py-0.5 rounded text-[10px] uppercase tracking-wider text-cream bg-copper/90 font-bold mb-2">Viagem Completa</span>
             )}
-            <CardTitle className="text-cream text-2xl pr-24 relative z-0" style={{ fontFamily: "var(--font-display)" }}>
+            <h3 className="font-display text-2xl text-cream leading-tight drop-shadow-md" style={{ fontFamily: "var(--font-display)" }}>
               {route.title}
-            </CardTitle>
+            </h3>
+            <p className="text-cream/90 text-sm flex items-center gap-1.5 mt-1.5 font-medium">
+              <Flag className="h-4 w-4 text-copper" /> Destino: {route.destination}
+            </p>
           </div>
-          <p className="text-cream/80 text-sm flex items-center gap-1.5 mt-2">
-            <Flag className="h-4 w-4" /> Destino: {route.destination}
-          </p>
-        </CardHeader>
+        </div>
         
-        <CardContent className="p-5 flex-1 flex flex-col pt-0">
-          <div className="bg-cream shadow-sm border border-leather/20 rounded-lg p-4 -mt-6 relative z-10 space-y-3 mb-4">
-            <div className="flex items-center gap-3 text-sm text-coffee">
-              <Calendar className="h-4 w-4 text-copper shrink-0" />
-              <span>Data: {date.toLocaleDateString("pt-BR")}</span>
+        <CardContent className="p-5 flex-1 flex flex-col bg-cream">
+          <div className="grid grid-cols-2 gap-y-4 gap-x-3 text-sm text-coffee mb-5 mt-2">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-wider text-leather mb-1 flex items-center gap-1"><Calendar className="h-3 w-3" /> Data</span>
+              <span className="font-medium text-[15px]">{date.toLocaleDateString("pt-BR")}</span>
             </div>
-            <div className="flex items-center gap-3 text-sm text-coffee">
-              <Clock className="h-4 w-4 text-copper shrink-0" />
-              <span>Saída: {route.meeting_time} | Ponto: {route.meeting_point}</span>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-wider text-leather mb-1 flex items-center gap-1"><Clock className="h-3 w-3" /> Saída</span>
+              <span className="font-medium text-[15px]">{route.meeting_time} <span className="text-leather font-normal text-xs">({route.meeting_point})</span></span>
             </div>
             {route.estimated_distance_km && (
-              <div className="flex items-center gap-3 text-sm text-coffee">
-                <Navigation className="h-4 w-4 text-copper shrink-0" />
-                <span>Distância: {route.estimated_distance_km} km (aprox.)</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-wider text-leather mb-1 flex items-center gap-1"><Navigation className="h-3 w-3" /> Distância</span>
+                <span className="font-medium text-[15px]">{route.estimated_distance_km} km</span>
               </div>
             )}
             {route.estimated_duration_mins && (
-              <div className="flex items-center gap-3 text-sm text-coffee">
-                <RouteIcon className="h-4 w-4 text-copper shrink-0" />
-                <span>Tempo estimado: {formatDuration(route.estimated_duration_mins)}</span>
-              </div>
-            )}
-            {route.visited_places && (
-              <div className="flex items-start gap-3 text-sm text-coffee mt-2 border-t border-leather/10 pt-2">
-                <MapPin className="h-4 w-4 text-copper shrink-0 mt-0.5" />
-                <span>Locais: {route.visited_places}</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-wider text-leather mb-1 flex items-center gap-1"><RouteIcon className="h-3 w-3" /> Duração</span>
+                <span className="font-medium text-[15px]">{formatDuration(route.estimated_duration_mins)}</span>
               </div>
             )}
           </div>
 
-          <p className="text-sm text-leather mb-6 flex-1">
+          {route.visited_places && (
+            <div className="mb-4 bg-leather/5 border border-leather/10 rounded-md p-3 text-sm">
+              <span className="text-[10px] uppercase tracking-wider text-leather mb-1 block flex items-center gap-1"><MapPin className="h-3 w-3" /> Locais e Cidades</span>
+              <span className="text-coffee font-medium">{route.visited_places}</span>
+            </div>
+          )}
+
+          <p className="text-sm text-leather mb-6 flex-1 border-t border-leather/10 pt-4">
             {route.description}
           </p>
 
@@ -181,7 +190,7 @@ function RotasPage() {
             {!isPastMode && (
               <Button onClick={() => openWaze(route)} className="flex-1 w-full btn-copper flex gap-2">
                 <Navigation className="h-4 w-4" />
-                Iniciar Passeio (Waze)
+                Ir com Waze
               </Button>
             )}
             
