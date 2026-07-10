@@ -5,14 +5,42 @@ import { toast } from "sonner";
 export function Contato({ content }: { content?: Record<string, string> }) {
   const [sending, setSending] = useState(false);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSending(true);
-    setTimeout(() => {
+    
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/cafemotoasfalto@gmail.com", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          Nome: data.nome,
+          "E-mail": data.email,
+          WhatsApp: data.whatsapp,
+          Cidade: data.cidade,
+          Instagram: data.instagram || "Não informado",
+          Mensagem: data.mensagem,
+          _subject: `Novo contato pelo site - ${data.nome}`
+        })
+      });
+
+      if (response.ok) {
+        toast.success("Mensagem enviada! Verifique seu e-mail caso seja o primeiro envio para ativar o recebimento. 🤝", { duration: 6000 });
+        (e.target as HTMLFormElement).reset();
+      } else {
+        throw new Error("Erro no envio");
+      }
+    } catch (error) {
+      toast.error("Ocorreu um erro ao enviar a mensagem. Tente contato pelo WhatsApp.");
+    } finally {
       setSending(false);
-      toast.success("Mensagem enviada! A turma vai responder em breve. 🤝");
-      (e.target as HTMLFormElement).reset();
-    }, 700);
+    }
   };
 
   const inputCls =
