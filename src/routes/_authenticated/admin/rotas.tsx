@@ -14,8 +14,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin, X, ArrowLeft } from "lucide-react";
+import { Pencil, Plus, Trash2, Loader2, Navigation, MapPin, X, ArrowLeft, Upload } from "lucide-react";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
+import { uploadMedia } from "@/lib/upload";
 
 type RouteData = Tables<"routes">;
 
@@ -36,6 +37,7 @@ function AdminRotas() {
   const [editing, setEditing] = useState<Partial<RouteData>>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -197,52 +199,89 @@ function AdminRotas() {
 
               {editing.destination && editing.destination.trim() !== "" && (
                 <div className="p-4 border border-leather/20 rounded-lg bg-black/5">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
                     <Label className="text-coffee/80">Capa do Passeio</Label>
-                    <Button 
-                      type="button"
-                      variant="outline" 
-                      size="sm" 
-                      disabled={isGenerating}
-                      onClick={() => {
-                        setIsGenerating(true);
-                        toast.info("Gerando nova imagem... isso pode levar uns 5 segundos.", { id: "generating" });
-                        const newUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}&cb=${Date.now()}`;
-                        
-                        // Pre-load the image so the UI updates only when it's ready
-                        const img = new Image();
-                        img.onload = () => {
-                          setEditing(p => ({ ...p, cover_url: newUrl }));
-                          setIsGenerating(false);
-                          toast.success("Nova imagem gerada com sucesso!", { id: "generating" });
-                        };
-                        img.onerror = () => {
-                          setIsGenerating(false);
-                          toast.error("Erro ao gerar imagem, tente novamente.", { id: "generating" });
-                        };
-                        img.src = newUrl;
-                      }}
-                      className="h-7 text-xs border-copper text-copper hover:bg-copper hover:text-white"
-                    >
-                      {isGenerating ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Gerando...</> : "Gerar Nova Imagem com IA"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <div>
+                        <input 
+                          type="file" 
+                          id="cover_upload" 
+                          className="hidden" 
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            try {
+                              setIsUploading(true);
+                              toast.info("Enviando imagem...", { id: "uploading" });
+                              const url = await uploadMedia(file, "rotas");
+                              setEditing(p => ({ ...p, cover_url: url }));
+                              toast.success("Imagem enviada com sucesso!", { id: "uploading" });
+                            } catch (err: any) {
+                              toast.error(err.message || "Erro ao enviar imagem", { id: "uploading" });
+                            } finally {
+                              setIsUploading(false);
+                              // Reset the input
+                              e.target.value = "";
+                            }
+                          }}
+                        />
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          size="sm" 
+                          disabled={isUploading || isGenerating}
+                          onClick={() => document.getElementById("cover_upload")?.click()}
+                          className="h-7 text-xs border-coffee text-coffee hover:bg-coffee hover:text-white"
+                        >
+                          {isUploading ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Enviando...</> : <><Upload className="h-3 w-3 mr-1" /> Fazer Upload</>}
+                        </Button>
+                      </div>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        size="sm" 
+                        disabled={isGenerating || isUploading}
+                        onClick={() => {
+                          setIsGenerating(true);
+                          toast.info("Gerando nova imagem... isso pode levar uns 5 segundos.", { id: "generating" });
+                          const newUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true&seed=${Math.floor(Math.random() * 100000)}&cb=${Date.now()}`;
+                          
+                          // Pre-load the image so the UI updates only when it's ready
+                          const img = new Image();
+                          img.onload = () => {
+                            setEditing(p => ({ ...p, cover_url: newUrl }));
+                            setIsGenerating(false);
+                            toast.success("Nova imagem gerada com sucesso!", { id: "generating" });
+                          };
+                          img.onerror = () => {
+                            setIsGenerating(false);
+                            toast.error("Erro ao gerar imagem, tente novamente.", { id: "generating" });
+                          };
+                          img.src = newUrl;
+                        }}
+                        className="h-7 text-xs border-copper text-copper hover:bg-copper hover:text-white"
+                      >
+                        {isGenerating ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" /> Gerando...</> : "Gerar com IA"}
+                      </Button>
+                    </div>
                   </div>
                   <div className="relative w-full h-40 bg-coffee/10 rounded-md overflow-hidden shadow-inner mb-3">
-                    {isGenerating ? (
+                    {isGenerating || isUploading ? (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/10">
                         <Loader2 className="h-6 w-6 animate-spin text-copper" />
                       </div>
                     ) : (
                       <img 
                         src={editing.cover_url || `https://image.pollinations.ai/prompt/${encodeURIComponent(editing.destination + ' beautiful landscape motorcycle road trip cinematic realistic')}?width=1200&height=800&nologo=true`} 
-                        alt="Preview IA" 
+                        alt="Preview Capa" 
                         className="w-full h-full object-cover opacity-80" 
                         loading="lazy"
                       />
                     )}
                   </div>
                   <Input 
-                    placeholder="URL da imagem (se quiser usar uma foto própria)" 
+                    placeholder="URL da imagem (se quiser colar o link de um site)" 
                     value={editing.cover_url ?? ""} 
                     onChange={(e) => setEditing((p) => ({ ...p, cover_url: e.target.value }))}
                     className="text-xs"
