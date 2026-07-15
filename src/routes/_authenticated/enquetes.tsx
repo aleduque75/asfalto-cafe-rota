@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
+import { Checkbox } from "../../components/ui/checkbox";
 import { Label } from "../../components/ui/label";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import { toast } from "sonner";
@@ -22,7 +23,8 @@ export const Route = createFileRoute("/_authenticated/enquetes")({
 
 function EnquetesPage() {
   const queryClient = useQueryClient();
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string[]>>({});
+  const [editingPolls, setEditingPolls] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [enlargedImage, setEnlargedImage] = useState<string | null>(null);
 
@@ -50,42 +52,47 @@ function EnquetesPage() {
   });
 
   const voteMutation = useMutation({
-    mutationFn: async ({ pollId, optionId }: { pollId: string; optionId: string }) => {
+    mutationFn: async ({ pollId, optionIds }: { pollId: string; optionIds: string[] }) => {
       setIsSubmitting(true);
       if (!userProfile?.id) throw new Error("Usuário não autenticado.");
       try {
-        const { error } = await (supabase as any)
+        const { error: delError } = await (supabase as any)
           .from("poll_votes")
-          .insert({
+          .delete()
+          .eq("poll_id", pollId)
+          .eq("profile_id", userProfile.id);
+        if (delError) throw delError;
+
+        const inserts = optionIds.map(optId => ({
             poll_id: pollId,
-            option_id: optionId,
+            option_id: optId,
             profile_id: userProfile.id,
-          });
-        if (error) throw error;
+        }));
+        const { error: insError } = await (supabase as any)
+          .from("poll_votes")
+          .insert(inserts);
+        if (insError) throw insError;
       } finally {
         setIsSubmitting(false);
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       toast.success("Seu voto foi registrado com sucesso!");
+      setEditingPolls(prev => ({ ...prev, [variables.pollId]: false }));
       queryClient.invalidateQueries({ queryKey: ["polls"] });
     },
     onError: (error: any) => {
-      if (error.code === "23505") { // Unique violation
-        toast.error("Você já votou nesta enquete.");
-      } else {
-        toast.error("Erro ao registrar voto.");
-      }
+      toast.error("Erro ao registrar voto.");
     },
   });
 
   const handleVote = (pollId: string) => {
-    const optionId = selectedOptions[pollId];
-    if (!optionId) {
-      toast.error("Selecione uma opção antes de votar!");
+    const optionIds = selectedOptions[pollId];
+    if (!optionIds || optionIds.length === 0) {
+      toast.error("Selecione pelo menos uma opção antes de votar!");
       return;
     }
-    voteMutation.mutate({ pollId, optionId });
+    voteMutation.mutate({ pollId, optionIds });
   };
 
   if (isLoading) return <div className="p-6 text-foreground">Carregando votações...</div>;
@@ -114,10 +121,10 @@ function EnquetesPage() {
         <div className="grid gap-8">
           {activePolls?.map((poll) => {
             // Verificar se o usuário já votou
-            const userVote = poll.poll_votes?.find(
+            const userVotes = poll.poll_votes?.filter(
               (v: any) => v.profile_id === userProfile?.id
-            );
-            const hasVoted = !!userVote;
+            ) || [];
+            const hasVoted = userVotes.length > 0 && !editingPolls[poll.id];
 
             // Se já votou, calcula os resultados para exibir
             const totalVotes = poll.poll_votes?.length || 1;
@@ -170,7 +177,7 @@ function EnquetesPage() {
                                 (v: any) => v.option_id === opt.id
                               ).length || 0;
                               const percentage = Math.round((votesCount / totalVotes) * 100);
-                              const isSelected = userVote.option_id === opt.id;
+                              const isSelected = userVotes.some((v: any) => v.option_id === opt.id);
 
                               return (
                                 <div key={opt.id} className="space-y-2">
@@ -208,57 +215,132 @@ function EnquetesPage() {
                               );
                             })}
                           </div>
+                          <div className="pt-4 mt-4 flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-coffee border-coffee/20 hover:bg-white"
+                              onClick={() => {
+                                setEditingPolls({ ...editingPolls, [poll.id]: true });
+                                setSelectedOptions({
+                                  ...selectedOptions,
+                                  [poll.id]: userVotes.map((v: any) => v.option_id),
+                                });
+                              }}
+                            >
+                              Mudar Voto
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-6 flex flex-col flex-1">
-                        <RadioGroup
-                          onValueChange={(val) =>
-                            setSelectedOptions({ ...selectedOptions, [poll.id]: val })
-                          }
-                          value={selectedOptions[poll.id]}
-                          className="space-y-3"
-                        >
-                          {poll.poll_options?.map((opt: any) => (
-                            <div
-                              key={opt.id}
-                              className={`flex items-center space-x-3 bg-[#F0EBE1] border border-coffee/10 p-4 rounded-xl transition-all hover:bg-coffee/5 hover:border-coffee/20 cursor-pointer shadow-sm ${
-                                selectedOptions[poll.id] === opt.id ? "border-primary bg-primary/5 shadow-md" : ""
-                              }`}
-                              onClick={() => setSelectedOptions({ ...selectedOptions, [poll.id]: opt.id })}
-                            >
-                              <div className="flex items-center space-x-4 w-full">
-                                <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5 border-coffee/30 text-primary data-[state=checked]:border-primary" />
-                                <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                                  {opt.image_url && (
-                                    <div 
-                                      className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-coffee/10 shadow-sm relative group z-10"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        setEnlargedImage(opt.image_url);
+                        {poll.allow_multiple_answers ? (
+                          <div className="space-y-3">
+                            {poll.poll_options?.map((opt: any) => {
+                              const isChecked = selectedOptions[poll.id]?.includes(opt.id);
+                              return (
+                                <div
+                                  key={opt.id}
+                                  className={`flex items-center space-x-3 bg-[#F0EBE1] border border-coffee/10 p-4 rounded-xl transition-all hover:bg-coffee/5 hover:border-coffee/20 cursor-pointer shadow-sm ${
+                                    isChecked ? "border-primary bg-primary/5 shadow-md" : ""
+                                  }`}
+                                  onClick={() => {
+                                    const current = selectedOptions[poll.id] || [];
+                                    if (isChecked) {
+                                      setSelectedOptions({ ...selectedOptions, [poll.id]: current.filter(id => id !== opt.id) });
+                                    } else {
+                                      setSelectedOptions({ ...selectedOptions, [poll.id]: [...current, opt.id] });
+                                    }
+                                  }}
+                                >
+                                  <div className="flex items-center space-x-4 w-full">
+                                    <Checkbox
+                                      checked={isChecked}
+                                      onCheckedChange={(checked) => {
+                                        const current = selectedOptions[poll.id] || [];
+                                        if (!checked) {
+                                          setSelectedOptions({ ...selectedOptions, [poll.id]: current.filter(id => id !== opt.id) });
+                                        } else {
+                                          setSelectedOptions({ ...selectedOptions, [poll.id]: [...current, opt.id] });
+                                        }
                                       }}
-                                    >
-                                      <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
-                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <ZoomIn className="w-5 h-5 text-white" />
-                                      </div>
+                                      className="border-coffee/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                    />
+                                    <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                      {opt.image_url && (
+                                        <div 
+                                          className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-coffee/10 shadow-sm relative group z-10"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setEnlargedImage(opt.image_url);
+                                          }}
+                                        >
+                                          <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <ZoomIn className="w-5 h-5 text-white" />
+                                          </div>
+                                        </div>
+                                      )}
+                                      <Label className="cursor-pointer flex-1 text-base leading-snug text-coffee/90 font-medium">
+                                        {opt.text}
+                                      </Label>
                                     </div>
-                                  )}
-                                  <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug text-coffee/90 font-medium">
-                                    {opt.text}
-                                  </Label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <RadioGroup
+                            onValueChange={(val) =>
+                              setSelectedOptions({ ...selectedOptions, [poll.id]: [val] })
+                            }
+                            value={selectedOptions[poll.id]?.[0]}
+                            className="space-y-3"
+                          >
+                            {poll.poll_options?.map((opt: any) => (
+                              <div
+                                key={opt.id}
+                                className={`flex items-center space-x-3 bg-[#F0EBE1] border border-coffee/10 p-4 rounded-xl transition-all hover:bg-coffee/5 hover:border-coffee/20 cursor-pointer shadow-sm ${
+                                  selectedOptions[poll.id]?.[0] === opt.id ? "border-primary bg-primary/5 shadow-md" : ""
+                                }`}
+                                onClick={() => setSelectedOptions({ ...selectedOptions, [poll.id]: [opt.id] })}
+                              >
+                                <div className="flex items-center space-x-4 w-full">
+                                  <RadioGroupItem value={opt.id} id={opt.id} className="mt-0.5 border-coffee/30 text-primary data-[state=checked]:border-primary" />
+                                  <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                                    {opt.image_url && (
+                                      <div 
+                                        className="w-16 h-16 rounded-md overflow-hidden shrink-0 bg-muted border border-coffee/10 shadow-sm relative group z-10"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          setEnlargedImage(opt.image_url);
+                                        }}
+                                      >
+                                        <img src={opt.image_url} alt={opt.text} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                          <ZoomIn className="w-5 h-5 text-white" />
+                                        </div>
+                                      </div>
+                                    )}
+                                    <Label htmlFor={opt.id} className="cursor-pointer flex-1 text-base leading-snug text-coffee/90 font-medium">
+                                      {opt.text}
+                                    </Label>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
-                        </RadioGroup>
+                            ))}
+                          </RadioGroup>
+                        )}
                         
                         <div className="pt-4 mt-auto">
                           <Button
                             className="w-full btn-copper font-display uppercase tracking-widest py-6"
                             onClick={() => handleVote(poll.id)}
-                            disabled={!selectedOptions[poll.id] || isSubmitting}
+                            disabled={!selectedOptions[poll.id]?.length || isSubmitting}
                           >
                             {isSubmitting ? "Registrando..." : "Confirmar Voto"}
                           </Button>

@@ -6,6 +6,7 @@ import { supabase } from "../../../integrations/supabase/client";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import { Switch } from "../../../components/ui/switch";
 import {
   Card,
   CardContent,
@@ -35,11 +36,12 @@ function AdminEnquetesPage() {
 
   // Edit Poll State
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editingPoll, setEditingPoll] = useState<{ id: string; title: string; description: string } | null>(null);
+  const [editingPoll, setEditingPoll] = useState<{ id: string; title: string; description: string; allow_multiple_answers: boolean } | null>(null);
 
   // Formulário State
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [allowMultipleAnswers, setAllowMultipleAnswers] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [options, setOptions] = useState<{ text: string; file: File | null }[]>([
     { text: "", file: null },
@@ -96,6 +98,7 @@ function AdminEnquetesPage() {
             description,
             image_url: imageUrl,
             status: "active",
+            allow_multiple_answers: allowMultipleAnswers,
           })
           .select()
           .single();
@@ -133,6 +136,7 @@ function AdminEnquetesPage() {
       toast.success("Enquete criada com sucesso!");
       setTitle("");
       setDescription("");
+      setAllowMultipleAnswers(false);
       setFile(null);
       setOptions([
         { text: "", file: null },
@@ -189,11 +193,11 @@ function AdminEnquetesPage() {
   });
 
   const updatePoll = useMutation({
-    mutationFn: async ({ id, title, description }: { id: string; title: string; description: string }) => {
+    mutationFn: async ({ id, title, description, allow_multiple_answers }: { id: string; title: string; description: string; allow_multiple_answers: boolean }) => {
       if (!title.trim()) throw new Error("O título é obrigatório.");
       const { error } = await (supabase as any)
         .from("polls")
-        .update({ title, description })
+        .update({ title, description, allow_multiple_answers })
         .eq("id", id);
       if (error) throw error;
     },
@@ -279,6 +283,17 @@ function AdminEnquetesPage() {
                 </div>
               </div>
 
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="allow-multiple"
+                  checked={allowMultipleAnswers}
+                  onCheckedChange={setAllowMultipleAnswers}
+                />
+                <Label htmlFor="allow-multiple" className="text-coffee cursor-pointer font-medium">
+                  Permitir múltiplas respostas nesta enquete
+                </Label>
+              </div>
+
               <div className="space-y-4">
                 <Label className="text-coffee">Opções de Voto</Label>
                 {options.map((option, index) => (
@@ -362,7 +377,7 @@ function AdminEnquetesPage() {
                       size="sm"
                       className="flex-1 sm:flex-none bg-white/50 border-coffee/20 text-coffee hover:bg-white/80"
                       onClick={() => {
-                        setEditingPoll({ id: poll.id, title: poll.title, description: poll.description || "" });
+                        setEditingPoll({ id: poll.id, title: poll.title, description: poll.description || "", allow_multiple_answers: poll.allow_multiple_answers || false });
                         setEditDialogOpen(true);
                       }}
                       title="Editar"
@@ -554,6 +569,16 @@ function AdminEnquetesPage() {
                   onChange={(e) => setEditingPoll({ ...editingPoll, description: e.target.value })}
                   className="bg-white/70 border-leather/30 text-coffee"
                 />
+              </div>
+              <div className="flex items-center space-x-2 pt-2">
+                <Switch
+                  id="edit-allow-multiple"
+                  checked={editingPoll.allow_multiple_answers}
+                  onCheckedChange={(checked) => setEditingPoll({ ...editingPoll, allow_multiple_answers: checked })}
+                />
+                <Label htmlFor="edit-allow-multiple" className="text-coffee cursor-pointer font-medium">
+                  Permitir múltiplas respostas
+                </Label>
               </div>
               <Button
                 className="w-full mt-4"
