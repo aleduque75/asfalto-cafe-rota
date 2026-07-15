@@ -219,7 +219,7 @@ function EnquetesPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-coffee border-coffee/20 hover:bg-white"
+                              className="bg-white text-coffee border-coffee/20 hover:bg-white/80"
                               onClick={() => {
                                 setEditingPolls({ ...editingPolls, [poll.id]: true });
                                 setSelectedOptions({
