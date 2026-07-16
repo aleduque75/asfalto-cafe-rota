@@ -22,6 +22,9 @@ type AdminUser = {
   banned_until: string | null;
   created_at: string;
   role: AppRole | null;
+  member_type?: string | null;
+  partner_id?: string | null;
+  partner_name?: string | null;
 };
 
 export const Route = createFileRoute("/_authenticated/admin/usuarios")({
@@ -42,7 +45,31 @@ function AdminUsuarios() {
       return toast.error("Erro ao carregar usuários: " + error.message);
     }
     
-    setUsers(data || []);
+    // Fetch profiles to get member_type and partner details without changing the RPC
+    const { data: profilesData } = await supabase
+      .from("profiles")
+      .select("id, member_type, partner_id, full_name, nickname");
+
+    let mergedData = data || [];
+    
+    if (profilesData) {
+      mergedData = mergedData.map((u: any) => {
+        const p = profilesData.find(prof => prof.id === u.id);
+        let partnerName = null;
+        if (p?.partner_id) {
+          const partner = profilesData.find(prof => prof.id === p.partner_id);
+          partnerName = partner?.full_name || partner?.nickname || "Sem nome";
+        }
+        return {
+          ...u,
+          member_type: p?.member_type,
+          partner_id: p?.partner_id,
+          partner_name: partnerName
+        };
+      });
+    }
+    
+    setUsers(mergedData);
   }
 
   useEffect(() => {
@@ -133,6 +160,7 @@ function AdminUsuarios() {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
+                <TableHead>Perfil / Vínculo</TableHead>
                 <TableHead>Data de Cadastro</TableHead>
                 <TableHead>Cargo (Permissão)</TableHead>
                 <TableHead>Status de Acesso</TableHead>
@@ -150,6 +178,18 @@ function AdminUsuarios() {
                       <div className="flex flex-col gap-0.5">
                         <span className="truncate">{user.full_name || "Sem Nome"}</span>
                         <span className="text-xs text-leather truncate opacity-80">{user.email}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="capitalize text-sm font-medium text-coffee">
+                          {user.member_type || "Piloto"}
+                        </span>
+                        {user.partner_id && (
+                          <span className="text-xs text-leather truncate opacity-80">
+                            Parceiro(a): {user.partner_name}
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell className="text-leather text-sm">
