@@ -798,8 +798,8 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
 
         {form.maintenance_item_id === "" && form.item_name !== "" && (
           <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
-            <Label className="text-copper-dark font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
-            <p className="text-sm text-coffee">
+            <Label className="text-copper font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
+            <p className="text-sm text-foreground/90">
               O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
             </p>
           </div>
@@ -881,7 +881,7 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
       const { data: u } = await supabase.auth.getUser();
       const { data: newItem } = await supabase.from("maintenance_items").insert({
         motorcycle_id: motorcycleId,
-        user_id: u?.user?.id,
+        user_id: u?.user?.id as string,
         name: form.item_name.trim(),
         last_change_km: km,
         last_change_date: form.service_date,
@@ -991,8 +991,8 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
 
           {form.maintenance_item_id === "" && form.item_name !== "" && (
             <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
-              <Label className="text-copper-dark font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
-              <p className="text-sm text-coffee">
+              <Label className="text-copper font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
+              <p className="text-sm text-foreground/90">
                 O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
               </p>
             </div>
