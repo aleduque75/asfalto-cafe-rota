@@ -660,6 +660,7 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
   const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     maintenance_item_id: "",
+    new_category_name: "",
     item_name: "",
     service_date: new Date().toISOString().slice(0, 10),
     km_at_service: String(currentKm),
@@ -678,14 +679,14 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
     if (!u.user) { setSaving(false); return toast.error("Sessão expirou"); }
     const km = form.km_at_service ? parseInt(form.km_at_service) : null;
 
-    let finalItemId = form.maintenance_item_id || null;
+    let finalItemId = form.maintenance_item_id === "NEW" ? null : (form.maintenance_item_id || null);
 
-    // Se o usuário não selecionou um item existente, criamos a categoria automaticamente!
-    if (!finalItemId && form.item_name.trim()) {
+    // Se o usuário selecionou para criar uma nova categoria
+    if (form.maintenance_item_id === "NEW" && form.new_category_name.trim()) {
       const { data: newItem, error: itemError } = await supabase.from("maintenance_items").insert({
         motorcycle_id: motorcycleId,
         user_id: u.user.id,
-        name: form.item_name.trim(),
+        name: form.new_category_name.trim(),
         last_change_km: km,
         last_change_date: form.service_date,
       }).select().single();
@@ -732,7 +733,7 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
       </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
         <div className="flex flex-col gap-2">
-          <Label>Item / Categoria do Serviço *</Label>
+          <Label>Categoria / Item vinculado</Label>
           <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
             <PopoverTrigger asChild>
               <Button
@@ -741,7 +742,11 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
                 aria-expanded={openCombobox}
                 className="w-full justify-between font-normal bg-transparent border-input hover:bg-transparent"
               >
-                {form.item_name || "Selecione ou digite uma categoria..."}
+                {form.maintenance_item_id === "NEW" 
+                  ? `✨ Nova: ${form.new_category_name}`
+                  : form.maintenance_item_id === "" 
+                    ? "— Sem categoria (Avulso) —"
+                    : items.find(i => i.id === form.maintenance_item_id)?.name || "Selecione..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -757,25 +762,36 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
                     {searchQuery ? (
                       <button 
                         type="button"
-                        className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper-dark transition-colors font-medium flex items-center"
+                        className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper transition-colors font-medium flex items-center"
                         onClick={() => {
-                          setForm(f => ({ ...f, item_name: searchQuery, maintenance_item_id: "" }));
+                          setForm(f => ({ ...f, maintenance_item_id: "NEW", new_category_name: searchQuery, item_name: f.item_name || searchQuery }));
                           setOpenCombobox(false);
                           setSearchQuery("");
                         }}
                       >
                         <Plus className="w-4 h-4 mr-2" />
-                        Criar nova: "{searchQuery}"
+                        Salvar '{searchQuery}' como nova categoria
                       </button>
                     ) : "Nenhuma encontrada."}
                   </CommandEmpty>
                   <CommandGroup>
+                    <CommandItem
+                      value="Sem categoria (Avulso)"
+                      onSelect={() => {
+                        setForm(f => ({ ...f, maintenance_item_id: "", new_category_name: "" }));
+                        setOpenCombobox(false);
+                        setSearchQuery("");
+                      }}
+                    >
+                      <Check className={cn("mr-2 h-4 w-4", form.maintenance_item_id === "" ? "opacity-100" : "opacity-0")} />
+                      — Sem categoria (Avulso) —
+                    </CommandItem>
                     {items.map((i) => (
                       <CommandItem
                         key={i.id}
                         value={i.name}
                         onSelect={() => {
-                          setForm(f => ({ ...f, item_name: i.name, maintenance_item_id: i.id }));
+                          setForm(f => ({ ...f, maintenance_item_id: i.id, new_category_name: "", item_name: f.item_name || i.name }));
                           setOpenCombobox(false);
                           setSearchQuery("");
                         }}
@@ -796,11 +812,16 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
           </Popover>
         </div>
 
-        {form.maintenance_item_id === "" && form.item_name !== "" && (
+        <div>
+          <Label>Descrição do Serviço *</Label>
+          <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} placeholder="Ex: Limpeza e lubrificação da corrente" />
+        </div>
+
+        {form.maintenance_item_id === "NEW" && (
           <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
             <Label className="text-copper font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
             <p className="text-sm text-foreground/90">
-              O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
+              O item <strong>{form.new_category_name}</strong> será salvo como uma nova categoria de lembrete!
             </p>
           </div>
         )}
@@ -842,6 +863,7 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
   const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     maintenance_item_id: record.maintenance_item_id || "",
+    new_category_name: "",
     item_name: record.item_name || "",
     service_date: record.service_date ? record.service_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
     km_at_service: record.km_at_service ? String(record.km_at_service) : "",
@@ -854,6 +876,7 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
     if (open) {
       setForm({
         maintenance_item_id: record.maintenance_item_id || "",
+        new_category_name: "",
         item_name: record.item_name || "",
         service_date: record.service_date ? record.service_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
         km_at_service: record.km_at_service ? String(record.km_at_service) : "",
@@ -875,14 +898,14 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
     e.preventDefault();
     setSaving(true);
     const km = form.km_at_service ? parseInt(form.km_at_service) : null;
-    let finalItemId = form.maintenance_item_id || null;
+    let finalItemId = form.maintenance_item_id === "NEW" ? null : (form.maintenance_item_id || null);
 
-    if (!finalItemId && form.item_name.trim()) {
+    if (form.maintenance_item_id === "NEW" && form.new_category_name.trim()) {
       const { data: u } = await supabase.auth.getUser();
       const { data: newItem } = await supabase.from("maintenance_items").insert({
         motorcycle_id: motorcycleId,
         user_id: u?.user?.id as string,
-        name: form.item_name.trim(),
+        name: form.new_category_name.trim(),
         last_change_km: km,
         last_change_date: form.service_date,
       }).select().single();
@@ -925,7 +948,7 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
           <div className="flex flex-col gap-2">
-            <Label>Item / Categoria do Serviço *</Label>
+            <Label>Categoria / Item vinculado</Label>
             <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
               <PopoverTrigger asChild>
                 <Button
@@ -934,7 +957,11 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
                   aria-expanded={openCombobox}
                   className="w-full justify-between font-normal bg-transparent border-input hover:bg-transparent"
                 >
-                  {form.item_name || "Selecione ou digite uma categoria..."}
+                  {form.maintenance_item_id === "NEW" 
+                    ? `✨ Nova: ${form.new_category_name}`
+                    : form.maintenance_item_id === "" 
+                      ? "— Sem categoria (Avulso) —"
+                      : items.find(i => i.id === form.maintenance_item_id)?.name || "Selecione..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -950,25 +977,36 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
                       {searchQuery ? (
                         <button 
                           type="button"
-                          className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper-dark transition-colors font-medium flex items-center"
+                          className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper transition-colors font-medium flex items-center"
                           onClick={() => {
-                            setForm(f => ({ ...f, item_name: searchQuery, maintenance_item_id: "" }));
+                            setForm(f => ({ ...f, maintenance_item_id: "NEW", new_category_name: searchQuery, item_name: f.item_name || searchQuery }));
                             setOpenCombobox(false);
                             setSearchQuery("");
                           }}
                         >
                           <Plus className="w-4 h-4 mr-2" />
-                          Criar nova: "{searchQuery}"
+                          Salvar '{searchQuery}' como nova categoria
                         </button>
                       ) : "Nenhuma encontrada."}
                     </CommandEmpty>
                     <CommandGroup>
+                      <CommandItem
+                        value="Sem categoria (Avulso)"
+                        onSelect={() => {
+                          setForm(f => ({ ...f, maintenance_item_id: "", new_category_name: "" }));
+                          setOpenCombobox(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", form.maintenance_item_id === "" ? "opacity-100" : "opacity-0")} />
+                        — Sem categoria (Avulso) —
+                      </CommandItem>
                       {items.map((i) => (
                         <CommandItem
                           key={i.id}
                           value={i.name}
                           onSelect={() => {
-                            setForm(f => ({ ...f, item_name: i.name, maintenance_item_id: i.id }));
+                            setForm(f => ({ ...f, maintenance_item_id: i.id, new_category_name: "", item_name: f.item_name || i.name }));
                             setOpenCombobox(false);
                             setSearchQuery("");
                           }}
@@ -989,11 +1027,16 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
             </Popover>
           </div>
 
-          {form.maintenance_item_id === "" && form.item_name !== "" && (
+          <div>
+            <Label>Descrição do Serviço *</Label>
+            <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} />
+          </div>
+
+          {form.maintenance_item_id === "NEW" && (
             <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
               <Label className="text-copper font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
               <p className="text-sm text-foreground/90">
-                O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
+                O item <strong>{form.new_category_name}</strong> será salvo como uma nova categoria de lembrete!
               </p>
             </div>
           )}
