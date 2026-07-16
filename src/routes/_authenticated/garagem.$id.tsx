@@ -35,7 +35,7 @@ type Item = {
 };
 
 type Record_ = {
-  id: string; service_date: string; item_name: string;
+  id: string; maintenance_item_id: string | null; service_date: string; item_name: string;
   km_at_service: number | null; cost: number | null;
   workshop: string | null; notes: string | null;
 };
@@ -115,6 +115,14 @@ function MotoDetail() {
     const { error } = await supabase.from("maintenance_items").delete().eq("id", itemId);
     if (error) return toast.error(error.message);
     toast.success("Item removido");
+    loadAll();
+  }
+
+  async function deleteRecord(recordId: string) {
+    if (!confirm("Excluir este registro de manutenção?")) return;
+    const { error } = await supabase.from("maintenance_records").delete().eq("id", recordId);
+    if (error) return toast.error(error.message);
+    toast.success("Registro removido");
     loadAll();
   }
 
@@ -352,11 +360,17 @@ function MotoDetail() {
                         <Calendar className="w-4 h-4 text-copper" /> {new Date(r.service_date).toLocaleDateString("pt-BR")}
                       </p>
                     </div>
-                    {r.cost != null && (
-                      <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5 font-medium">
-                        R$ {Number(r.cost).toFixed(2).replace(".", ",")}
-                      </Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {r.cost != null && (
+                        <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5 font-medium">
+                          R$ {Number(r.cost).toFixed(2).replace(".", ",")}
+                        </Badge>
+                      )}
+                      <EditRecordDialog record={r} items={items} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
+                      <Button variant="ghost" size="sm" onClick={() => deleteRecord(r.id)} className="text-destructive hover:bg-destructive/10 h-8 px-2" title="Excluir">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm mt-4 pt-4 border-t border-leather/15">
                     <div>
@@ -553,7 +567,7 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
 
   function pickItem(id: string) {
     const item = items.find((i) => i.id === id);
-    setForm((f) => ({ ...f, maintenance_item_id: id, item_name: item?.name ?? f.item_name }));
+    setForm((f) => ({ ...f, maintenance_item_id: id, item_name: item?.name ?? "" }));
   }
 
   async function submit(e: React.FormEvent) {
@@ -563,9 +577,32 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
     if (!u.user) { setSaving(false); return toast.error("Sessão expirou"); }
     const km = form.km_at_service ? parseInt(form.km_at_service) : null;
 
+    let finalItemId = form.maintenance_item_id || null;
+
+    // Se o usuário não selecionou um item existente, criamos a categoria automaticamente!
+    if (!finalItemId && form.item_name.trim()) {
+      const { data: newItem, error: itemError } = await supabase.from("maintenance_items").insert({
+        motorcycle_id: motorcycleId,
+        user_id: u.user.id,
+        name: form.item_name.trim(),
+        last_change_km: km,
+        last_change_date: form.service_date,
+      }).select().single();
+      
+      if (!itemError && newItem) {
+        finalItemId = newItem.id;
+      }
+    } else if (finalItemId) {
+      // Atualiza o item existente com os dados da nova troca
+      await supabase.from("maintenance_items").update({
+        last_change_km: km,
+        last_change_date: form.service_date,
+      }).eq("id", finalItemId);
+    }
+
     const { error } = await supabase.from("maintenance_records").insert({
       motorcycle_id: motorcycleId,
-      maintenance_item_id: form.maintenance_item_id || null,
+      maintenance_item_id: finalItemId,
       user_id: u.user.id,
       item_name: form.item_name.trim(),
       service_date: form.service_date,
@@ -576,13 +613,6 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
     });
     if (error) { setSaving(false); return toast.error(error.message); }
 
-    // Update the maintenance item with the new last_change values
-    if (form.maintenance_item_id) {
-      await supabase.from("maintenance_items").update({
-        last_change_km: km,
-        last_change_date: form.service_date,
-      }).eq("id", form.maintenance_item_id);
-    }
     // Bump moto KM if greater
     if (km && km > currentKm) {
       await supabase.from("motorcycles").update({ current_km: km }).eq("id", motorcycleId);
@@ -601,19 +631,19 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
       </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
         <div>
-          <Label>Item cadastrado</Label>
+          <Label>Item / Categoria</Label>
           <select
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-coffee"
             value={form.maintenance_item_id}
             onChange={(e) => pickItem(e.target.value)}
           >
-            <option value="">— Avulso —</option>
+            <option value="">— Cadastrar nova categoria —</option>
             {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
           </select>
         </div>
         <div>
-          <Label>Descrição *</Label>
-          <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} placeholder="Óleo + filtro" />
+          <Label>{form.maintenance_item_id ? "Descrição do serviço *" : "Nome da nova categoria *"}</Label>
+          <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} placeholder="Ex: Óleo + filtro" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -642,5 +672,123 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
         </DialogFooter>
       </form>
     </DialogContent>
+  );
+}
+
+function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }: { record: Record_; items: Item[]; motorcycleId: string; currentKm: number; onUpdated: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    maintenance_item_id: record.maintenance_item_id || "",
+    item_name: record.item_name || "",
+    service_date: record.service_date ? record.service_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+    km_at_service: record.km_at_service ? String(record.km_at_service) : "",
+    cost: record.cost ? String(record.cost) : "",
+    workshop: record.workshop || "",
+    notes: record.notes || "",
+  });
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        maintenance_item_id: record.maintenance_item_id || "",
+        item_name: record.item_name || "",
+        service_date: record.service_date ? record.service_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
+        km_at_service: record.km_at_service ? String(record.km_at_service) : "",
+        cost: record.cost ? String(record.cost) : "",
+        workshop: record.workshop || "",
+        notes: record.notes || "",
+      });
+    }
+  }, [open, record]);
+
+  function pickItem(id: string) {
+    const item = items.find((i) => i.id === id);
+    setForm((f) => ({ ...f, maintenance_item_id: id, item_name: item?.name ?? f.item_name }));
+  }
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const km = form.km_at_service ? parseInt(form.km_at_service) : null;
+
+    const { error } = await supabase.from("maintenance_records").update({
+      maintenance_item_id: form.maintenance_item_id || null,
+      item_name: form.item_name.trim(),
+      service_date: form.service_date,
+      km_at_service: km,
+      cost: form.cost ? parseFloat(form.cost) : null,
+      workshop: form.workshop.trim() || null,
+      notes: form.notes.trim() || null,
+    }).eq("id", record.id);
+
+    if (error) { setSaving(false); return toast.error(error.message); }
+
+    if (km && km > currentKm) {
+      await supabase.from("motorcycles").update({ current_km: km }).eq("id", motorcycleId);
+    }
+
+    setSaving(false);
+    toast.success("Registro atualizado");
+    setOpen(false);
+    onUpdated();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="text-coffee hover:bg-leather/10 h-8 px-2" title="Editar">
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Editar registro de manutenção</DialogTitle>
+          <DialogDescription>Altere as informações desse registro.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={submit} className="space-y-3">
+          <div>
+            <Label>Categoria / Item vinculado</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-coffee"
+              value={form.maintenance_item_id}
+              onChange={(e) => pickItem(e.target.value)}
+            >
+              <option value="">— Sem categoria (Avulso) —</option>
+              {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Descrição *</Label>
+            <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Data *</Label>
+              <Input type="date" required value={form.service_date} onChange={(e) => setForm({ ...form, service_date: e.target.value })} />
+            </div>
+            <div>
+              <Label>KM no serviço</Label>
+              <Input type="number" value={form.km_at_service} onChange={(e) => setForm({ ...form, km_at_service: e.target.value })} />
+            </div>
+            <div>
+              <Label>Custo (R$)</Label>
+              <Input type="number" step="0.01" value={form.cost} onChange={(e) => setForm({ ...form, cost: e.target.value })} />
+            </div>
+            <div>
+              <Label>Oficina</Label>
+              <Input value={form.workshop} onChange={(e) => setForm({ ...form, workshop: e.target.value })} />
+            </div>
+          </div>
+          <div>
+            <Label>Observações</Label>
+            <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando…" : "Salvar alterações"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
