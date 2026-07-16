@@ -838,6 +838,8 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
 function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }: { record: Record_; items: Item[]; motorcycleId: string; currentKm: number; onUpdated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     maintenance_item_id: record.maintenance_item_id || "",
     item_name: record.item_name || "",
@@ -859,6 +861,8 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
         workshop: record.workshop || "",
         notes: record.notes || "",
       });
+      setSearchQuery("");
+      setOpenCombobox(false);
     }
   }, [open, record]);
 
@@ -871,9 +875,22 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
     e.preventDefault();
     setSaving(true);
     const km = form.km_at_service ? parseInt(form.km_at_service) : null;
+    let finalItemId = form.maintenance_item_id || null;
+
+    if (!finalItemId && form.item_name.trim()) {
+      const { data: u } = await supabase.auth.getUser();
+      const { data: newItem } = await supabase.from("maintenance_items").insert({
+        motorcycle_id: motorcycleId,
+        user_id: u?.user?.id,
+        name: form.item_name.trim(),
+        last_change_km: km,
+        last_change_date: form.service_date,
+      }).select().single();
+      if (newItem) finalItemId = newItem.id;
+    }
 
     const { error } = await supabase.from("maintenance_records").update({
-      maintenance_item_id: form.maintenance_item_id || null,
+      maintenance_item_id: finalItemId,
       item_name: form.item_name.trim(),
       service_date: form.service_date,
       km_at_service: km,
@@ -907,21 +924,79 @@ function EditRecordDialog({ record, items, motorcycleId, currentKm, onUpdated }:
           <DialogDescription>Altere as informações desse registro.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="space-y-3">
-          <div>
-            <Label>Categoria / Item vinculado</Label>
-            <select
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-coffee"
-              value={form.maintenance_item_id}
-              onChange={(e) => pickItem(e.target.value)}
-            >
-              <option value="">— Sem categoria (Avulso) —</option>
-              {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
-            </select>
+          <div className="flex flex-col gap-2">
+            <Label>Item / Categoria do Serviço *</Label>
+            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openCombobox}
+                  className="w-full justify-between font-normal bg-transparent border-input hover:bg-transparent"
+                >
+                  {form.item_name || "Selecione ou digite uma categoria..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command>
+                  <CommandInput 
+                    placeholder="Buscar categoria..." 
+                    value={searchQuery}
+                    onValueChange={setSearchQuery}
+                  />
+                  <CommandList>
+                    <CommandEmpty className="py-2 px-4 text-sm flex flex-col items-start gap-2">
+                      {searchQuery ? (
+                        <button 
+                          type="button"
+                          className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper-dark transition-colors font-medium flex items-center"
+                          onClick={() => {
+                            setForm(f => ({ ...f, item_name: searchQuery, maintenance_item_id: "" }));
+                            setOpenCombobox(false);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Criar nova: "{searchQuery}"
+                        </button>
+                      ) : "Nenhuma encontrada."}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {items.map((i) => (
+                        <CommandItem
+                          key={i.id}
+                          value={i.name}
+                          onSelect={() => {
+                            setForm(f => ({ ...f, item_name: i.name, maintenance_item_id: i.id }));
+                            setOpenCombobox(false);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              form.maintenance_item_id === i.id ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {i.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
-          <div>
-            <Label>Descrição *</Label>
-            <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} />
-          </div>
+
+          {form.maintenance_item_id === "" && form.item_name !== "" && (
+            <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
+              <Label className="text-copper-dark font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
+              <p className="text-sm text-coffee">
+                O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>Data *</Label>
