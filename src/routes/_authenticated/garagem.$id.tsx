@@ -12,7 +12,10 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar } from "lucide-react";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar, Search, LayoutGrid, List as ListIcon } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -82,6 +85,8 @@ function MotoDetail() {
   const [itemOpen, setItemOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
   const [kmEditOpen, setKmEditOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"card" | "list">("card");
+  const [search, setSearch] = useState("");
 
   async function loadAll() {
     const [{ data: m }, { data: it }, { data: rc }] = await Promise.all([
@@ -140,6 +145,16 @@ function MotoDetail() {
     const s = statusFor(i, moto.current_km);
     return s.overdue || s.soon;
   }).length;
+
+  const filteredRecords = records.filter(r => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      r.item_name.toLowerCase().includes(q) || 
+      (r.workshop && r.workshop.toLowerCase().includes(q)) ||
+      (r.notes && r.notes.toLowerCase().includes(q))
+    );
+  });
 
   return (
     <div>
@@ -340,17 +355,38 @@ function MotoDetail() {
       </section>
 
       <section className="mt-12">
-        <h2 className="font-display text-2xl text-coffee mb-6" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+          <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
+          <div className="flex flex-col sm:flex-row gap-3 items-end">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-leather/60" />
+              <Input 
+                placeholder="Buscar manutenção..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 w-full sm:w-[200px] bg-white border-leather/20 h-9"
+              />
+            </div>
+            <div className="flex gap-1 bg-cream/50 p-1 rounded-md border border-leather/20 w-fit">
+              <button onClick={() => setViewMode("card")} className={`px-3 py-1.5 text-sm rounded flex items-center gap-2 ${viewMode === 'card' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
+                <LayoutGrid className="w-4 h-4" /> Cards
+              </button>
+              <button onClick={() => setViewMode("list")} className={`px-3 py-1.5 text-sm rounded flex items-center gap-2 ${viewMode === 'list' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
+                <ListIcon className="w-4 h-4" /> Lista
+              </button>
+            </div>
+          </div>
+        </div>
         
-        {records.length === 0 ? (
+        {filteredRecords.length === 0 ? (
           <Card className="border-dashed border-leather/40 bg-cream">
             <CardContent className="py-12 text-center text-leather">
-              Nenhum registro de manutenção ainda.
+              Nenhum registro encontrado.
             </CardContent>
           </Card>
-        ) : (
+        ) : viewMode === "card" ? (
           <div className="grid sm:grid-cols-2 gap-4">
-            {records.map((r) => (
+            {filteredRecords.map((r) => (
               <Card key={r.id} className="border-leather/30 bg-cream hover:border-copper transition-colors">
                 <CardContent className="p-5">
                   <div className="flex justify-between items-start mb-3">
@@ -394,6 +430,62 @@ function MotoDetail() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        ) : (
+          <div className="border border-leather/30 rounded-lg bg-cream shadow-sm overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Serviço / Data</TableHead>
+                  <TableHead>Quilometragem</TableHead>
+                  <TableHead>Oficina / Obs</TableHead>
+                  <TableHead>Custo</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRecords.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium min-w-[200px]">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-coffee">{r.item_name}</span>
+                        <span className="text-xs text-leather flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-copper" /> {new Date(r.service_date).toLocaleDateString("pt-BR")}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-coffee text-sm flex items-center gap-1.5">
+                        <Gauge className="w-3.5 h-3.5 text-copper" /> {r.km_at_service?.toLocaleString("pt-BR") ?? "—"} km
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1 max-w-[250px]">
+                        <span className="text-sm text-coffee flex items-center gap-1.5 truncate">
+                          <Wrench className="w-3.5 h-3.5 text-copper flex-shrink-0" /> {r.workshop || "—"}
+                        </span>
+                        {r.notes && <span className="text-xs text-leather/80 italic truncate">{r.notes}</span>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {r.cost != null ? (
+                        <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5">
+                          R$ {Number(r.cost).toFixed(2).replace(".", ",")}
+                        </Badge>
+                      ) : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <EditRecordDialog record={r} items={items} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
+                        <Button variant="ghost" size="sm" onClick={() => deleteRecord(r.id)} className="text-destructive hover:bg-destructive/10 h-8 px-2" title="Excluir">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
       </section>
