@@ -213,7 +213,7 @@ function AdminUsuarios() {
               placeholder="Buscar usuário..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 w-full sm:w-[250px] bg-white border-leather/20 h-9"
+              className="pl-9 w-full sm:w-[250px] bg-white border-leather/20 h-9 text-coffee placeholder:text-leather/70"
             />
           </div>
           <div className="flex gap-1 bg-cream/50 p-1 rounded-md border border-leather/20 w-fit">

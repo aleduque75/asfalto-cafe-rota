@@ -15,7 +15,14 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar, Search, LayoutGrid, List as ListIcon } from "lucide-react";
+import {
+  Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
+} from "@/components/ui/command";
+import {
+  Popover, PopoverContent, PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar, Search, LayoutGrid, List as ListIcon, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -364,7 +371,7 @@ function MotoDetail() {
                 placeholder="Buscar manutenção..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-full sm:w-[200px] bg-white border-leather/20 h-9"
+                className="pl-9 w-full sm:w-[200px] bg-white border-leather/20 h-9 text-coffee placeholder:text-leather/70"
               />
             </div>
             <div className="flex gap-1 bg-cream/50 p-1 rounded-md border border-leather/20 w-fit">
@@ -649,6 +656,8 @@ function EditItemDialog({ item, motorcycleId, currentKm, onUpdated }: { item: It
 
 function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorcycleId: string; currentKm: number; items: Item[]; onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState({
     maintenance_item_id: "",
     item_name: "",
@@ -722,21 +731,80 @@ function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorc
         <DialogDescription>O item será marcado como recém-trocado.</DialogDescription>
       </DialogHeader>
       <form onSubmit={submit} className="space-y-3">
-        <div>
-          <Label>Item / Categoria</Label>
-          <select
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm text-coffee"
-            value={form.maintenance_item_id}
-            onChange={(e) => pickItem(e.target.value)}
-          >
-            <option value="">— Cadastrar nova categoria —</option>
-            {items.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
-          </select>
+        <div className="flex flex-col gap-2">
+          <Label>Item / Categoria do Serviço *</Label>
+          <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openCombobox}
+                className="w-full justify-between font-normal bg-transparent border-input hover:bg-transparent"
+              >
+                {form.item_name || "Selecione ou digite uma categoria..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+              <Command>
+                <CommandInput 
+                  placeholder="Buscar categoria..." 
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                />
+                <CommandList>
+                  <CommandEmpty className="py-2 px-4 text-sm flex flex-col items-start gap-2">
+                    {searchQuery ? (
+                      <button 
+                        type="button"
+                        className="text-left w-full hover:bg-copper/10 p-2 rounded text-copper-dark transition-colors font-medium flex items-center"
+                        onClick={() => {
+                          setForm(f => ({ ...f, item_name: searchQuery, maintenance_item_id: "" }));
+                          setOpenCombobox(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Criar nova: "{searchQuery}"
+                      </button>
+                    ) : "Nenhuma encontrada."}
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {items.map((i) => (
+                      <CommandItem
+                        key={i.id}
+                        value={i.name}
+                        onSelect={() => {
+                          setForm(f => ({ ...f, item_name: i.name, maintenance_item_id: i.id }));
+                          setOpenCombobox(false);
+                          setSearchQuery("");
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            form.maintenance_item_id === i.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {i.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
-        <div>
-          <Label>{form.maintenance_item_id ? "Descrição do serviço *" : "Nome da nova categoria *"}</Label>
-          <Input required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} placeholder="Ex: Óleo + filtro" />
-        </div>
+
+        {form.maintenance_item_id === "" && form.item_name !== "" && (
+          <div className="bg-copper/10 p-3 rounded-md border border-copper/30">
+            <Label className="text-copper-dark font-bold text-xs uppercase tracking-wider mb-1 block">Nova Categoria Automática</Label>
+            <p className="text-sm text-coffee">
+              O item <strong>{form.item_name}</strong> será salvo como uma nova categoria para você usar nas próximas vezes!
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Data *</Label>
