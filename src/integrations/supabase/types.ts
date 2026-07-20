@@ -511,6 +511,122 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_expense_installments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          expense_id: string
+          id: string
+          installment_number: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          expense_id: string
+          id?: string
+          installment_number: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          expense_id?: string
+          id?: string
+          installment_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_expense_installments_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "trip_shared_expenses"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      trip_installment_payments: {
+        Row: {
+          id: string
+          installment_id: string
+          is_paid: boolean | null
+          paid_at: string | null
+          plan_id: string
+        }
+        Insert: {
+          id?: string
+          installment_id: string
+          is_paid?: boolean | null
+          paid_at?: string | null
+          plan_id: string
+        }
+        Update: {
+          id?: string
+          installment_id?: string
+          is_paid?: boolean | null
+          paid_at?: string | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_installment_payments_installment_id_fkey"
+            columns: ["installment_id"]
+            isOneToOne: false
+            referencedRelation: "trip_expense_installments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_installment_payments_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "trip_financial_plans"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      trip_shared_expenses: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          route_id: string
+          title: string
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          route_id: string
+          title: string
+          total_amount: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          route_id?: string
+          title?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_shared_expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_shared_expenses_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
