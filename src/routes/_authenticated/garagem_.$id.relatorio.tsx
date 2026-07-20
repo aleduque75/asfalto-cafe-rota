@@ -178,12 +178,12 @@ function RelatorioFinanceiro() {
           </div>
         ) : (
           <div className="space-y-8">
-            <div className="bg-white rounded-lg border border-leather/20 overflow-hidden print:border-leather/40">
+            <div className="bg-white rounded-lg border border-leather/20 overflow-x-auto print:overflow-visible print:border-leather/40">
               <table className="w-full text-left text-sm">
                 <thead className="bg-leather/5 print:bg-transparent border-b border-leather/20 print:border-leather/40">
                   <tr>
-                    <th className="py-4 px-6 font-semibold text-coffee uppercase tracking-wider text-xs">Data / Serviço</th>
-                    <th className="py-4 px-6 font-semibold text-coffee uppercase tracking-wider text-xs text-right w-[150px]">Custo (R$)</th>
+                    <th className="py-3 px-3 sm:py-4 sm:px-6 font-semibold text-coffee uppercase tracking-wider text-xs">Data / Serviço</th>
+                    <th className="py-3 px-3 sm:py-4 sm:px-6 font-semibold text-coffee uppercase tracking-wider text-xs text-right w-[120px] sm:w-[150px]">Custo (R$)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-leather/10 print:divide-leather/30">
@@ -191,30 +191,32 @@ function RelatorioFinanceiro() {
                     <React.Fragment key={category}>
                       {/* Cabeçalho da Categoria */}
                       <tr className="bg-leather/5 print:bg-transparent">
-                        <td colSpan={2} className="py-3 px-6 font-display font-semibold text-coffee uppercase tracking-wide border-b border-leather/20 print:border-leather/40 bg-[#F0EBE1] print:bg-transparent" style={{ fontFamily: "var(--font-display)" }}>
+                        <td colSpan={2} className="py-2 px-3 sm:py-3 sm:px-6 font-display font-semibold text-coffee uppercase tracking-wide border-b border-leather/20 print:border-leather/40 bg-[#F0EBE1] print:bg-transparent text-xs sm:text-sm" style={{ fontFamily: "var(--font-display)" }}>
                           {category}
                         </td>
                       </tr>
                       {/* Itens da Categoria */}
                       {data.records.map((record) => (
                         <tr key={record.id} className="hover:bg-leather/5 print:hover:bg-transparent">
-                          <td className="py-3 px-6 text-leather flex items-center gap-4">
-                            <span className="font-medium text-coffee w-24 tabular-nums shrink-0">
-                              {new Date(record.service_date).toLocaleDateString('pt-BR')}
-                            </span>
-                            <span className="truncate">{record.item_name}</span>
+                          <td className="py-2 px-3 sm:py-3 sm:px-6 text-leather">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-4">
+                              <span className="font-medium text-coffee text-[11px] sm:text-sm tabular-nums shrink-0">
+                                {new Date(record.service_date).toLocaleDateString('pt-BR')}
+                              </span>
+                              <span className="text-xs sm:text-sm line-clamp-2 sm:line-clamp-1">{record.item_name}</span>
+                            </div>
                           </td>
-                          <td className="py-3 px-6 text-coffee text-right whitespace-nowrap tabular-nums">
+                          <td className="py-2 px-3 sm:py-3 sm:px-6 text-coffee text-right whitespace-nowrap tabular-nums text-xs sm:text-sm font-medium">
                             R$ {Number(record.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                         </tr>
                       ))}
                       {/* Subtotal da Categoria */}
                       <tr className="border-b-2 border-leather/20 print:border-leather/40 bg-leather/5 print:bg-transparent">
-                        <td className="py-2 px-6 text-right font-medium text-leather text-xs uppercase tracking-wider">
+                        <td className="py-2 px-3 sm:py-2 sm:px-6 text-right font-medium text-leather text-[10px] sm:text-xs uppercase tracking-wider">
                           Subtotal {category}:
                         </td>
-                        <td className="py-2 px-6 text-right font-semibold text-copper tabular-nums">
+                        <td className="py-2 px-3 sm:py-2 sm:px-6 text-right font-semibold text-copper tabular-nums text-xs sm:text-sm">
                           R$ {data.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                       </tr>
@@ -223,10 +225,10 @@ function RelatorioFinanceiro() {
                 </tbody>
                 <tfoot className="bg-copper/5 print:bg-transparent border-t-4 border-copper/30 print:border-leather/60">
                   <tr>
-                    <td className="py-5 px-6 font-display text-xl text-coffee font-bold" style={{ fontFamily: "var(--font-display)" }}>
+                    <td className="py-4 px-3 sm:py-5 sm:px-6 font-display text-lg sm:text-xl text-coffee font-bold" style={{ fontFamily: "var(--font-display)" }}>
                       Total Geral
                     </td>
-                    <td className="py-5 px-6 text-xl text-copper font-bold text-right whitespace-nowrap">
+                    <td className="py-4 px-3 sm:py-5 sm:px-6 text-base sm:text-xl text-copper font-bold text-right whitespace-nowrap">
                       R$ {totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                   </tr>
