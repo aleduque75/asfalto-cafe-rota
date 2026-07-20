@@ -828,22 +828,22 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
           </div>
         </div>
         
-        <div className="border border-leather/20 rounded-md p-3 max-h-[160px] overflow-y-auto bg-coffee/5">
-           <Label className="mb-2 block text-coffee font-bold">Participantes (Desmarque quem não entra no rateio)</Label>
+        <div className="border border-leather/20 rounded-md p-3 max-h-[160px] overflow-y-auto bg-coffee/20">
+           <Label className="mb-2 block font-bold text-cream">Participantes (Desmarque quem não entra no rateio)</Label>
            <div className="space-y-1.5 mt-2">
              {allPlans.map((p: any) => {
                const pilot = p.profile?.nickname || p.profile?.full_name?.split(" ")[0] || "Moto";
                const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
                const name = partner ? `${pilot} e ${partner}` : pilot;
                return (
-                 <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/10 p-1.5 rounded transition-colors">
+                 <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/40 p-1.5 rounded transition-colors">
                    <input 
                      type="checkbox" 
                      className="rounded border-leather text-copper focus:ring-copper w-4 h-4"
                      checked={selectedPlans.includes(p.id)}
                      onChange={() => togglePlan(p.id)}
                    />
-                   <span className="text-coffee font-medium">{name}</span>
+                   <span className="text-cream font-medium">{name}</span>
                  </label>
                )
              })}
