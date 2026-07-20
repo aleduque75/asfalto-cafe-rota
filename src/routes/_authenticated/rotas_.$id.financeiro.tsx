@@ -792,10 +792,14 @@ function NewSharedExpenseDialog({ routeId, allPlans, allProfiles, onCreated }: a
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (allPlans && allPlans.length > 0) {
-      setSelectedProfileIds(allPlans.map((p:any) => p.profile_id));
+    if (allPlans && allPlans.length > 0 && allProfiles.length > 0) {
+      const initialIds = allPlans.map((plan:any) => {
+         const profInList = allProfiles.find(ap => ap.id === plan.profile_id || ap.partner?.id === plan.profile_id);
+         return profInList ? profInList.id : null;
+      }).filter(Boolean);
+      setSelectedProfileIds(Array.from(new Set(initialIds)) as string[]);
     }
-  }, [allPlans]);
+  }, [allPlans, allProfiles]);
 
   function toggleProfile(profileId: string) {
     if (selectedProfileIds.includes(profileId)) {
@@ -950,10 +954,12 @@ function EditSharedExpenseDialog({ expense, allPlans, allProfiles, onUpdated }: 
 
   const initialProfileIds = expense.participating_plans.map((pid: string) => {
      const plan = allPlans.find((p:any) => p.id === pid);
-     return plan?.profile_id || plan?.profile?.partner_id;
+     if (!plan) return null;
+     const profInList = allProfiles.find((ap:any) => ap.id === plan.profile_id || ap.partner?.id === plan.profile_id);
+     return profInList ? profInList.id : null;
   }).filter(Boolean);
   
-  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>(initialProfileIds);
+  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>(Array.from(new Set(initialProfileIds)) as string[]);
 
   function toggleProfile(profileId: string) {
     if (selectedProfileIds.includes(profileId)) {
