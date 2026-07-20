@@ -436,10 +436,11 @@ function RouteFinanceiroPage() {
                         <span className={`absolute left-3 top-2.5 text-sm font-bold ${item.disabled ? 'text-copper' : 'text-coffee'}`}>R$</span>
                         <Input 
                           type="number" 
-                          className={`pl-10 ${item.disabled ? 'bg-copper/10 border-copper/30 font-bold text-copper' : 'bg-white border-leather/40'}`}
+                          className={`pl-10 ${item.disabled ? 'bg-copper/10 border-copper/30 font-bold text-copper' : 'bg-white border-leather/40 text-coffee font-medium placeholder:text-coffee/50 focus-visible:ring-copper'}`}
                           value={costs[item.key as keyof Costs] || ''}
                           onChange={(e) => setCosts(prev => ({ ...prev, [item.key]: parseFloat(e.target.value)||0 }))}
                           disabled={item.disabled}
+                          placeholder="0,00"
                         />
                       </div>
                     </div>
