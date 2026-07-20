@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Calculator, Users, Info, Plus, CheckCircle2, Circle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Calculator, Users, Info, Plus, CheckCircle2, Circle, AlertCircle, Edit, Trash2, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/_authenticated/rotas_/financeiro")({
   head: () => ({ meta: [{ title: "Planejamento Financeiro — Café Moto e Asfalto" }] }),
@@ -42,7 +43,7 @@ type Installment = {
 };
 
 type SharedExpense = {
-  id: string; route_id: string; title: string; total_amount: number;
+  id: string; route_id: string; title: string; total_amount: number; description: string | null; participating_plans: string[];
   created_at: string; installments: Installment[];
 };
 
@@ -179,7 +180,12 @@ function RouteFinanceiroPage() {
   
   // My totals
   const myManualTotal = calculateTotal(costs);
-  const mySharedTotal = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / numMotos), 0);
+  const mySharedTotal = sharedExpenses.reduce((sum, exp) => {
+    if (myPlanId && exp.participating_plans?.includes(myPlanId)) {
+      return sum + (exp.total_amount / (exp.participating_plans.length || 1));
+    }
+    return sum;
+  }, 0);
   const myTotal = myManualTotal + mySharedTotal;
   const myPerPerson = partnerId ? myTotal / 2 : myTotal;
 
@@ -298,7 +304,12 @@ function RouteFinanceiroPage() {
                     <TableRow className="border-leather/20 bg-coffee/5">
                       <TableCell className="font-medium text-coffee">Despesas Compartilhadas</TableCell>
                       {allPlans.map(p => {
-                        const myShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        const myShared = sharedExpenses.reduce((sum, exp) => {
+                          if (exp.participating_plans?.includes(p.id)) {
+                            return sum + (exp.total_amount / (exp.participating_plans.length || 1));
+                          }
+                          return sum;
+                        }, 0);
                         return (
                           <TableCell key={p.id} className="text-center text-copper font-bold">
                             {myShared > 0 ? myShared.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}
@@ -315,7 +326,12 @@ function RouteFinanceiroPage() {
                       <TableCell className="font-bold text-coffee uppercase text-xs">Total Moto</TableCell>
                       {allPlans.map(p => {
                         const pTotalManual = calculateTotal(p.costs);
-                        const pTotalShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        const pTotalShared = sharedExpenses.reduce((sum, exp) => {
+                          if (exp.participating_plans?.includes(p.id)) {
+                            return sum + (exp.total_amount / (exp.participating_plans.length || 1));
+                          }
+                          return sum;
+                        }, 0);
                         const pTotal = pTotalManual + pTotalShared;
                         return <TableCell key={`total-${p.id}`} className="text-center font-bold text-coffee">{pTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
                       })}
@@ -326,7 +342,12 @@ function RouteFinanceiroPage() {
                       <TableCell className="font-bold text-copper uppercase text-xs">Por Pessoa</TableCell>
                       {allPlans.map(p => {
                         const pTotalManual = calculateTotal(p.costs);
-                        const pTotalShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        const pTotalShared = sharedExpenses.reduce((sum, exp) => {
+                          if (exp.participating_plans?.includes(p.id)) {
+                            return sum + (exp.total_amount / (exp.participating_plans.length || 1));
+                          }
+                          return sum;
+                        }, 0);
                         const pTotal = pTotalManual + pTotalShared;
                         const perPerson = p.has_passenger ? pTotal / 2 : pTotal;
                         return <TableCell key={`per-${p.id}`} className="text-center font-bold text-copper">{perPerson.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
@@ -534,7 +555,7 @@ function RouteFinanceiroPage() {
 
 function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdated }: any) {
   const [openNew, setOpenNew] = useState(false);
-  const numMotos = allPlans.length || 1;
+  const [editExpense, setEditExpense] = useState<SharedExpense | null>(null);
 
   async function handleTogglePayment(installmentId: string, planId: string, currentPaid: boolean) {
     if (!isAdmin) return toast.error("Apenas admins podem dar baixa em pagamentos.");
@@ -565,6 +586,13 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
     }
   }
 
+  async function handleDeleteExpense(expenseId: string) {
+    if (!confirm("Tem certeza que deseja excluir esta despesa e TODAS as suas parcelas permanentemente?")) return;
+    const { error } = await supabase.from("trip_shared_expenses").delete().eq("id", expenseId);
+    if (error) toast.error("Erro ao excluir: " + error.message);
+    else { toast.success("Despesa excluída com sucesso"); onUpdated(); }
+  }
+
   return (
     <Card className="border-leather/30 bg-cream">
       <CardHeader className="bg-leather text-cream rounded-t-lg flex flex-row items-center justify-between pb-4">
@@ -581,7 +609,12 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
                 <Plus className="w-4 h-4 mr-2" /> Nova Despesa
               </Button>
             </DialogTrigger>
-            <NewSharedExpenseDialog routeId={routeId} onCreated={() => { setOpenNew(false); onUpdated(); }} />
+            <NewSharedExpenseDialog routeId={routeId} allPlans={allPlans} onCreated={() => { setOpenNew(false); onUpdated(); }} />
+          </Dialog>
+        )}
+        {isAdmin && (
+          <Dialog open={!!editExpense} onOpenChange={(open) => !open && setEditExpense(null)}>
+            {editExpense && <EditSharedExpenseDialog expense={editExpense} onUpdated={() => { setEditExpense(null); onUpdated(); }} />}
           </Dialog>
         )}
       </CardHeader>
@@ -594,22 +627,43 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
         ) : (
           sharedExpenses.map((exp: SharedExpense) => (
             <div key={exp.id} className="border border-leather/30 rounded-lg overflow-hidden bg-white">
-              <div className="bg-coffee/5 p-4 flex justify-between items-center border-b border-leather/20">
-                <div>
+              <div className="bg-coffee/5 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-leather/20 gap-4 sm:gap-0">
+                <div className="flex-1 pr-4">
                   <h3 className="font-bold text-coffee text-lg">{exp.title}</h3>
+                  {exp.description && <p className="text-sm text-coffee/80 mt-1 mb-2">{exp.description}</p>}
                   <p className="text-sm text-leather">Custo Total: {exp.total_amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase text-leather font-bold">Por Moto ({numMotos})</p>
-                  <p className="font-bold text-copper text-lg">
-                    {(exp.total_amount / numMotos).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </p>
+                <div className="text-right flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                  <div className="text-right">
+                    <p className="text-xs uppercase text-leather font-bold">Por Moto ({exp.participating_plans?.length || 1})</p>
+                    <p className="font-bold text-copper text-lg">
+                      {(exp.total_amount / (exp.participating_plans?.length || 1)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </p>
+                  </div>
+                  {isAdmin && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-leather hover:text-coffee shrink-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setEditExpense(exp)} className="cursor-pointer">
+                          <Edit className="h-4 w-4 mr-2" /> Editar Título/Desc
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDeleteExpense(exp.id)} className="cursor-pointer text-red-600 focus:text-red-700">
+                          <Trash2 className="h-4 w-4 mr-2" /> Excluir Despesa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
               <div className="p-4 space-y-6">
                 {exp.installments.map(inst => {
-                  const instShare = inst.amount / numMotos;
-                  const paidCount = allPlans.filter((p:any) => inst.payments.find(pmt => pmt.plan_id === p.id)?.is_paid).length;
+                  const expNumMotos = exp.participating_plans?.length || 1;
+                  const instShare = inst.amount / expNumMotos;
+                  const participatingPlansList = allPlans.filter(p => exp.participating_plans?.includes(p.id));
                   return (
                     <div key={inst.id}>
                       <div className="flex justify-between items-center mb-3">
@@ -631,8 +685,8 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {allPlans.map((plan: any) => {
-                               const pilot = plan.profile?.nickname || "Moto";
+                            {participatingPlansList.map((plan: any) => {
+                               const pilot = plan.profile?.nickname || plan.profile?.full_name?.split(" ")[0] || "Moto";
                                const partner = plan.partner?.nickname || "";
                                const name = partner ? `${pilot} & ${partner}` : pilot;
                                const isPaid = inst.payments.find(p => p.plan_id === plan.id)?.is_paid || false;
@@ -673,9 +727,18 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
   )
 }
 
-function NewSharedExpenseDialog({ routeId, onCreated }: any) {
-  const [form, setForm] = useState({ title: "", amount: "", installmentsCount: "1", firstDueDate: new Date().toISOString().slice(0, 10) });
+function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
+  const [form, setForm] = useState({ title: "", description: "", amount: "", installmentsCount: "1", firstDueDate: new Date().toISOString().slice(0, 10) });
+  const [selectedPlans, setSelectedPlans] = useState<string[]>(allPlans?.map((p:any) => p.id) || []);
   const [saving, setSaving] = useState(false);
+
+  function togglePlan(planId: string) {
+    if (selectedPlans.includes(planId)) {
+      setSelectedPlans(selectedPlans.filter(id => id !== planId));
+    } else {
+      setSelectedPlans([...selectedPlans, planId]);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -686,6 +749,8 @@ function NewSharedExpenseDialog({ routeId, onCreated }: any) {
     const { data: exp, error: err1 } = await supabase.from("trip_shared_expenses").insert({
       route_id: routeId,
       title: form.title,
+      description: form.description || null,
+      participating_plans: selectedPlans,
       total_amount: parseFloat(form.amount),
       created_by: u.user?.id
     }).select().single();
@@ -732,6 +797,10 @@ function NewSharedExpenseDialog({ routeId, onCreated }: any) {
           <Label>Título (ex: Hospedagem Hotel X)</Label>
           <Input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
         </div>
+        <div>
+          <Label>Descrição / Detalhes (Opcional)</Label>
+          <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Mais informações sobre a despesa" />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
              <Label>Valor Total (R$)</Label>
@@ -742,12 +811,78 @@ function NewSharedExpenseDialog({ routeId, onCreated }: any) {
              <Input required type="number" min="1" max="24" value={form.installmentsCount} onChange={e => setForm({...form, installmentsCount: e.target.value})} />
           </div>
         </div>
+        
+        <div className="border border-leather/20 rounded-md p-3 max-h-[160px] overflow-y-auto bg-coffee/5">
+           <Label className="mb-2 block text-coffee font-bold">Participantes (Desmarque quem não entra no rateio)</Label>
+           <div className="space-y-1.5 mt-2">
+             {allPlans.map((p: any) => {
+               const pilot = p.profile?.nickname || p.profile?.full_name?.split(" ")[0] || "Moto";
+               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
+               const name = partner ? `${pilot} e ${partner}` : pilot;
+               return (
+                 <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/10 p-1.5 rounded transition-colors">
+                   <input 
+                     type="checkbox" 
+                     className="rounded border-leather text-copper focus:ring-copper w-4 h-4"
+                     checked={selectedPlans.includes(p.id)}
+                     onChange={() => togglePlan(p.id)}
+                   />
+                   <span className="text-coffee font-medium">{name}</span>
+                 </label>
+               )
+             })}
+           </div>
+        </div>
+
         <div>
           <Label>Vencimento da 1ª Parcela</Label>
           <Input required type="date" value={form.firstDueDate} onChange={e => setForm({...form, firstDueDate: e.target.value})} />
         </div>
         <DialogFooter>
            <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando..." : "Criar Despesa"}</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  )
+}
+
+function EditSharedExpenseDialog({ expense, onUpdated }: any) {
+  const [form, setForm] = useState({ title: expense.title, description: expense.description || "" });
+  const [saving, setSaving] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const { error } = await supabase.from("trip_shared_expenses").update({
+      title: form.title,
+      description: form.description || null
+    }).eq("id", expense.id);
+
+    if (error) { 
+      toast.error(`Erro ao editar: ${error.message}`); 
+    } else {
+      toast.success("Despesa atualizada!");
+      onUpdated();
+    }
+    setSaving(false);
+  }
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Editar Despesa</DialogTitle>
+      </DialogHeader>
+      <form onSubmit={submit} className="space-y-4 mt-4">
+        <div>
+          <Label>Título</Label>
+          <Input required value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+        </div>
+        <div>
+          <Label>Descrição / Detalhes</Label>
+          <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+        </div>
+        <DialogFooter>
+           <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando..." : "Salvar Alterações"}</Button>
         </DialogFooter>
       </form>
     </DialogContent>

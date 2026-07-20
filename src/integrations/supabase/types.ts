@@ -589,7 +589,9 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          description: string | null
           id: string
+          participating_plans: string[]
           route_id: string
           title: string
           total_amount: number
@@ -597,7 +599,9 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
+          participating_plans: string[]
           route_id: string
           title: string
           total_amount: number
@@ -605,7 +609,9 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
+          participating_plans?: string[]
           route_id?: string
           title?: string
           total_amount?: number
