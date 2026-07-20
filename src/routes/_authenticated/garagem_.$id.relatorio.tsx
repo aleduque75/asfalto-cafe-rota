@@ -162,7 +162,7 @@ function RelatorioFinanceiro() {
             period === 'anual' ? 'Últimos 365 dias' : 'Todo o período'
           }
           <br />
-          <strong>Data de emissão:</strong> {new Date().toLocaleDateString('pt-BR')}
+          <strong>Data de emissão:</strong> {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
         </div>
 
         {/* Conteúdo */}
@@ -213,16 +213,23 @@ function RelatorioFinanceiro() {
 
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
-          body * {
-            visibility: hidden;
-          }
-          #root, #root * {
-            visibility: visible;
-          }
-          /* Oculta completamente a Sidebar e navegação principal durante a impressão */
-          aside, nav, header {
+          /* Oculta completamente a Sidebar, navegação e botões durante a impressão */
+          aside, nav, header, button {
             display: none !important;
           }
+          
+          /* Garante que o fundo seja branco para economizar tinta e melhorar legibilidade */
+          body, html, #root, main {
+            background-color: white !important;
+            height: auto !important;
+            overflow: visible !important;
+          }
+
+          /* Remove restrições de altura/scroll que podem cortar o conteúdo no PDF */
+          * {
+            overflow: visible !important;
+          }
+
           .print\\:hidden {
             display: none !important;
           }
@@ -244,19 +251,13 @@ function RelatorioFinanceiro() {
           .print\\:shadow-none {
             box-shadow: none !important;
           }
-          /* Remove margens e ajusta layout apenas para o container atual */
+          
+          /* Ajusta layout do conteúdo principal */
           main {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
             max-width: none !important;
-          }
-          /* Posiciona o conteudo de impressao no topo da pagina */
-          .max-w-4xl {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
           }
         }
       `}} />
