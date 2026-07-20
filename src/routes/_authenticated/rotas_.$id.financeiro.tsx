@@ -203,7 +203,13 @@ function RouteFinanceiroPage() {
   const myManualTotal = calculateTotal(costs);
   const mySharedTotal = sharedExpenses.reduce((sum, exp) => {
     if (myPlanId && exp.participating_plans?.includes(myPlanId)) {
-      return sum + (exp.total_amount / (exp.participating_plans.length || 1));
+      const totalHeads = exp.participating_plans.reduce((h: number, pid: string) => {
+        const p = allPlans.find(plan => plan.id === pid);
+        return h + (p?.has_passenger ? 2 : 1);
+      }, 0) || 1;
+      const myPlan = allPlans.find(p => p.id === myPlanId);
+      const myHeads = myPlan?.has_passenger ? 2 : 1;
+      return sum + (exp.total_amount / totalHeads) * myHeads;
     }
     return sum;
   }, 0);
@@ -501,7 +507,13 @@ function RouteFinanceiroPage() {
                 ) : (
                   <div className="space-y-4">
                     {sharedExpenses.map(exp => {
-                      const myShare = exp.total_amount / numMotos;
+                      const totalHeads = exp.participating_plans?.reduce((h: number, pid: string) => {
+                        const p = allPlans.find(plan => plan.id === pid);
+                        return h + (p?.has_passenger ? 2 : 1);
+                      }, 0) || 1;
+                      const myPlan = allPlans.find(p => p.id === myPlanId);
+                      const myHeads = myPlan?.has_passenger ? 2 : 1;
+                      const myShare = (exp.total_amount / totalHeads) * myHeads;
                       return (
                         <div key={exp.id} className="border-b border-leather/20 pb-3 last:border-0 last:pb-0">
                           <div className="flex justify-between items-center mb-2">
@@ -512,7 +524,7 @@ function RouteFinanceiroPage() {
                             {exp.installments.map(inst => {
                               const pmt = inst.payments.find(p => p.plan_id === myPlanId);
                               const isPaid = pmt?.is_paid;
-                              const instShare = inst.amount / numMotos;
+                              const instShare = (inst.amount / totalHeads) * myHeads;
                               return (
                                 <div key={inst.id} className="flex justify-between items-center text-xs">
                                   <span className="text-leather flex items-center gap-1.5">
@@ -665,10 +677,20 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                 </div>
                 <div className="text-right flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="text-right">
-                    <p className="text-xs uppercase text-leather font-bold">Por Moto ({exp.participating_plans?.length || 1})</p>
-                    <p className="font-bold text-copper text-lg">
-                      {(exp.total_amount / (exp.participating_plans?.length || 1)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </p>
+                    {(() => {
+                      const totalHeads = exp.participating_plans?.reduce((h: number, pid: string) => {
+                        const p = allPlans.find(plan => plan.id === pid);
+                        return h + (p?.has_passenger ? 2 : 1);
+                      }, 0) || 1;
+                      return (
+                        <>
+                          <p className="text-xs uppercase text-leather font-bold">Por Pessoa ({totalHeads})</p>
+                          <p className="font-bold text-copper text-lg">
+                            {(exp.total_amount / totalHeads).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </p>
+                        </>
+                      )
+                    })()}
                   </div>
                   {isAdmin && (
                     <DropdownMenu>
@@ -691,8 +713,11 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
               </div>
               <div className="p-4 space-y-6">
                 {exp.installments.map(inst => {
-                  const expNumMotos = exp.participating_plans?.length || 1;
-                  const instShare = inst.amount / expNumMotos;
+                  const totalHeads = exp.participating_plans?.reduce((h: number, pid: string) => {
+                    const p = allPlans.find(plan => plan.id === pid);
+                    return h + (p?.has_passenger ? 2 : 1);
+                  }, 0) || 1;
+                  const instSharePerHead = inst.amount / totalHeads;
                   const participatingPlansList = allPlans.filter(p => exp.participating_plans?.includes(p.id));
                   return (
                     <div key={inst.id}>
@@ -702,7 +727,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                           <span className="text-xs font-normal text-leather">Vencimento: {new Date(inst.due_date).toLocaleDateString('pt-BR')}</span>
                         </h4>
                         <span className="text-xs font-bold text-copper bg-copper/10 px-2 py-1 rounded">
-                          {instShare.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / moto
+                          {instSharePerHead.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} / pessoa
                         </span>
                       </div>
                       <div className="overflow-x-auto border border-leather/15 rounded-md">
@@ -710,6 +735,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                           <TableHeader className="bg-coffee/5">
                             <TableRow>
                               <TableHead className="py-2 text-xs">Moto / Casal</TableHead>
+                              <TableHead className="py-2 text-xs">Valor</TableHead>
                               <TableHead className="py-2 text-xs">Status</TableHead>
                               <TableHead className="py-2 text-xs text-right">Ação</TableHead>
                             </TableRow>
@@ -720,10 +746,13 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                                const partner = plan.partner?.nickname || "";
                                const name = partner ? `${pilot} & ${partner}` : pilot;
                                const isPaid = inst.payments.find(p => p.plan_id === plan.id)?.is_paid || false;
+                               const myHeads = plan.has_passenger ? 2 : 1;
+                               const planValue = instSharePerHead * myHeads;
                                
                                return (
                                  <TableRow key={plan.id}>
                                    <TableCell className="py-2 font-medium text-sm text-coffee">{name}</TableCell>
+                                   <TableCell className="py-2 font-bold text-sm text-copper">{planValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
                                    <TableCell className="py-2">
                                      {isPaid 
                                        ? <span className="inline-flex items-center gap-1 text-xs text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full"><CheckCircle2 className="w-3 h-3"/> Pago</span>
