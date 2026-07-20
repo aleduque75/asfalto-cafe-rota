@@ -124,10 +124,17 @@ function MotoDetail() {
   }
 
   async function deleteItem(itemId: string) {
-    if (!confirm("Excluir este item de manutenção?")) return;
+    const isUsed = records.some(r => r.maintenance_item_id === itemId);
+    
+    if (isUsed) {
+      if (!confirm("⚠️ ATENÇÃO: Existem manutenções no histórico vinculadas a esta categoria!\n\nSe você excluí-la, os registros antigos perderão a categoria e ficarão como 'Avulso'.\n\nDeseja excluir a categoria mesmo assim?")) return;
+    } else {
+      if (!confirm("Excluir este item?")) return;
+    }
+    
     const { error } = await supabase.from("maintenance_items").delete().eq("id", itemId);
     if (error) return toast.error(error.message);
-    toast.success("Item removido");
+    toast.success("Removido com sucesso");
     loadAll();
   }
 
@@ -163,6 +170,9 @@ function MotoDetail() {
       (r.notes && r.notes.toLowerCase().includes(q))
     );
   });
+
+  const lembretes = items.filter(it => it.interval_km || it.interval_months);
+  const categorias = items.filter(it => !it.interval_km && !it.interval_months);
 
   return (
     <div>
@@ -277,16 +287,16 @@ function MotoDetail() {
             </div>
           </div>
 
-          {items.length === 0 ? (
+          {lembretes.length === 0 ? (
             <Card className="border-dashed border-leather/40 bg-cream">
               <CardContent className="py-12 text-center">
                 <Wrench className="h-10 w-10 mx-auto mb-3 text-copper" />
-                <p className="text-leather">Nenhum item cadastrado. Comece adicionando, por exemplo, "Óleo do motor".</p>
+                <p className="text-leather">Nenhum lembrete com intervalo de tempo ou KM cadastrado.</p>
               </CardContent>
             </Card>
           ) : (
             <div className="grid md:grid-cols-2 gap-4">
-              {items.map((it) => {
+              {lembretes.map((it) => {
                 const s = statusFor(it, moto.current_km);
                 return (
                   <Card key={it.id} className="border-leather/30 bg-cream">
@@ -364,6 +374,28 @@ function MotoDetail() {
                   </Card>
                 );
               })}
+            </div>
+          )}
+
+          {categorias.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-leather/20">
+              <h3 className="text-sm font-medium text-leather mb-4">Outras Categorias de Serviços (sem alerta definido):</h3>
+              <div className="flex flex-wrap gap-2">
+                {categorias.map(c => (
+                  <Badge key={c.id} variant="outline" className="bg-cream border-leather/30 text-coffee py-1.5 px-3 flex items-center gap-2">
+                    {c.name}
+                    <div className="flex gap-1 ml-2 pl-2 border-l border-leather/20">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button className="text-leather hover:text-coffee transition-colors" title="Editar (Adicionar alerta)"><Pencil className="w-3.5 h-3.5"/></button>
+                        </DialogTrigger>
+                        <EditItemDialog item={c} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
+                      </Dialog>
+                      <button onClick={() => deleteItem(c.id)} className="text-leather hover:text-destructive transition-colors" title="Excluir"><Trash2 className="w-3.5 h-3.5"/></button>
+                    </div>
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
       </section>
