@@ -56,6 +56,7 @@ function RouteFinanceiroPage() {
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [myPlanId, setMyPlanId] = useState<string | null>(null);
   const [allPlans, setAllPlans] = useState<PlanData[]>([]);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [sharedExpenses, setSharedExpenses] = useState<SharedExpense[]>([]);
 
@@ -76,7 +77,27 @@ function RouteFinanceiroPage() {
 
     // Check if user is admin
     const { data: roleData } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id).maybeSingle();
-    setIsAdmin(roleData?.role === "admin");
+    const isUserAdmin = roleData?.role === "admin";
+    setIsAdmin(isUserAdmin);
+
+    if (isUserAdmin) {
+      const { data: profs } = await supabase.from("profiles").select("*").order("nickname", { ascending: true });
+      if (profs) {
+        const processedProfs = [];
+        const seen = new Set();
+        for (const p of profs) {
+          if (seen.has(p.id)) continue;
+          let partner = null;
+          if (p.partner_id) {
+            partner = profs.find(x => x.id === p.partner_id);
+            if (partner) seen.add(partner.id);
+          }
+          processedProfs.push({ ...p, partner });
+          seen.add(p.id);
+        }
+        setAllProfiles(processedProfs);
+      }
+    }
 
     // Get Route info
     const { data: routeData } = await supabase.from("routes").select("title").eq("id", routeId).maybeSingle();
@@ -535,10 +556,11 @@ function RouteFinanceiroPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="grupo">
+         <TabsContent value="grupo">
            <GroupExpensesTab 
              sharedExpenses={sharedExpenses} 
              allPlans={allPlans} 
+             allProfiles={allProfiles}
              isAdmin={isAdmin} 
              routeId={routeId}
              onUpdated={loadData}
@@ -553,7 +575,7 @@ function RouteFinanceiroPage() {
 // COMPONENT FOR GROUP EXPENSES TAB
 // -------------------------------------------------------------------------
 
-function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdated }: any) {
+function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, routeId, onUpdated }: any) {
   const [openNew, setOpenNew] = useState(false);
   const [editExpense, setEditExpense] = useState<SharedExpense | null>(null);
 
@@ -609,7 +631,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
                 <Plus className="w-4 h-4 mr-2" /> Nova Despesa
               </Button>
             </DialogTrigger>
-            <NewSharedExpenseDialog routeId={routeId} allPlans={allPlans} onCreated={() => { setOpenNew(false); onUpdated(); }} />
+            <NewSharedExpenseDialog routeId={routeId} allPlans={allPlans} allProfiles={allProfiles} onCreated={() => { setOpenNew(false); onUpdated(); }} />
           </Dialog>
         )}
         {isAdmin && (
@@ -733,16 +755,22 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
   )
 }
 
-function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
+function NewSharedExpenseDialog({ routeId, allPlans, allProfiles, onCreated }: any) {
   const [form, setForm] = useState({ title: "", description: "", link: "", paid_by: "", amount: "", installmentsCount: "1", firstDueDate: new Date().toISOString().slice(0, 10) });
-  const [selectedPlans, setSelectedPlans] = useState<string[]>(allPlans?.map((p:any) => p.id) || []);
+  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
-  function togglePlan(planId: string) {
-    if (selectedPlans.includes(planId)) {
-      setSelectedPlans(selectedPlans.filter(id => id !== planId));
+  useEffect(() => {
+    if (allPlans && allPlans.length > 0) {
+      setSelectedProfileIds(allPlans.map((p:any) => p.profile_id));
+    }
+  }, [allPlans]);
+
+  function toggleProfile(profileId: string) {
+    if (selectedProfileIds.includes(profileId)) {
+      setSelectedProfileIds(selectedProfileIds.filter(id => id !== profileId));
     } else {
-      setSelectedPlans([...selectedPlans, planId]);
+      setSelectedProfileIds([...selectedProfileIds, profileId]);
     }
   }
 
@@ -751,6 +779,29 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
     setSaving(true);
     const { data: u } = await supabase.auth.getUser();
     
+    const participating_plans: string[] = [];
+    
+    for (const profId of selectedProfileIds) {
+       const existingPlan = allPlans.find((p:any) => p.profile_id === profId || p.profile?.partner_id === profId);
+       if (existingPlan) {
+          participating_plans.push(existingPlan.id);
+       } else {
+          const prof = allProfiles.find((p:any) => p.id === profId);
+          const hasPassenger = !!prof?.partner_id;
+          const { data: newPlan } = await supabase.from("trip_financial_plans").insert({
+             route_id: routeId,
+             profile_id: profId,
+             has_passenger: hasPassenger,
+             costs: { revisao: 0, hospedagem: 0, alimentacao: 0, reserva: 0, combustivel: 0, pedagio: 0, passeios: 0, outros: 0 },
+             fuel_calc: { distance: 0, autonomy: 0, price: 0 },
+             observations: {}
+          }).select().single();
+          if (newPlan) {
+            participating_plans.push(newPlan.id);
+          }
+       }
+    }
+
     // 1. Insert expense
     const { data: exp, error: err1 } = await supabase.from("trip_shared_expenses").insert({
       route_id: routeId,
@@ -758,7 +809,7 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
       description: form.description || null,
       link: form.link || null,
       paid_by: form.paid_by || null,
-      participating_plans: selectedPlans,
+      participating_plans: participating_plans,
       total_amount: parseFloat(form.amount),
       created_by: u.user?.id
     }).select().single();
@@ -831,8 +882,8 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
         <div className="border border-leather/20 rounded-md p-3 max-h-[160px] overflow-y-auto bg-coffee/20">
            <Label className="mb-2 block font-bold text-cream">Participantes (Desmarque quem não entra no rateio)</Label>
            <div className="space-y-1.5 mt-2">
-             {allPlans.map((p: any) => {
-               const pilot = p.profile?.nickname || p.profile?.full_name?.split(" ")[0] || "Moto";
+             {allProfiles.map((p: any) => {
+               const pilot = p.nickname || p.full_name?.split(" ")[0] || "Moto";
                const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
                const name = partner ? `${pilot} e ${partner}` : pilot;
                return (
@@ -840,8 +891,8 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
                    <input 
                      type="checkbox" 
                      className="rounded border-leather text-copper focus:ring-copper w-4 h-4"
-                     checked={selectedPlans.includes(p.id)}
-                     onChange={() => togglePlan(p.id)}
+                     checked={selectedProfileIds.includes(p.id)}
+                     onChange={() => toggleProfile(p.id)}
                    />
                    <span className="text-cream font-medium">{name}</span>
                  </label>
