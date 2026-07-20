@@ -243,8 +243,8 @@ function RelatorioFinanceiro() {
 
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
-          /* Oculta completamente a Sidebar, navegação e botões durante a impressão */
-          aside, nav, header, button {
+          /* Oculta completamente a Sidebar, navegação, botões e rodapé mobile durante a impressão */
+          aside, nav, header, button, .fixed.bottom-0 {
             display: none !important;
           }
           
