@@ -636,7 +636,9 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
         )}
         {isAdmin && (
           <Dialog open={!!editExpense} onOpenChange={(open) => !open && setEditExpense(null)}>
-            {editExpense && <EditSharedExpenseDialog expense={editExpense} onUpdated={() => { setEditExpense(null); onUpdated(); }} />}
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
+              {editExpense && <EditSharedExpenseDialog expense={editExpense} allPlans={allPlans} allProfiles={allProfiles} onUpdated={() => { setEditExpense(null); onUpdated(); }} />}
+            </DialogContent>
           </Dialog>
         )}
       </CardHeader>
