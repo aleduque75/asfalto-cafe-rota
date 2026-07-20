@@ -251,6 +251,91 @@ function RouteFinanceiroPage() {
               <div className="p-4 text-sm text-center text-leather">
                 (O total do grupo inclui as despesas compartilhadas: {totalGroupShared.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
               </div>
+
+              <div className="overflow-x-auto p-4 border-t border-leather/30">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-leather/20 bg-coffee/5 hover:bg-coffee/5">
+                      <TableHead className="font-bold text-coffee">Item</TableHead>
+                      {allPlans.map(p => {
+                        const pilotName = p.profile?.nickname || p.profile?.full_name?.split(" ")[0] || "Moto";
+                        const partnerName = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
+                        const displayName = partnerName ? `${pilotName} e ${partnerName}` : pilotName;
+                        return <TableHead key={p.id} className="text-center font-bold text-coffee min-w-[120px]">{displayName}</TableHead>
+                      })}
+                      <TableHead className="text-right font-bold text-coffee min-w-[120px]">TOTAL</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { key: 'revisao', label: 'Revisão da Moto' },
+                      { key: 'hospedagem', label: 'Hospedagem' },
+                      { key: 'alimentacao', label: 'Alimentação' },
+                      { key: 'reserva', label: 'Reserva' },
+                      { key: 'combustivel', label: 'Combustível' },
+                      { key: 'pedagio', label: 'Pedágio' },
+                      { key: 'passeios', label: 'Passeios/Atrações' },
+                      { key: 'outros', label: 'Outros' }
+                    ].map((category) => {
+                      const rowTotal = allPlans.reduce((sum, p) => sum + (p.costs[category.key as keyof Costs] || 0), 0);
+                      return (
+                        <TableRow key={category.key} className="border-leather/20">
+                          <TableCell className="font-medium text-coffee">{category.label}</TableCell>
+                          {allPlans.map(p => (
+                            <TableCell key={p.id} className="text-center">
+                              {p.costs[category.key as keyof Costs] > 0 
+                                ? p.costs[category.key as keyof Costs].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                                : '-'}
+                            </TableCell>
+                          ))}
+                          <TableCell className="text-right font-bold">
+                            {rowTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+
+                    <TableRow className="border-leather/20 bg-coffee/5">
+                      <TableCell className="font-medium text-coffee">Despesas Compartilhadas</TableCell>
+                      {allPlans.map(p => {
+                        const myShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        return (
+                          <TableCell key={p.id} className="text-center text-copper font-bold">
+                            {myShared > 0 ? myShared.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}
+                          </TableCell>
+                        )
+                      })}
+                      <TableCell className="text-right font-bold text-copper">
+                        {totalGroupShared.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </TableCell>
+                    </TableRow>
+                    
+                    {/* Row Totals */}
+                    <TableRow className="border-leather/40 bg-leather/10 hover:bg-leather/10">
+                      <TableCell className="font-bold text-coffee uppercase text-xs">Total Moto</TableCell>
+                      {allPlans.map(p => {
+                        const pTotalManual = calculateTotal(p.costs);
+                        const pTotalShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        const pTotal = pTotalManual + pTotalShared;
+                        return <TableCell key={`total-${p.id}`} className="text-center font-bold text-coffee">{pTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                      })}
+                      <TableCell className="text-right font-black text-coffee">{totalGroup.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                    </TableRow>
+                    
+                    <TableRow className="border-none bg-cream hover:bg-cream">
+                      <TableCell className="font-bold text-copper uppercase text-xs">Por Pessoa</TableCell>
+                      {allPlans.map(p => {
+                        const pTotalManual = calculateTotal(p.costs);
+                        const pTotalShared = sharedExpenses.reduce((sum, exp) => sum + (exp.total_amount / (allPlans.length || 1)), 0);
+                        const pTotal = pTotalManual + pTotalShared;
+                        const perPerson = p.has_passenger ? pTotal / 2 : pTotal;
+                        return <TableCell key={`per-${p.id}`} className="text-center font-bold text-copper">{perPerson.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                      })}
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -269,7 +354,67 @@ function RouteFinanceiroPage() {
             </CardHeader>
             <CardContent className="p-4 sm:p-6 space-y-8">
               
-              {/* Custos Individuais (Calculadora de Combustivel e Inputs) */}
+              {/* Fuel Calculator */}
+              <div className="bg-coffee/5 rounded-lg border border-copper/30 p-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-copper/10 rounded-bl-full z-0"></div>
+                <div className="relative z-10 flex items-center gap-2 mb-4">
+                  <Calculator className="h-5 w-5 text-copper" />
+                  <h3 className="font-bold text-coffee uppercase text-sm">Calculadora de Combustível</h3>
+                </div>
+                <div className="relative z-10 grid sm:grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-coffee/80">Distância (Ida e Volta)</Label>
+                    <div className="relative mt-1">
+                      <Input 
+                        type="number" 
+                        value={fuelCalc.distance || ''} 
+                        onChange={(e) => setFuelCalc(prev => ({ ...prev, distance: parseFloat(e.target.value)||0 }))} 
+                        placeholder="Ex: 800"
+                        className="pr-10 border-copper/60 text-coffee font-medium placeholder:text-coffee/50 bg-white"
+                      />
+                      <span className="absolute right-3 top-2.5 text-xs text-coffee font-bold">KM</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-coffee/80">Autonomia Média</Label>
+                    <div className="relative mt-1">
+                      <Input 
+                        type="number" 
+                        value={fuelCalc.autonomy || ''} 
+                        onChange={(e) => setFuelCalc(prev => ({ ...prev, autonomy: parseFloat(e.target.value)||0 }))} 
+                        placeholder="Ex: 25"
+                        className="pr-12 border-copper/60 text-coffee font-medium placeholder:text-coffee/50 bg-white"
+                      />
+                      <span className="absolute right-3 top-2.5 text-xs text-coffee font-bold">KM/L</span>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-coffee/80">Preço do Litro</Label>
+                    <div className="relative mt-1">
+                      <span className="absolute left-3 top-2.5 text-xs text-coffee font-bold">R$</span>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        value={fuelCalc.price || ''} 
+                        onChange={(e) => setFuelCalc(prev => ({ ...prev, price: parseFloat(e.target.value)||0 }))} 
+                        placeholder="5,80"
+                        className="pl-8 border-copper/60 text-coffee font-medium placeholder:text-coffee/50 bg-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-copper/30 flex justify-between items-center relative z-10">
+                   <p className="text-xs text-coffee/80 max-w-[200px] sm:max-w-none">
+                     <Info className="h-3 w-3 inline mr-1" />
+                     O custo estimado preenche automaticamente o campo abaixo.
+                   </p>
+                   <p className="text-lg font-black text-copper">
+                      {costs.combustivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                   </p>
+                </div>
+              </div>
+
+              {/* Custos Individuais Manuais */}
               <div className="bg-white/50 p-4 rounded-lg border border-leather/20">
                 <h3 className="font-bold text-coffee uppercase text-sm mb-4">Custos Individuais Manuais</h3>
                 <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
@@ -278,21 +423,25 @@ function RouteFinanceiroPage() {
                     { key: 'hospedagem', label: 'Hospedagem', icon: '🛌' },
                     { key: 'alimentacao', label: 'Alimentação', icon: '🍔' },
                     { key: 'reserva', label: 'Reserva', icon: '💳' },
-                    { key: 'combustivel', label: 'Combustível (Calculado)', icon: '⛽' },
+                    { key: 'combustivel', label: 'Combustível (Calculado)', icon: '⛽', disabled: true },
                     { key: 'pedagio', label: 'Pedágio', icon: '🛣️' },
                     { key: 'passeios', label: 'Passeios / Atrações', icon: '🎟️' },
                     { key: 'outros', label: 'Outros Custos', icon: '📦' }
                   ].map((item) => (
                     <div key={item.key}>
-                      <Label className="flex justify-between items-center mb-1 text-coffee text-xs">
+                      <Label className="flex justify-between items-center mb-1 text-coffee text-xs font-semibold">
                         <span>{item.icon} {item.label}</span>
                       </Label>
-                      <Input 
-                        type="number" 
-                        className="bg-white border-leather/40"
-                        value={costs[item.key as keyof Costs] || ''}
-                        onChange={(e) => setCosts(prev => ({ ...prev, [item.key]: parseFloat(e.target.value)||0 }))}
-                      />
+                      <div className="relative">
+                        <span className={`absolute left-3 top-2.5 text-sm font-bold ${item.disabled ? 'text-copper' : 'text-coffee'}`}>R$</span>
+                        <Input 
+                          type="number" 
+                          className={`pl-10 ${item.disabled ? 'bg-copper/10 border-copper/30 font-bold text-copper' : 'bg-white border-leather/40'}`}
+                          value={costs[item.key as keyof Costs] || ''}
+                          onChange={(e) => setCosts(prev => ({ ...prev, [item.key]: parseFloat(e.target.value)||0 }))}
+                          disabled={item.disabled}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
