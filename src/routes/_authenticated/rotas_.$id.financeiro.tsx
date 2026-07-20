@@ -43,7 +43,7 @@ type Installment = {
 };
 
 type SharedExpense = {
-  id: string; route_id: string; title: string; total_amount: number; description: string | null; participating_plans: string[];
+  id: string; route_id: string; title: string; total_amount: number; description: string | null; link: string | null; paid_by: string | null; participating_plans: string[];
   created_at: string; installments: Installment[];
 };
 
@@ -631,6 +631,12 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
                 <div className="flex-1 pr-4">
                   <h3 className="font-bold text-coffee text-lg">{exp.title}</h3>
                   {exp.description && <p className="text-sm text-coffee/80 mt-1 mb-2">{exp.description}</p>}
+                  {exp.paid_by && <p className="text-sm text-leather mt-1 mb-2 font-bold">💳 Pago por: {exp.paid_by}</p>}
+                  {exp.link && (
+                    <a href={exp.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-xs text-copper hover:text-copper/80 font-bold mb-2 bg-copper/10 px-2 py-1 rounded">
+                      🔗 Acessar Link da Reserva
+                    </a>
+                  )}
                   <p className="text-sm text-leather">Custo Total: {exp.total_amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </div>
                 <div className="text-right flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
@@ -728,7 +734,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, isAdmin, routeId, onUpdate
 }
 
 function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
-  const [form, setForm] = useState({ title: "", description: "", amount: "", installmentsCount: "1", firstDueDate: new Date().toISOString().slice(0, 10) });
+  const [form, setForm] = useState({ title: "", description: "", link: "", paid_by: "", amount: "", installmentsCount: "1", firstDueDate: new Date().toISOString().slice(0, 10) });
   const [selectedPlans, setSelectedPlans] = useState<string[]>(allPlans?.map((p:any) => p.id) || []);
   const [saving, setSaving] = useState(false);
 
@@ -750,6 +756,8 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
       route_id: routeId,
       title: form.title,
       description: form.description || null,
+      link: form.link || null,
+      paid_by: form.paid_by || null,
       participating_plans: selectedPlans,
       total_amount: parseFloat(form.amount),
       created_by: u.user?.id
@@ -801,6 +809,14 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
           <Label>Descrição / Detalhes (Opcional)</Label>
           <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Mais informações sobre a despesa" />
         </div>
+        <div>
+          <Label>Quem Pagou? (Cartão de quem? Opcional)</Label>
+          <Input value={form.paid_by} onChange={e => setForm({...form, paid_by: e.target.value})} placeholder="Ex: Cartão do João" />
+        </div>
+        <div>
+          <Label>Link da Reserva (Ex: Airbnb, Booking - Opcional)</Label>
+          <Input type="url" value={form.link} onChange={e => setForm({...form, link: e.target.value})} placeholder="https://..." />
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
              <Label>Valor Total (R$)</Label>
@@ -847,7 +863,7 @@ function NewSharedExpenseDialog({ routeId, allPlans, onCreated }: any) {
 }
 
 function EditSharedExpenseDialog({ expense, onUpdated }: any) {
-  const [form, setForm] = useState({ title: expense.title, description: expense.description || "" });
+  const [form, setForm] = useState({ title: expense.title, description: expense.description || "", link: expense.link || "", paid_by: expense.paid_by || "" });
   const [saving, setSaving] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -855,7 +871,9 @@ function EditSharedExpenseDialog({ expense, onUpdated }: any) {
     setSaving(true);
     const { error } = await supabase.from("trip_shared_expenses").update({
       title: form.title,
-      description: form.description || null
+      description: form.description || null,
+      link: form.link || null,
+      paid_by: form.paid_by || null
     }).eq("id", expense.id);
 
     if (error) { 
@@ -880,6 +898,14 @@ function EditSharedExpenseDialog({ expense, onUpdated }: any) {
         <div>
           <Label>Descrição / Detalhes</Label>
           <Input value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
+        </div>
+        <div>
+          <Label>Quem Pagou?</Label>
+          <Input value={form.paid_by} onChange={e => setForm({...form, paid_by: e.target.value})} />
+        </div>
+        <div>
+          <Label>Link da Reserva (Opcional)</Label>
+          <Input type="url" value={form.link} onChange={e => setForm({...form, link: e.target.value})} placeholder="https://..." />
         </div>
         <DialogFooter>
            <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando..." : "Salvar Alterações"}</Button>
