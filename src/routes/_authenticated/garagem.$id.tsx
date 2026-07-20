@@ -22,7 +22,7 @@ import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar, Search, LayoutGrid, List as ListIcon, Check, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, Bike, Plus, Wrench, Trash2, Gauge, AlertTriangle, CheckCircle2, Clock, Pencil, Calendar, Search, LayoutGrid, List as ListIcon, Check, ChevronsUpDown, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { generateUploadUrl } from "@/lib/upload";
 
@@ -91,6 +91,7 @@ function MotoDetail() {
   const [editOpen, setEditOpen] = useState(false);
   const [itemOpen, setItemOpen] = useState(false);
   const [recordOpen, setRecordOpen] = useState(false);
+  const [initialRecordItemId, setInitialRecordItemId] = useState<string | null>(null);
   const [kmEditOpen, setKmEditOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"card" | "list">("card");
   const [search, setSearch] = useState("");
@@ -254,13 +255,16 @@ function MotoDetail() {
             <p className="text-sm text-leather mt-1">Cadastre cada item e seu intervalo de troca por KM e/ou por tempo.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-              <Dialog open={recordOpen} onOpenChange={setRecordOpen}>
+              <Dialog open={recordOpen} onOpenChange={(o) => {
+                if (!o) setInitialRecordItemId(null);
+                setRecordOpen(o);
+              }}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream">
+                  <Button variant="outline" className="bg-transparent border-coffee text-coffee hover:bg-coffee hover:text-cream" onClick={() => setInitialRecordItemId(null)}>
                     <Wrench className="h-4 w-4 mr-2" /> Registrar manutenção
                   </Button>
                 </DialogTrigger>
-                <NewRecordDialog motorcycleId={id} currentKm={moto.current_km} items={items} onCreated={() => { setRecordOpen(false); loadAll(); }} />
+                {recordOpen && <NewRecordDialog motorcycleId={id} currentKm={moto.current_km} items={items} initialItemId={initialRecordItemId || undefined} onCreated={() => { setRecordOpen(false); setInitialRecordItemId(null); loadAll(); }} />}
               </Dialog>
               <Dialog open={itemOpen} onOpenChange={setItemOpen}>
                 <DialogTrigger asChild>
@@ -341,6 +345,9 @@ function MotoDetail() {
                       )}
                       {it.notes && <p className="text-xs text-coffee/80 mt-2 italic">{it.notes}</p>}
                       <div className="flex justify-end gap-1 mt-3">
+                        <Button variant="ghost" size="sm" onClick={() => { setInitialRecordItemId(it.id); setRecordOpen(true); }} className="text-copper hover:bg-copper/10 h-8 px-2" title="Registrar Manutenção">
+                          <Wrench className="h-3.5 w-3.5" />
+                        </Button>
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button variant="ghost" size="sm" className="text-coffee hover:bg-leather/10 h-8 px-2">
@@ -363,7 +370,14 @@ function MotoDetail() {
 
       <section className="mt-12">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-          <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
+            <Button asChild variant="outline" size="sm" className="bg-white border-copper text-copper hover:bg-copper hover:text-cream">
+              <Link to="/garagem/$id/relatorio" params={{ id: moto.id }}>
+                <FileText className="h-4 w-4 mr-2" /> Relatório Financeiro
+              </Link>
+            </Button>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3 items-end">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-leather/60" />
@@ -654,18 +668,30 @@ function EditItemDialog({ item, motorcycleId, currentKm, onUpdated }: { item: It
   );
 }
 
-function NewRecordDialog({ motorcycleId, currentKm, items, onCreated }: { motorcycleId: string; currentKm: number; items: Item[]; onCreated: () => void }) {
+function NewRecordDialog({ motorcycleId, currentKm, items, initialItemId, onCreated }: { motorcycleId: string; currentKm: number; items: Item[]; initialItemId?: string; onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const initialItem = initialItemId ? items.find(i => i.id === initialItemId) : null;
   const [form, setForm] = useState({
-    maintenance_item_id: "",
+    maintenance_item_id: initialItemId || "",
     new_category_name: "",
-    item_name: "",
+    item_name: initialItem?.name || "",
     service_date: new Date().toISOString().slice(0, 10),
     km_at_service: String(currentKm),
     cost: "", workshop: "", notes: "",
   });
+
+  useEffect(() => {
+    const it = initialItemId ? items.find(i => i.id === initialItemId) : null;
+    setForm(f => ({
+      ...f,
+      maintenance_item_id: initialItemId || "",
+      item_name: it?.name || "",
+      km_at_service: String(currentKm)
+    }));
+  }, [initialItemId, items, currentKm]);
 
   function pickItem(id: string) {
     const item = items.find((i) => i.id === id);
