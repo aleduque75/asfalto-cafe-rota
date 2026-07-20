@@ -690,7 +690,11 @@ function NewSharedExpenseDialog({ routeId, onCreated }: any) {
       created_by: u.user?.id
     }).select().single();
 
-    if (err1 || !exp) { toast.error("Erro ao criar despesa"); setSaving(false); return; }
+    if (err1 || !exp) { 
+      toast.error(`Erro ao criar despesa: ${err1?.message || 'Desconhecido'}`); 
+      setSaving(false); 
+      return; 
+    }
 
     // 2. Insert installments
     const count = parseInt(form.installmentsCount);
@@ -711,7 +715,7 @@ function NewSharedExpenseDialog({ routeId, onCreated }: any) {
     }
 
     const { error: err2 } = await supabase.from("trip_expense_installments").insert(installments);
-    if (err2) toast.error("Erro ao gerar parcelas");
+    if (err2) toast.error(`Erro ao gerar parcelas: ${err2.message}`);
     else toast.success("Despesa e parcelas criadas!");
     
     setSaving(false);
