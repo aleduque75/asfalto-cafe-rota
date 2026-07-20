@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,8 +75,8 @@ function RelatorioFinanceiro() {
     });
   }, [records, period]);
 
-  const expensesByCategory = useMemo(() => {
-    const expenses: Record<string, number> = {};
+  const groupedRecords = useMemo(() => {
+    const groups: Record<string, { total: number; records: Record_[] }> = {};
     
     filteredRecords.forEach(r => {
       const cost = Number(r.cost || 0);
@@ -86,14 +86,19 @@ function RelatorioFinanceiro() {
         ? itemsMap.get(r.maintenance_item_id)!
         : "Avulso / Sem categoria";
         
-      expenses[categoryName] = (expenses[categoryName] || 0) + cost;
+      if (!groups[categoryName]) {
+        groups[categoryName] = { total: 0, records: [] };
+      }
+      
+      groups[categoryName].total += cost;
+      groups[categoryName].records.push(r);
     });
 
-    // Ordenar do maior para o menor custo
-    return Object.entries(expenses).sort((a, b) => b[1] - a[1]);
+    // Ordenar do maior para o menor custo total
+    return Object.entries(groups).sort((a, b) => b[1].total - a[1].total);
   }, [filteredRecords, itemsMap]);
 
-  const totalCost = expensesByCategory.reduce((sum, [_, cost]) => sum + cost, 0);
+  const totalCost = groupedRecords.reduce((sum, [_, data]) => sum + data.total, 0);
 
   if (loading || !moto) return <p className="text-leather p-8 text-center">Carregando relatório...</p>;
 
@@ -166,7 +171,7 @@ function RelatorioFinanceiro() {
         </div>
 
         {/* Conteúdo */}
-        {expensesByCategory.length === 0 ? (
+        {groupedRecords.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-lg border border-leather/10 print:border-none">
             <PieChart className="w-12 h-12 text-leather/30 mx-auto mb-3" />
             <p className="text-leather text-lg">Nenhuma despesa registrada para o período selecionado.</p>
@@ -177,21 +182,46 @@ function RelatorioFinanceiro() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-leather/5 print:bg-transparent border-b border-leather/20 print:border-leather/40">
                   <tr>
-                    <th className="py-4 px-6 font-semibold text-coffee uppercase tracking-wider text-xs">Categoria / Item</th>
+                    <th className="py-4 px-6 font-semibold text-coffee uppercase tracking-wider text-xs">Data / Serviço</th>
                     <th className="py-4 px-6 font-semibold text-coffee uppercase tracking-wider text-xs text-right w-[150px]">Custo (R$)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-leather/10 print:divide-leather/30">
-                  {expensesByCategory.map(([category, cost]) => (
-                    <tr key={category} className="hover:bg-leather/5 print:hover:bg-transparent">
-                      <td className="py-4 px-6 text-coffee font-medium">{category}</td>
-                      <td className="py-4 px-6 text-coffee text-right whitespace-nowrap">
-                        R$ {cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </td>
-                    </tr>
+                  {groupedRecords.map(([category, data]) => (
+                    <React.Fragment key={category}>
+                      {/* Cabeçalho da Categoria */}
+                      <tr className="bg-leather/5 print:bg-transparent">
+                        <td colSpan={2} className="py-3 px-6 font-display font-semibold text-coffee uppercase tracking-wide border-b border-leather/20 print:border-leather/40 bg-[#F0EBE1] print:bg-transparent" style={{ fontFamily: "var(--font-display)" }}>
+                          {category}
+                        </td>
+                      </tr>
+                      {/* Itens da Categoria */}
+                      {data.records.map((record) => (
+                        <tr key={record.id} className="hover:bg-leather/5 print:hover:bg-transparent">
+                          <td className="py-3 px-6 text-leather flex items-center gap-4">
+                            <span className="font-medium text-coffee w-24 tabular-nums shrink-0">
+                              {new Date(record.service_date).toLocaleDateString('pt-BR')}
+                            </span>
+                            <span className="truncate">{record.item_name}</span>
+                          </td>
+                          <td className="py-3 px-6 text-coffee text-right whitespace-nowrap tabular-nums">
+                            R$ {Number(record.cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      ))}
+                      {/* Subtotal da Categoria */}
+                      <tr className="border-b-2 border-leather/20 print:border-leather/40 bg-leather/5 print:bg-transparent">
+                        <td className="py-2 px-6 text-right font-medium text-leather text-xs uppercase tracking-wider">
+                          Subtotal {category}:
+                        </td>
+                        <td className="py-2 px-6 text-right font-semibold text-copper tabular-nums">
+                          R$ {data.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   ))}
                 </tbody>
-                <tfoot className="bg-copper/5 print:bg-transparent border-t-2 border-copper/30 print:border-leather/60">
+                <tfoot className="bg-copper/5 print:bg-transparent border-t-4 border-copper/30 print:border-leather/60">
                   <tr>
                     <td className="py-5 px-6 font-display text-xl text-coffee font-bold" style={{ fontFamily: "var(--font-display)" }}>
                       Total Geral
