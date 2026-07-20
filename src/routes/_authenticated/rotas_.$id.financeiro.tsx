@@ -730,7 +730,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                                    </TableCell>
                                    <TableCell className="py-2 text-right">
                                      {isAdmin ? (
-                                       <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => handleTogglePayment(inst.id, plan.id, isPaid)}>
+                                       <Button size="sm" className={`h-7 text-xs ${isPaid ? 'bg-transparent border border-copper text-copper hover:bg-copper/10' : 'bg-copper hover:bg-copper/90 text-white border-none'}`} onClick={() => handleTogglePayment(inst.id, plan.id, isPaid)}>
                                          {isPaid ? "Desmarcar" : "Dar Baixa"}
                                        </Button>
                                      ) : (
@@ -913,23 +913,77 @@ function NewSharedExpenseDialog({ routeId, allPlans, allProfiles, onCreated }: a
   )
 }
 
-function EditSharedExpenseDialog({ expense, onUpdated }: any) {
+function EditSharedExpenseDialog({ expense, allPlans, allProfiles, onUpdated }: any) {
   const [form, setForm] = useState({ title: expense.title, description: expense.description || "", link: expense.link || "", paid_by: expense.paid_by || "" });
   const [saving, setSaving] = useState(false);
+
+  const initialProfileIds = expense.participating_plans.map((pid: string) => {
+     const plan = allPlans.find((p:any) => p.id === pid);
+     return plan?.profile_id || plan?.profile?.partner_id;
+  }).filter(Boolean);
+  
+  const [selectedProfileIds, setSelectedProfileIds] = useState<string[]>(initialProfileIds);
+
+  function toggleProfile(profileId: string) {
+    if (selectedProfileIds.includes(profileId)) {
+      setSelectedProfileIds(selectedProfileIds.filter(id => id !== profileId));
+    } else {
+      setSelectedProfileIds([...selectedProfileIds, profileId]);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+
+    const newParticipatingPlans: string[] = [];
+    for (const profId of selectedProfileIds) {
+       const existingPlan = allPlans.find((p:any) => p.profile_id === profId || p.profile?.partner_id === profId);
+       if (existingPlan) {
+          newParticipatingPlans.push(existingPlan.id);
+       } else {
+          const prof = allProfiles.find((p:any) => p.id === profId);
+          const hasPassenger = !!prof?.partner_id;
+          const { data: newPlan } = await supabase.from("trip_financial_plans").insert({
+             route_id: expense.route_id,
+             profile_id: profId,
+             has_passenger: hasPassenger,
+             costs: { revisao: 0, hospedagem: 0, alimentacao: 0, reserva: 0, combustivel: 0, pedagio: 0, passeios: 0, outros: 0 },
+             fuel_calc: { distance: 0, autonomy: 0, price: 0 },
+             observations: {}
+          }).select().single();
+          if (newPlan) {
+            newParticipatingPlans.push(newPlan.id);
+          }
+       }
+    }
+
     const { error } = await supabase.from("trip_shared_expenses").update({
       title: form.title,
       description: form.description || null,
       link: form.link || null,
-      paid_by: form.paid_by || null
+      paid_by: form.paid_by || null,
+      participating_plans: newParticipatingPlans
     }).eq("id", expense.id);
 
     if (error) { 
       toast.error(`Erro ao editar: ${error.message}`); 
     } else {
+      const { data: insts } = await supabase.from("trip_expense_installments").select("id").eq("expense_id", expense.id);
+      if (insts) {
+         const oldPlans = expense.participating_plans;
+         const addedPlans = newParticipatingPlans.filter(id => !oldPlans.includes(id));
+         const removedPlans = oldPlans.filter((id: string) => !newParticipatingPlans.includes(id));
+         
+         for (const inst of insts) {
+            for (const planId of addedPlans) {
+               await supabase.from("trip_installment_payments").insert({ installment_id: inst.id, plan_id: planId });
+            }
+            for (const planId of removedPlans) {
+               await supabase.from("trip_installment_payments").delete().eq("installment_id", inst.id).eq("plan_id", planId);
+            }
+         }
+      }
       toast.success("Despesa atualizada!");
       onUpdated();
     }
@@ -937,7 +991,7 @@ function EditSharedExpenseDialog({ expense, onUpdated }: any) {
   }
 
   return (
-    <DialogContent>
+    <>
       <DialogHeader>
         <DialogTitle>Editar Despesa</DialogTitle>
       </DialogHeader>
@@ -958,10 +1012,33 @@ function EditSharedExpenseDialog({ expense, onUpdated }: any) {
           <Label>Link da Reserva (Opcional)</Label>
           <Input type="url" value={form.link} onChange={e => setForm({...form, link: e.target.value})} placeholder="https://..." />
         </div>
+
+        <div className="border border-leather/20 rounded-md p-3 max-h-[160px] overflow-y-auto bg-coffee/20">
+           <Label className="mb-2 block font-bold text-cream">Participantes (Desmarque quem não entra no rateio)</Label>
+           <div className="space-y-1.5 mt-2">
+             {allProfiles.map((p: any) => {
+               const pilot = p.nickname || p.full_name?.split(" ")[0] || "Moto";
+               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
+               const name = partner ? `${pilot} e ${partner}` : pilot;
+               return (
+                 <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/40 p-1.5 rounded transition-colors">
+                   <input 
+                     type="checkbox" 
+                     className="rounded border-leather text-copper focus:ring-copper w-4 h-4"
+                     checked={selectedProfileIds.includes(p.id)}
+                     onChange={() => toggleProfile(p.id)}
+                   />
+                   <span className="text-cream font-medium">{name}</span>
+                 </label>
+               )
+             })}
+           </div>
+        </div>
+
         <DialogFooter>
            <Button type="submit" className="btn-copper" disabled={saving}>{saving ? "Salvando..." : "Salvar Alterações"}</Button>
         </DialogFooter>
       </form>
-    </DialogContent>
+    </>
   )
 }
