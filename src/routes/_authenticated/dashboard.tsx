@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight, Gift, Calculator } from "lucide-react";
+import { Bike, Gauge, Wrench, AlertTriangle, Clock, CheckCircle2, Plus, Route as RouteIcon, MapPin, Navigation, Calendar, Vote, ChevronRight, Gift, Calculator, Map as MapIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Café Moto e Asfalto" }] }),
@@ -30,6 +30,7 @@ type Record_ = {
 type RouteData = {
   id: string; title: string; destination: string; start_date: string;
   waze_url: string | null; route_type: string; cover_url?: string | null;
+  itinerary?: string | null;
 };
 
 type Alert = {
@@ -113,7 +114,7 @@ function DashboardPage() {
       const [{ data: it }, { data: rc }, { data: rt }, { data: polls }, { data: bdays }, { data: plansData }] = await Promise.all([
         motoIds.length > 0 ? supabase.from("maintenance_items").select("*").in("motorcycle_id", motoIds) : Promise.resolve({ data: [] }),
         motoIds.length > 0 ? supabase.from("maintenance_records").select("*").in("motorcycle_id", motoIds).order("service_date", { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
-        supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type, cover_url").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
+        supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type, cover_url, itinerary").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
         supabase.rpc("get_todays_birthdays"),
         supabase.from("trip_financial_plans").select(`id, costs, profile_id, has_passenger, route:routes(id, title, status)`)
@@ -349,12 +350,20 @@ function DashboardPage() {
                         </Button>
                       </Link>
                     )}
-                    <Button className="flex-1 btn-copper flex gap-2 shadow-lg" onClick={() => {
-                      const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
-                      window.open(wazeLink, "_blank");
-                    }}>
-                      <Navigation className="h-4 w-4" /> Waze
-                    </Button>
+                    {nextRoute.itinerary ? (
+                      <Link to="/rotas/$id/roteiro" params={{ id: nextRoute.id }} className="flex-1">
+                        <Button className="w-full btn-copper flex gap-2 shadow-lg">
+                          <MapIcon className="h-4 w-4" /> Roteiro Completo
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button className="flex-1 btn-copper flex gap-2 shadow-lg" onClick={() => {
+                        const wazeLink = nextRoute.waze_url?.trim() || `https://waze.com/ul?q=${encodeURIComponent(nextRoute.destination)}&navigate=yes`;
+                        window.open(wazeLink, "_blank");
+                      }}>
+                        <Navigation className="h-4 w-4" /> Waze
+                      </Button>
+                    )}
                   </div>
                 </div>
 
