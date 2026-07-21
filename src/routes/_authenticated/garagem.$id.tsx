@@ -372,30 +372,32 @@ function MotoDetail() {
       </section>
 
       <section className="mt-12">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <h2 className="font-display text-2xl text-coffee" style={{ fontFamily: "var(--font-display)" }}>Histórico de Manutenções</h2>
-            <Button asChild variant="outline" size="sm" className="bg-white border-copper text-copper hover:bg-copper hover:text-cream">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <h2 className="font-display text-2xl sm:text-3xl text-coffee leading-tight" style={{ fontFamily: "var(--font-display)" }}>
+              Histórico de Manutenções
+            </h2>
+            <Button asChild variant="outline" size="sm" className="bg-white border-copper text-copper hover:bg-copper hover:text-cream w-fit self-start sm:self-auto">
               <Link to="/garagem/$id/relatorio" params={{ id: moto.id }}>
                 <FileText className="h-4 w-4 mr-2" /> Relatório Financeiro
               </Link>
             </Button>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 items-end">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-leather/60" />
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative w-full sm:flex-1 lg:w-auto min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-leather/60" />
               <Input 
                 placeholder="Buscar manutenção..." 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-full sm:w-[200px] bg-white border-leather/20 h-9 text-coffee placeholder:text-leather/70"
+                className="pl-9 w-full bg-white border-leather/20 h-10 text-coffee placeholder:text-leather/70 shadow-sm"
               />
             </div>
-            <div className="flex gap-1 bg-cream/50 p-1 rounded-md border border-leather/20 w-fit">
-              <button onClick={() => setViewMode("card")} className={`px-3 py-1.5 text-sm rounded flex items-center gap-2 ${viewMode === 'card' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
+            <div className="flex bg-cream/50 p-1 rounded-md border border-leather/20 w-full sm:w-fit shrink-0 h-10">
+              <button onClick={() => setViewMode("card")} className={`flex-1 sm:flex-none justify-center px-4 py-1.5 text-sm rounded flex items-center gap-2 transition-colors ${viewMode === 'card' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
                 <LayoutGrid className="w-4 h-4" /> Cards
               </button>
-              <button onClick={() => setViewMode("list")} className={`px-3 py-1.5 text-sm rounded flex items-center gap-2 ${viewMode === 'list' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
+              <button onClick={() => setViewMode("list")} className={`flex-1 sm:flex-none justify-center px-4 py-1.5 text-sm rounded flex items-center gap-2 transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-coffee font-medium' : 'text-leather hover:text-coffee hover:bg-white/50'}`}>
                 <ListIcon className="w-4 h-4" /> Lista
               </button>
             </div>
@@ -413,22 +415,22 @@ function MotoDetail() {
             {filteredRecords.map((r) => (
               <Card key={r.id} className="border-leather/30 bg-cream hover:border-copper transition-colors">
                 <CardContent className="p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h3 className="font-display text-lg text-coffee" style={{ fontFamily: "var(--font-display)" }}>{r.item_name}</h3>
+                  <div className="flex flex-wrap justify-between items-start gap-3 mb-3">
+                    <div className="min-w-[150px] flex-1">
+                      <h3 className="font-display text-lg text-coffee leading-tight break-words" style={{ fontFamily: "var(--font-display)" }}>{r.item_name}</h3>
                       <p className="text-sm text-leather flex items-center gap-1.5 mt-1">
                         <Calendar className="w-4 h-4 text-copper" /> {new Date(r.service_date).toLocaleDateString("pt-BR")}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       {r.cost != null && (
-                        <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5 font-medium">
+                        <Badge variant="outline" className="border-copper/50 text-coffee bg-copper/5 font-medium mr-1">
                           R$ {Number(r.cost).toFixed(2).replace(".", ",")}
                         </Badge>
                       )}
                       <EditRecordDialog record={r} items={items} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
-                      <Button variant="ghost" size="sm" onClick={() => deleteRecord(r.id)} className="text-destructive hover:bg-destructive/10 h-8 px-2" title="Excluir">
-                        <Trash2 className="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="sm" onClick={() => deleteRecord(r.id)} className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0 shrink-0" title="Excluir">
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
