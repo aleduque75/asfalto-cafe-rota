@@ -743,7 +743,7 @@ function GroupExpensesTab({ sharedExpenses, allPlans, allProfiles, isAdmin, rout
                           <TableBody>
                             {participatingPlansList.map((plan: any) => {
                                const pilot = plan.profile?.nickname || plan.profile?.full_name?.split(" ")[0] || "Moto";
-                               const partner = plan.partner?.nickname || "";
+                               const partner = plan.partner?.nickname || plan.partner?.full_name?.split(" ")[0] || "";
                                const name = partner ? `${pilot} & ${partner}` : pilot;
                                const isPaid = inst.payments.find(p => p.plan_id === plan.id)?.is_paid || false;
                                const myHeads = plan.has_passenger ? 2 : 1;
@@ -919,7 +919,7 @@ function NewSharedExpenseDialog({ routeId, allPlans, allProfiles, onCreated }: a
            <div className="space-y-1.5 mt-2">
              {allProfiles.map((p: any) => {
                const pilot = p.nickname || p.full_name?.split(" ")[0] || "Moto";
-               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
+               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0] || "";
                const name = partner ? `${pilot} e ${partner}` : pilot;
                return (
                  <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/40 p-1.5 rounded transition-colors">
@@ -1055,7 +1055,7 @@ function EditSharedExpenseDialog({ expense, allPlans, allProfiles, onUpdated }: 
            <div className="space-y-1.5 mt-2">
              {allProfiles.map((p: any) => {
                const pilot = p.nickname || p.full_name?.split(" ")[0] || "Moto";
-               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0];
+               const partner = p.partner?.nickname || p.partner?.full_name?.split(" ")[0] || "";
                const name = partner ? `${pilot} e ${partner}` : pilot;
                return (
                  <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-leather/40 p-1.5 rounded transition-colors">
