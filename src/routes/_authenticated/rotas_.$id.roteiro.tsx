@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Calendar, MapPin, Navigation, Map, Printer } from "
 import { toast } from "sonner";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 
 export const Route = createFileRoute("/_authenticated/rotas_/$id/roteiro")({
   component: RoteiroPage,
@@ -114,7 +115,7 @@ function RoteiroPage() {
             prose-blockquote:border-l-copper prose-blockquote:bg-leather/5 prose-blockquote:px-4 prose-blockquote:py-1 prose-blockquote:rounded-r-md prose-blockquote:not-italic prose-blockquote:text-coffee/80
           ">
             {route.itinerary ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>
                 {route.itinerary}
               </ReactMarkdown>
             ) : (
