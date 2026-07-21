@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin/rotas")({
 const EMPTY: Partial<RouteData> = {
   title: "", destination: "", start_date: "", meeting_point: "", meeting_time: "",
   description: "", estimated_distance_km: null, estimated_duration_mins: null,
-  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio", has_financial_plan: false, cover_url: ""
+  visited_places: "", waze_url: "", media_url: "", status: "open", route_type: "passeio", has_financial_plan: false, cover_url: "", itinerary: ""
 };
 
 function AdminRotas() {
@@ -125,6 +125,7 @@ function AdminRotas() {
       route_type: editing.route_type || "passeio",
       has_financial_plan: editing.has_financial_plan || false,
       cover_url: editing.cover_url || null,
+      itinerary: editing.itinerary?.trim() || null,
     };
 
     const res = editing.id
@@ -342,8 +343,14 @@ function AdminRotas() {
               </div>
 
               <div>
-                <Label>Descrição completa</Label>
-                <Textarea rows={3} value={editing.description ?? ""} onChange={(e) => setEditing((p) => ({ ...p, description: e.target.value }))} placeholder="Orientações e cronograma..." />
+                <Label>Descrição Curta</Label>
+                <Textarea rows={2} value={editing.description ?? ""} onChange={(e) => setEditing((p) => ({ ...p, description: e.target.value }))} placeholder="Breve resumo sobre a rota..." />
+              </div>
+
+              <div>
+                <Label>Roteiro Completo e Planejamento (Markdown/Texto Longo)</Label>
+                <Textarea rows={10} value={editing.itinerary ?? ""} onChange={(e) => setEditing((p) => ({ ...p, itinerary: e.target.value }))} placeholder="Cole aqui o roteiro detalhado (Cronograma, Logística, Mapa, etc)..." className="font-mono text-sm leading-relaxed" />
+                <p className="text-[10px] text-leather mt-1">Este campo aceita formatação Markdown (como **negrito**, # Títulos, - listas).</p>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">

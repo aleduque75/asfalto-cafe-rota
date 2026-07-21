@@ -36,6 +36,7 @@ type RouteData = {
   visited_places: string | null;
   has_financial_plan?: boolean | null;
   cover_url?: string | null;
+  itinerary?: string | null;
 };
 
 function RotasPage() {
@@ -220,6 +221,16 @@ function RotasPage() {
                   <Link to="/rotas/$id/financeiro" params={{ id: route.id }}>
                     <Calculator className="h-4 w-4" />
                     Planejamento Financeiro
+                  </Link>
+               </Button>
+            </div>
+          )}
+          {route.itinerary && route.itinerary.trim() !== '' && (
+            <div className="mt-3">
+               <Button asChild variant="outline" className="w-full bg-cream border-coffee text-coffee hover:bg-coffee hover:text-cream flex gap-2">
+                  <Link to="/rotas/$id/roteiro" params={{ id: route.id }}>
+                    <Map className="h-4 w-4" />
+                    Ver Roteiro Completo
                   </Link>
                </Button>
             </div>

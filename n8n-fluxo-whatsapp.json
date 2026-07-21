@@ -1,0 +1,443 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aa621b0a-8d0b-4932-a06f-5305af533b8c",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        192
+      ],
+      "id": "3410b260-4226-4025-97dd-76e4a6fa91e2",
+      "name": "Webhook Central",
+      "webhookId": "8f1ca795-510d-46eb-a86e-8ec463920465"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.table}}",
+              "value2": "routes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        96
+      ],
+      "id": "5217b4fc-5d09-4f9a-ba14-6c56bcbebf16",
+      "name": "Rotas?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.table}}",
+              "value2": "route_photos"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        288
+      ],
+      "id": "a29393fe-a8bb-4a59-a02d-331c32e7a7f7",
+      "name": "Fotos?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.table}}",
+              "value2": "polls"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        496
+      ],
+      "id": "9e8e4ce2-6844-40a2-9f5f-2b174ab38668",
+      "name": "Enquetes?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.table}}",
+              "value2": "profiles"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        688
+      ],
+      "id": "943fbb88-4363-4eb8-8824-884edb185732",
+      "name": "Membros?"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "msg",
+              "value": "={{ '🏍️ *NOVA ROTA MARCADA!* 🏍️\n\nFala Pessoal! Acabamos de agendar um novo passeio no app!\n\n📌 *' + $json.body.record.title + '*\n🚩 *Destino:* ' + $json.body.record.destination + '\n📅 *Data:* ' + new Date($json.body.record.start_date).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) + '\n⏰ *Saída:* ' + $json.body.record.meeting_time + '\n📍 *Ponto de Encontro:* ' + $json.body.record.meeting_point + '\n\nAbram o app para ver os detalhes completos e traçar o Waze!' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "dce311c5-5356-47f7-ab34-692ced174438",
+      "name": "Msg Rota"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "msg",
+              "value": "📸 *NOVA FOTO NO APP!* 📸\n\nFala Pessoal, alguém acabou de subir uma nova foto de um dos nossos passeios!\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        272
+      ],
+      "id": "fabb7d97-5263-4b06-9b13-2915286660cd",
+      "name": "Msg Foto"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "msg",
+              "value": "={{ '📊 *NOVA VOTAÇÃO NO APP!* 📊\n\nTem enquete nova rolando:\n*\"' + $json.body.record.question + '\"*\n\nAcesse o app para deixar o seu voto!\nhttps://cafemotoasfalto.e-sal.app.br' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        464
+      ],
+      "id": "a313ead8-9435-4d96-a4f6-3d07a88f7a3a",
+      "name": "Msg Enquete"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "msg",
+              "value": "={{ '🔥 *NOVO MEMBRO NA ÁREA!* 🔥\n\nDêem as boas-vindas ao mais novo integrante do app Café, Moto e Asfalto!\n*Nome:* ' + ($json.body.record.full_name || 'Membro') + '\n\nTamo junto nas estradas!' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        672
+      ],
+      "id": "6441b2e1-899f-4dc3-8c40-645c5ccf02f4",
+      "name": "Msg Membro"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://wa.electrosal.com.br/message/sendText/n8n-bot",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "72C50F1D9D2D-474F-9261-6EBC81C94EF9"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "120363417506007473@g.us"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.msg }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        32,
+        368
+      ],
+      "id": "13e6cda6-2123-4492-951a-638d48fd59c4",
+      "name": "Aviso WhatsApp"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -672,
+        900
+      ],
+      "id": "cron-cobranca-id",
+      "name": "Todo dia às 09:00"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'SUA_URL_DO_SUPABASE_AQUI/rest/v1/trip_expense_installments?select=amount,due_date,trip_shared_expenses(title)&due_date=eq.' + $today.plus(1, 'day').toFormat('yyyy-MM-dd') }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SUA_CHAVE_ANON_DO_SUPABASE_AQUI"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer SUA_CHAVE_ANON_DO_SUPABASE_AQUI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -480,
+        900
+      ],
+      "id": "buscar-supabase-id",
+      "name": "Buscar Vencimentos"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "msg",
+              "value": "={{ '⚠️ *LEMBRETE DE PAGAMENTO* ⚠️\n\nFala Pessoal! Amanhã vence uma parcela das nossas despesas em grupo.\n\n📌 *Referente a:* ' + $json.trip_shared_expenses.title + '\n\nPor favor, verifiquem no app o valor da sua parte e realizem o pagamento para quitarmos esse compromisso!\n\n🔑 *Minha Chave PIX:* SUA_CHAVE_PIX_AQUI\n\n(Quem já pagou no app, favor ignorar esta mensagem. Valeu!)' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        -250,
+        900
+      ],
+      "id": "msg-cobranca-id",
+      "name": "Msg Cobrança"
+    }
+  ],
+  "connections": {
+    "Webhook Central": {
+      "main": [
+        [
+          {
+            "node": "Rotas?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fotos?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enquetes?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Membros?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rotas?": {
+      "main": [
+        [
+          {
+            "node": "Msg Rota",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fotos?": {
+      "main": [
+        [
+          {
+            "node": "Msg Foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enquetes?": {
+      "main": [
+        [
+          {
+            "node": "Msg Enquete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Membros?": {
+      "main": [
+        [
+          {
+            "node": "Msg Membro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg Rota": {
+      "main": [
+        [
+          {
+            "node": "Aviso WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg Foto": {
+      "main": [
+        [
+          {
+            "node": "Aviso WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg Enquete": {
+      "main": [
+        [
+          {
+            "node": "Aviso WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg Membro": {
+      "main": [
+        [
+          {
+            "node": "Aviso WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Todo dia às 09:00": {
+      "main": [
+        [
+          {
+            "node": "Buscar Vencimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Vencimentos": {
+      "main": [
+        [
+          {
+            "node": "Msg Cobrança",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg Cobrança": {
+      "main": [
+        [
+          {
+            "node": "Aviso WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

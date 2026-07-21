@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export const Route = createFileRoute("/_authenticated/rotas_/financeiro")({
+export const Route = createFileRoute("/_authenticated/rotas_/$id/financeiro")({
   head: () => ({ meta: [{ title: "Planejamento Financeiro — Café Moto e Asfalto" }] }),
   component: RouteFinanceiroPage,
 });

@@ -25,7 +25,6 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedGaragemIndexRouteImport } from './routes/_authenticated/garagem.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
-import { Route as AuthenticatedRotasFinanceiroRouteImport } from './routes/_authenticated/rotas_..financeiro'
 import { Route as AuthenticatedGaragemNewRouteImport } from './routes/_authenticated/garagem.new'
 import { Route as AuthenticatedGaragemIdRouteImport } from './routes/_authenticated/garagem.$id'
 import { Route as AuthenticatedAdminUsuariosRouteImport } from './routes/_authenticated/admin/usuarios'
@@ -35,6 +34,7 @@ import { Route as AuthenticatedAdminGaleriaRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminEnquetesRouteImport } from './routes/_authenticated/admin/enquetes'
 import { Route as AuthenticatedAdminConteudoRouteImport } from './routes/_authenticated/admin/conteudo'
 import { Route as AuthenticatedAdminBlogIndexRouteImport } from './routes/_authenticated/admin/blog/index'
+import { Route as AuthenticatedRotasIdRoteiroRouteImport } from './routes/_authenticated/rotas_.$id.roteiro'
 import { Route as AuthenticatedRotasIdGaleriaRouteImport } from './routes/_authenticated/rotas_.$id.galeria'
 import { Route as AuthenticatedRotasIdFinanceiroRouteImport } from './routes/_authenticated/rotas_.$id.financeiro'
 import { Route as AuthenticatedGaragemIdRelatorioRouteImport } from './routes/_authenticated/garagem_.$id.relatorio'
@@ -121,12 +121,6 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
-const AuthenticatedRotasFinanceiroRoute =
-  AuthenticatedRotasFinanceiroRouteImport.update({
-    id: '/rotas_/financeiro',
-    path: '/rotas/financeiro',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedGaragemNewRoute = AuthenticatedGaragemNewRouteImport.update({
   id: '/garagem/new',
   path: '/garagem/new',
@@ -176,6 +170,12 @@ const AuthenticatedAdminBlogIndexRoute =
     id: '/blog/',
     path: '/blog/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedRotasIdRoteiroRoute =
+  AuthenticatedRotasIdRoteiroRouteImport.update({
+    id: '/rotas_/$id/roteiro',
+    path: '/rotas/$id/roteiro',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedRotasIdGaleriaRoute =
   AuthenticatedRotasIdGaleriaRouteImport.update({
@@ -230,7 +230,6 @@ export interface FileRoutesByFullPath {
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/garagem/new': typeof AuthenticatedGaragemNewRoute
-  '/rotas/financeiro': typeof AuthenticatedRotasFinanceiroRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/garagem/': typeof AuthenticatedGaragemIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
@@ -238,6 +237,7 @@ export interface FileRoutesByFullPath {
   '/garagem/$id/relatorio': typeof AuthenticatedGaragemIdRelatorioRoute
   '/rotas/$id/financeiro': typeof AuthenticatedRotasIdFinanceiroRoute
   '/rotas/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
+  '/rotas/$id/roteiro': typeof AuthenticatedRotasIdRoteiroRoute
   '/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRoutesByTo {
@@ -261,7 +261,6 @@ export interface FileRoutesByTo {
   '/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/garagem/new': typeof AuthenticatedGaragemNewRoute
-  '/rotas/financeiro': typeof AuthenticatedRotasFinanceiroRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/garagem': typeof AuthenticatedGaragemIndexRoute
   '/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
@@ -269,6 +268,7 @@ export interface FileRoutesByTo {
   '/garagem/$id/relatorio': typeof AuthenticatedGaragemIdRelatorioRoute
   '/rotas/$id/financeiro': typeof AuthenticatedRotasIdFinanceiroRoute
   '/rotas/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
+  '/rotas/$id/roteiro': typeof AuthenticatedRotasIdRoteiroRoute
   '/admin/blog': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRoutesById {
@@ -295,7 +295,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/usuarios': typeof AuthenticatedAdminUsuariosRoute
   '/_authenticated/garagem/$id': typeof AuthenticatedGaragemIdRoute
   '/_authenticated/garagem/new': typeof AuthenticatedGaragemNewRoute
-  '/_authenticated/rotas_/financeiro': typeof AuthenticatedRotasFinanceiroRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/garagem/': typeof AuthenticatedGaragemIndexRoute
   '/_authenticated/admin/blog/$id': typeof AuthenticatedAdminBlogIdRoute
@@ -303,6 +302,7 @@ export interface FileRoutesById {
   '/_authenticated/garagem_/$id/relatorio': typeof AuthenticatedGaragemIdRelatorioRoute
   '/_authenticated/rotas_/$id/financeiro': typeof AuthenticatedRotasIdFinanceiroRoute
   '/_authenticated/rotas_/$id/galeria': typeof AuthenticatedRotasIdGaleriaRoute
+  '/_authenticated/rotas_/$id/roteiro': typeof AuthenticatedRotasIdRoteiroRoute
   '/_authenticated/admin/blog/': typeof AuthenticatedAdminBlogIndexRoute
 }
 export interface FileRouteTypes {
@@ -329,7 +329,6 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/garagem/$id'
     | '/garagem/new'
-    | '/rotas/financeiro'
     | '/admin/'
     | '/garagem/'
     | '/admin/blog/$id'
@@ -337,6 +336,7 @@ export interface FileRouteTypes {
     | '/garagem/$id/relatorio'
     | '/rotas/$id/financeiro'
     | '/rotas/$id/galeria'
+    | '/rotas/$id/roteiro'
     | '/admin/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -360,7 +360,6 @@ export interface FileRouteTypes {
     | '/admin/usuarios'
     | '/garagem/$id'
     | '/garagem/new'
-    | '/rotas/financeiro'
     | '/admin'
     | '/garagem'
     | '/admin/blog/$id'
@@ -368,6 +367,7 @@ export interface FileRouteTypes {
     | '/garagem/$id/relatorio'
     | '/rotas/$id/financeiro'
     | '/rotas/$id/galeria'
+    | '/rotas/$id/roteiro'
     | '/admin/blog'
   id:
     | '__root__'
@@ -393,7 +393,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/usuarios'
     | '/_authenticated/garagem/$id'
     | '/_authenticated/garagem/new'
-    | '/_authenticated/rotas_/financeiro'
     | '/_authenticated/admin/'
     | '/_authenticated/garagem/'
     | '/_authenticated/admin/blog/$id'
@@ -401,6 +400,7 @@ export interface FileRouteTypes {
     | '/_authenticated/garagem_/$id/relatorio'
     | '/_authenticated/rotas_/$id/financeiro'
     | '/_authenticated/rotas_/$id/galeria'
+    | '/_authenticated/rotas_/$id/roteiro'
     | '/_authenticated/admin/blog/'
   fileRoutesById: FileRoutesById
 }
@@ -529,13 +529,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
-    '/_authenticated/rotas_/financeiro': {
-      id: '/_authenticated/rotas_/financeiro'
-      path: '/rotas/financeiro'
-      fullPath: '/rotas/financeiro'
-      preLoaderRoute: typeof AuthenticatedRotasFinanceiroRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/garagem/new': {
       id: '/_authenticated/garagem/new'
       path: '/garagem/new'
@@ -598,6 +591,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/blog/'
       preLoaderRoute: typeof AuthenticatedAdminBlogIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/rotas_/$id/roteiro': {
+      id: '/_authenticated/rotas_/$id/roteiro'
+      path: '/rotas/$id/roteiro'
+      fullPath: '/rotas/$id/roteiro'
+      preLoaderRoute: typeof AuthenticatedRotasIdRoteiroRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rotas_/$id/galeria': {
       id: '/_authenticated/rotas_/$id/galeria'
@@ -676,12 +676,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRotasRoute: typeof AuthenticatedRotasRoute
   AuthenticatedGaragemIdRoute: typeof AuthenticatedGaragemIdRoute
   AuthenticatedGaragemNewRoute: typeof AuthenticatedGaragemNewRoute
-  AuthenticatedRotasFinanceiroRoute: typeof AuthenticatedRotasFinanceiroRoute
   AuthenticatedGaragemIndexRoute: typeof AuthenticatedGaragemIndexRoute
   AuthenticatedGaragemIdEditRoute: typeof AuthenticatedGaragemIdEditRoute
   AuthenticatedGaragemIdRelatorioRoute: typeof AuthenticatedGaragemIdRelatorioRoute
   AuthenticatedRotasIdFinanceiroRoute: typeof AuthenticatedRotasIdFinanceiroRoute
   AuthenticatedRotasIdGaleriaRoute: typeof AuthenticatedRotasIdGaleriaRoute
+  AuthenticatedRotasIdRoteiroRoute: typeof AuthenticatedRotasIdRoteiroRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -693,12 +693,12 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRotasRoute: AuthenticatedRotasRoute,
   AuthenticatedGaragemIdRoute: AuthenticatedGaragemIdRoute,
   AuthenticatedGaragemNewRoute: AuthenticatedGaragemNewRoute,
-  AuthenticatedRotasFinanceiroRoute: AuthenticatedRotasFinanceiroRoute,
   AuthenticatedGaragemIndexRoute: AuthenticatedGaragemIndexRoute,
   AuthenticatedGaragemIdEditRoute: AuthenticatedGaragemIdEditRoute,
   AuthenticatedGaragemIdRelatorioRoute: AuthenticatedGaragemIdRelatorioRoute,
   AuthenticatedRotasIdFinanceiroRoute: AuthenticatedRotasIdFinanceiroRoute,
   AuthenticatedRotasIdGaleriaRoute: AuthenticatedRotasIdGaleriaRoute,
+  AuthenticatedRotasIdRoteiroRoute: AuthenticatedRotasIdRoteiroRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
