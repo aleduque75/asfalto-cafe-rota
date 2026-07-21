@@ -276,14 +276,11 @@ function MotoDetail() {
                 </DialogTrigger>
                 {recordOpen && <NewRecordDialog motorcycleId={id} currentKm={moto.current_km} items={items} initialItemId={initialRecordItemId || undefined} onCreated={() => { setRecordOpen(false); setInitialRecordItemId(null); loadAll(); }} />}
               </Dialog>
-              <Dialog open={itemOpen} onOpenChange={setItemOpen}>
-                <DialogTrigger asChild>
-                  <Button className="btn-copper">
-                    <Plus className="h-4 w-4" /> Criar lembrete
-                  </Button>
-                </DialogTrigger>
-                <NewItemDialog motorcycleId={id} currentKm={moto.current_km} onCreated={() => { setItemOpen(false); loadAll(); }} />
-              </Dialog>
+              <Button asChild className="btn-copper">
+                <Link to="/garagem/$id/categorias" params={{ id }}>
+                  <ListIcon className="h-4 w-4 mr-2" /> Gerenciar Categorias
+                </Link>
+              </Button>
             </div>
           </div>
 
@@ -358,16 +355,10 @@ function MotoDetail() {
                         <Button variant="ghost" size="sm" onClick={() => { setInitialRecordItemId(it.id); setRecordOpen(true); }} className="text-copper hover:bg-copper/10 h-8 px-2" title="Registrar Manutenção">
                           <Wrench className="h-3.5 w-3.5" />
                         </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-coffee hover:bg-leather/10 h-8 px-2">
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                          </DialogTrigger>
-                          <EditItemDialog item={it} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
-                        </Dialog>
-                        <Button variant="ghost" size="sm" onClick={() => deleteItem(it.id)} className="text-destructive hover:bg-destructive/10 h-8 px-2">
-                          <Trash2 className="h-3.5 w-3.5" />
+                        <Button asChild variant="ghost" size="sm" className="text-coffee hover:bg-leather/10 h-8 px-2" title="Editar / Excluir Categoria">
+                          <Link to="/garagem/$id/categorias" params={{ id }}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Link>
                         </Button>
                       </div>
                     </CardContent>
@@ -377,27 +368,7 @@ function MotoDetail() {
             </div>
           )}
 
-          {categorias.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-leather/20">
-              <h3 className="text-sm font-medium text-leather mb-4">Outras Categorias de Serviços (sem alerta definido):</h3>
-              <div className="flex flex-wrap gap-2">
-                {categorias.map(c => (
-                  <Badge key={c.id} variant="outline" className="bg-cream border-leather/30 text-coffee py-1.5 px-3 flex items-center gap-2">
-                    {c.name}
-                    <div className="flex gap-1 ml-2 pl-2 border-l border-leather/20">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <button className="text-leather hover:text-coffee transition-colors" title="Editar (Adicionar alerta)"><Pencil className="w-3.5 h-3.5"/></button>
-                        </DialogTrigger>
-                        <EditItemDialog item={c} motorcycleId={id} currentKm={moto.current_km} onUpdated={loadAll} />
-                      </Dialog>
-                      <button onClick={() => deleteItem(c.id)} className="text-leather hover:text-destructive transition-colors" title="Excluir"><Trash2 className="w-3.5 h-3.5"/></button>
-                    </div>
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
+
       </section>
 
       <section className="mt-12">
