@@ -95,7 +95,8 @@ function DashboardPage() {
   const [activePolls, setActivePolls] = useState<any[]>([]);
   const [birthdays, setBirthdays] = useState<any[]>([]);
   const [fullName, setFullName] = useState<string>("");
-  const [activePlan, setActivePlan] = useState<{ id: string, routeId: string, routeTitle: string, total: number } | null>(null);
+  const [activePlan, setActivePlan] = useState<{ id: string, routeId: string, routeTitle: string, total: number, hasPassenger: boolean } | null>(null);
+  const [myInstallments, setMyInstallments] = useState<any[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -115,7 +116,7 @@ function DashboardPage() {
         supabase.from("routes").select("id, title, destination, start_date, waze_url, route_type, cover_url").in("status", ["open", "planning"]).order("start_date", { ascending: true }).limit(1).maybeSingle(),
         (supabase as any).from("polls").select("*").eq("status", "active"),
         supabase.rpc("get_todays_birthdays"),
-        supabase.from("trip_financial_plans").select(`id, costs, profile_id, route:routes(id, title, status)`)
+        supabase.from("trip_financial_plans").select(`id, costs, profile_id, has_passenger, route:routes(id, title, status)`)
       ]);
       setFullName((p?.full_name as string) || u.user.email || "");
       setMotos((m ?? []) as Moto[]);
@@ -131,7 +132,50 @@ function DashboardPage() {
       );
       if (myPlan && myPlan.route && myPlan.costs && typeof myPlan.costs === 'object') {
         const total = Object.values(myPlan.costs).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
-        setActivePlan({ id: myPlan.id, routeId: myPlan.route.id, routeTitle: myPlan.route.title, total });
+        
+        let sharedTotal = 0;
+        const insts: any[] = [];
+
+        if (myPlan.route.id) {
+          const { data: sharedExp } = await supabase.from("trip_shared_expenses")
+            .select(`
+              id, title, total_amount, participating_plans,
+              installments:trip_shared_expense_installments (
+                id, amount, due_date, installment_number,
+                payments:trip_installment_payments ( plan_id, is_paid )
+              )
+            `)
+            .eq("route_id", myPlan.route.id)
+            .contains("participating_plans", [myPlan.id]);
+
+          if (sharedExp) {
+            sharedExp.forEach(exp => {
+              const totalHeads = exp.participating_plans?.reduce((h: number, pid: string) => {
+                const p = plansData?.find((plan:any) => plan.id === pid);
+                return h + (p?.has_passenger ? 2 : 1);
+              }, 0) || 1;
+              const myHeads = myPlan.has_passenger ? 2 : 1;
+              
+              sharedTotal += (exp.total_amount / totalHeads) * myHeads;
+
+              exp.installments.forEach((inst: any) => {
+                const pmt = inst.payments.find((p:any) => p.plan_id === myPlan.id);
+                insts.push({
+                  expenseTitle: exp.title,
+                  installmentNumber: inst.installment_number,
+                  dueDate: inst.due_date,
+                  amount: (inst.amount / totalHeads) * myHeads,
+                  isPaid: pmt?.is_paid || false
+                });
+              });
+            });
+          }
+        }
+
+        insts.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+
+        setActivePlan({ id: myPlan.id, routeId: myPlan.route.id, routeTitle: myPlan.route.title, total: total + sharedTotal, hasPassenger: myPlan.has_passenger });
+        setMyInstallments(insts);
       }
       
       setLoading(false);
@@ -260,11 +304,37 @@ function DashboardPage() {
                   </div>
                   
                   {activePlan && activePlan.routeId === nextRoute.id && (
-                    <div className="mb-6 inline-block bg-cream/10 backdrop-blur-sm border border-cream/20 rounded-lg p-3">
-                      <p className="text-xs uppercase tracking-wider text-cream/70 mb-1">Custo Planejado</p>
-                      <p className="text-xl font-bold text-cream">
-                        {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                      </p>
+                    <div className="mb-6 flex flex-wrap gap-4">
+                      <div className="inline-block bg-cream/10 backdrop-blur-sm border border-cream/20 rounded-lg p-3">
+                        <p className="text-xs uppercase tracking-wider text-cream/70 mb-1">Custo Planejado</p>
+                        <p className="text-xl font-bold text-cream">
+                          {activePlan.total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                        </p>
+                      </div>
+
+                      {myInstallments.length > 0 && (
+                        <div className="inline-block bg-cream/10 backdrop-blur-sm border border-cream/20 rounded-lg p-3 flex-1 min-w-[280px]">
+                          <p className="text-xs uppercase tracking-wider text-cream/70 mb-2">Suas Parcelas</p>
+                          <div className="space-y-2">
+                            {myInstallments.slice(0, 3).map((inst, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <span className="text-cream/90 flex items-center gap-1.5 truncate max-w-[200px]" title={inst.expenseTitle}>
+                                  {inst.isPaid ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0"/> : <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0"/>}
+                                  <span className="truncate">{inst.expenseTitle} (P{inst.installmentNumber})</span>
+                                </span>
+                                <span className={inst.isPaid ? "text-emerald-400 line-through opacity-70" : "text-copper font-bold"}>
+                                  {inst.amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                                </span>
+                              </div>
+                            ))}
+                            {myInstallments.length > 3 && (
+                               <Link to="/rotas/$id/financeiro" params={{ id: nextRoute.id }} className="text-xs text-copper hover:underline block mt-1">
+                                 + {myInstallments.length - 3} outras parcelas
+                               </Link>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
