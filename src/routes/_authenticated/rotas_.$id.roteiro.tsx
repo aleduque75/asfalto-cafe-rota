@@ -93,11 +93,11 @@ function RoteiroPage() {
               <p className="text-leather text-sm mt-1">Detalhes completos da expedição</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => window.print()} className="border-coffee text-coffee hidden sm:flex">
+              <Button variant="outline" onClick={() => window.print()} className="bg-cream border-coffee text-coffee hover:bg-coffee hover:text-cream hidden sm:flex">
                 <Printer className="h-4 w-4 mr-2" /> Imprimir (PDF)
               </Button>
               {route.waze_url && (
-                <Button onClick={() => window.open(route.waze_url, "_blank")} className="btn-copper hidden sm:flex">
+                <Button onClick={() => window.open(route.waze_url, "_blank")} className="bg-copper text-white hover:bg-copper/90 hidden sm:flex">
                   <Navigation className="h-4 w-4 mr-2" /> Ir pro Waze
                 </Button>
               )}
@@ -127,11 +127,11 @@ function RoteiroPage() {
           </div>
           
           <div className="mt-8 sm:hidden flex flex-col gap-3 print:hidden">
-            <Button variant="outline" onClick={() => window.print()} className="border-coffee text-coffee w-full">
+            <Button variant="outline" onClick={() => window.print()} className="bg-cream border-coffee text-coffee hover:bg-coffee hover:text-cream w-full">
               <Printer className="h-4 w-4 mr-2" /> Imprimir / Salvar PDF
             </Button>
             {route.waze_url && (
-              <Button onClick={() => window.open(route.waze_url, "_blank")} className="btn-copper w-full">
+              <Button onClick={() => window.open(route.waze_url, "_blank")} className="bg-copper text-white hover:bg-copper/90 w-full">
                 <Navigation className="h-4 w-4 mr-2" /> Ir pro Waze
               </Button>
             )}
