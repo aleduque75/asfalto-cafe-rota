@@ -52,7 +52,7 @@ function RoteiroPage() {
   const date = new Date(route.start_date);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12 bg-white print:bg-white print:p-0 print:m-0 print:pb-0">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12 print:bg-white print:p-0 print:m-0 print:pb-0">
       <Link to="/rotas" className="self-start print:hidden">
         <Button variant="ghost" size="sm" className="pl-0 text-leather hover:text-copper hover:bg-transparent -ml-2 mb-2">
           <ArrowLeft className="h-4 w-4 mr-1.5" /> Voltar para Rotas
