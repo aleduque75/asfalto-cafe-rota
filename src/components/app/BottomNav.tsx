@@ -6,7 +6,7 @@ export function BottomNav() {
   const currentPath = location.pathname;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-coffee border-t border-leather/20 z-50 flex items-center justify-around px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.2)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-coffee border-t border-leather/20 z-50 flex items-center justify-around px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.2)] print:hidden">
       <Link 
         to="/dashboard" 
         className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${currentPath === '/dashboard' ? 'text-copper' : 'text-cream/70 hover:text-cream'}`}

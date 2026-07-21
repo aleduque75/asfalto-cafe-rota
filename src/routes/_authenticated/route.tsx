@@ -55,7 +55,7 @@ function AuthenticatedLayout() {
 
   return (
     <div className="min-h-screen relative pb-16 md:pb-0" style={{ background: "var(--cream)" }}>
-      <header className="border-b border-leather/20 bg-coffee">
+      <header className="border-b border-leather/20 bg-coffee print:hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/dashboard" className="flex items-center gap-3 group">
             <img src={logoUrl || logo} alt="" className="h-10 w-10 object-contain transition-transform group-hover:scale-105" />
